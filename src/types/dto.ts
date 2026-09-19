@@ -5,6 +5,10 @@ export interface HotelImage {
   image_url: string;
   sort_order: number;
 }
+    last_name: string;
+    email: string;
+  };
+}
 
 export interface Hotel {
   id: number;
@@ -390,4 +394,14 @@ export interface PlatformSummary {
   users: number;
   pending: number;
   by_status: Record<HotelStatus, number>;
+}
+
+export interface GuestLoginResult {
+  token: string;
+  guest: {
+    id: number;
+    first_name: string;
+    last_name: string;
+    email: string;
+  };
 }
