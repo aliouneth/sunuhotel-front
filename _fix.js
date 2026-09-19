@@ -1,0 +1,13 @@
+const fs = require("fs");
+const p = "C:\\Users\\aliou\\SunuHotelOpenCode\\frontend\\src\\i18n\\dictionaries.ts";
+let s = fs.readFileSync(p, "utf8");
+const frOld = "   hotel_logo_hint: \"PNG, JPG ou WEBP ? 2 Mo max\",";
+const frNew = "   hotel_logo_hint: \"PNG, JPG ou WEBP ? 2 Mo max\",\n   hotel_photos: \"Photos de l'h\u00f4tel\",\n   hotel_photos_hint: \"PNG, JPG ou WEBP. Maximum 5 images.\",";
+const enOld = "   hotel_logo_hint: \"PNG, JPG or WEBP ? 2 MB max\",";
+const enNew = "   hotel_logo_hint: \"PNG, JPG or WEBP ? 2 MB max\",\n   hotel_photos: \"Hotel photos\",\n   hotel_photos_hint: \"PNG, JPG or WEBP. Maximum 5 images.\",";
+console.log("fr matches:", (s.split(frOld).length - 1));
+console.log("en matches:", (s.split(enOld).length - 1));
+s = s.split(frOld).join(frNew);
+s = s.split(enOld).join(enNew);
+fs.writeFileSync(p, s);
+console.log("done");

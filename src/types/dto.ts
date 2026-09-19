@@ -1,10 +1,17 @@
 export type Locale = "fr" | "en";
 
+export interface HotelImage {
+  id: number;
+  image_url: string;
+  sort_order: number;
+}
+
 export interface Hotel {
   id: number;
   uuid?: string;
   slug: string;
   name: string;
+  stars?: number | null;
   legal_name?: string | null;
   address?: string | null;
   city?: string | null;
@@ -19,6 +26,7 @@ export interface Hotel {
   check_out_time?: string | null;
   logo_path?: string | null;
   logo_url?: string | null;
+  images?: HotelImage[];
   status?: string;
 }
 
@@ -290,17 +298,31 @@ export interface AvailableRoom {
 export interface HotelSearchResult {
   id: number;
   name: string;
+  stars?: number | null;
   slug: string;
   city?: string | null;
   country?: string | null;
   currency: string;
   phone?: string | null;
   email?: string | null;
+  logo_url?: string | null;
+  images?: HotelImage[];
   available_rooms?: AvailableRoom[];
+}
+
+export interface PublicReview {
+  id: number;
+  author: string;
+  rating: number;
+  title?: string | null;
+  comment: string;
+  verified: boolean;
+  created_at: string;
 }
 
 export interface PublicHotel {
   name: string;
+  stars?: number | null;
   city?: string | null;
   country?: string | null;
   currency: string;
@@ -308,6 +330,10 @@ export interface PublicHotel {
   check_out_time?: string;
   phone?: string | null;
   email?: string | null;
+  logo_url?: string | null;
+  images?: HotelImage[];
+  rating?: { average: number | null; count: number } | null;
+  reviews?: PublicReview[];
   room_types: (RoomType & { features?: string[] | null })[];
 }
 
@@ -317,6 +343,7 @@ export interface PlatformHotel {
   id: number;
   slug: string;
   name: string;
+  stars?: number | null;
   legal_name?: string | null;
   address?: string | null;
   city?: string | null;
@@ -328,6 +355,7 @@ export interface PlatformHotel {
   timezone: string;
   status: HotelStatus;
   logo_url?: string | null;
+  images?: HotelImage[];
   locale?: string | null;
   created_at?: string;
   users_count: number;

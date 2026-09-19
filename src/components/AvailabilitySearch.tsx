@@ -1,11 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { BedDouble, Building2, CalendarRange, MapPin, Phone, User } from "lucide-react";
 import { api } from "@/lib/api";
 import { useLocale } from "@/i18n/LocaleProvider";
 import { formatMoney, nightsBetween } from "@/lib/format";
+import { StarsDisplay } from "@/components/StarsDisplay";
 import type { AvailableRoom, HotelSearchResult } from "@/types/dto";
 
 type RateGroup = {
@@ -24,7 +25,22 @@ export function AvailabilitySearch() {
   const { t, locale } = useLocale();
   const router = useRouter();
   const [city, setCity] = useState("");
+  const [cities, setCities] = useState<string[]>([]);
   const [checkIn, setCheckIn] = useState("");
+
+  useEffect(() => {
+    let mounted = true;
+    api<{ data: string[] }>("/hotels/cities")
+      .then(({ data }) => {
+        if (mounted) setCities(data ?? []);
+      })
+      .catch(() => {
+        /* dropdown is optional; keep the form usable if it fails */
+      });
+    return () => {
+      mounted = false;
+    };
+  }, []);
   const [checkOut, setCheckOut] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
@@ -140,12 +156,16 @@ export function AvailabilitySearch() {
       >
         <label className="flex flex-col gap-1">
           <span className="text-xs font-semibold text-slate-500">{t("city")}</span>
-          <input
+          <select
             value={city}
             onChange={(e) => setCity(e.target.value)}
-            placeholder={t("city_placeholder")}
             className={input}
-          />
+          >
+            <option value="">{t("all_cities")}</option>
+            {cities.map((c) => (
+              <option key={c} value={c}>{c}</option>
+            ))}
+          </select>
         </label>
         <label className="flex flex-col gap-1">
           <span className="text-xs font-semibold text-slate-500">{t("check_in_date")}</span>
@@ -212,6 +232,18 @@ export function AvailabilitySearch() {
             const groups = groupByRate(hotel);
             return (
               <div key={hotel.id} className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+                {hotel.images && hotel.images.length > 0 && (
+                  <div className="flex gap-2 overflow-x-auto border-b border-slate-100 bg-slate-50 px-4 py-3">
+                    {hotel.images.map((img) => (
+                      <img
+                        key={img.id}
+                        src={img.image_url}
+                        alt={hotel.name}
+                        className="h-28 w-44 shrink-0 rounded-lg object-cover"
+                      />
+                    ))}
+                  </div>
+                )}
                 <div className="flex items-center gap-4 bg-gradient-to-r from-slate-800 via-slate-900 to-slate-800 px-6 py-4">
                   <span className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-amber-500/20">
                     <Building2 className="size-6 text-amber-400" />
@@ -221,9 +253,12 @@ export function AvailabilitySearch() {
                       <button
                         type="button"
                         onClick={() => router.push(`/guest/${hotel.slug}`)}
-                        className="truncate text-lg font-bold text-white hover:text-amber-300"
+                        className="truncate text-lg font-bold text-white hover:text-amber-300 flex items-center gap-1.5"
                       >
                         {hotel.name}
+                        {hotel.stars !== null && hotel.stars !== undefined && (
+                          <StarsDisplay stars={hotel.stars} size="sm" />
+                        )}
                       </button>
                       <span className="shrink-0 rounded-full bg-amber-500 px-2.5 py-0.5 text-xs font-bold text-slate-900">
                         {hotel.available_rooms?.length ?? 0} {t("available")}

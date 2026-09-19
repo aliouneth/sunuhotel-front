@@ -1,4 +1,5 @@
 const TOKEN_KEY = "sunuhotel_token";
+const GUEST_TOKEN_KEY = "sunuhotel_guest_token";
 
 export function getToken(): string | null {
   if (typeof window === "undefined") return null;
@@ -11,6 +12,20 @@ export function setToken(token: string | null): void {
   else window.localStorage.removeItem(TOKEN_KEY);
 }
 
+/**
+ * Guest-portal token, stored separately so a guest logging in through a
+ * hotel's public page never clobbers the staff/manager token.
+ */
+export function getGuestToken(): string | null {
+  if (typeof window === "undefined") return null;
+  return window.localStorage.getItem(GUEST_TOKEN_KEY);
+}
+
+export function setGuestToken(token: string | null): void {
+  if (typeof window === "undefined") return;
+  if (token) window.localStorage.setItem(GUEST_TOKEN_KEY, token);
+  else window.localStorage.removeItem(GUEST_TOKEN_KEY);
+}
 export class ApiError extends Error {
   status: number;
   detail: unknown;
@@ -48,8 +63,14 @@ async function readError(res: Response): Promise<ApiError> {
   return new ApiError(res.status, message, detail);
 }
 
-export async function api<T>(path: string, options: RequestInit = {}): Promise<T> {
+export interface ApiOptions extends RequestInit {
+  /** Send the guest self-service token instead of the staff token. */
+  guest?: boolean;
+}
+
+export async function api<T>(path: string, options: ApiOptions = {}): Promise<T> {
   const token = getToken();
+  const guestToken = getGuestToken();
   const isForm = typeof FormData !== "undefined" && options.body instanceof FormData;
   const headers: Record<string, string> = {
     Accept: "application/json",
@@ -57,7 +78,10 @@ export async function api<T>(path: string, options: RequestInit = {}): Promise<T
     ...(options.headers as Record<string, string> | undefined),
   };
 
-  if (token) headers.Authorization = `Bearer ${token}`;
+  // Guest endpoints authenticate with the guest token (stored separately);
+  // prefer it when the caller opts in, otherwise use the staff token.
+  if (options.guest && guestToken) headers.Authorization = `Bearer ${guestToken}`;
+  else if (token) headers.Authorization = `Bearer ${token}`;
 
   const res = await fetch(`${API_URL}${path}`, { ...options, headers });
 

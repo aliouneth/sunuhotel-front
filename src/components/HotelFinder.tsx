@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { api } from "@/lib/api";
 import { useLocale } from "@/i18n/LocaleProvider";
+import { StarsDisplay } from "@/components/StarsDisplay";
 import type { HotelSearchResult } from "@/types/dto";
 
 export function HotelFinder() {
@@ -66,10 +67,21 @@ export function HotelFinder() {
                   onClick={() => router.push(`/guest/${hotel.slug}`)}
                   className="flex w-full items-center justify-between gap-3 px-1 py-3 text-left transition hover:bg-slate-50"
                 >
-                  <span className="flex min-w-0 flex-col">
-                    <span className="truncate text-sm font-medium text-slate-900">
-                      {hotel.name}
-                    </span>
+<span className="flex min-w-0 flex-col">
+                        <span className="truncate text-sm font-medium text-slate-900 flex items-center gap-1.5">
+                          {hotel.logo_url ? (
+                            // eslint-disable-next-line @next/next/no-img-element
+                            <img src={hotel.logo_url} alt="" className="size-6 rounded object-cover" />
+                          ) : (
+                            <span className="size-6 flex items-center justify-center rounded bg-slate-200 text-xs font-bold text-slate-500">
+                              {hotel.name.charAt(0)}
+                            </span>
+                          )}
+                          {hotel.name}
+                          {hotel.stars !== null && hotel.stars !== undefined && (
+                            <StarsDisplay stars={hotel.stars} size="sm" />
+                          )}
+                        </span>
                     <span className="truncate text-xs text-slate-500">
                       {hotel.city && hotel.country
                         ? `${hotel.city}, ${hotel.country}`

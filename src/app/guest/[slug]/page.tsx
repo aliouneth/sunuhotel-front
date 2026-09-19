@@ -2,6 +2,8 @@ import Link from "next/link";
 import Image from "next/image";
 import { notFound } from "next/navigation";
 import { GuestAvailability } from "@/components/GuestAvailability";
+import { GuestReviews } from "@/components/GuestReviews";
+import { StarsDisplay } from "@/components/StarsDisplay";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import { API_URL } from "@/lib/api";
 import { formatMoney } from "@/lib/format";
@@ -38,11 +40,35 @@ export default async function GuestPage({ params }: { params: { slug: string } }
       </header>
 
       <section className="mx-auto max-w-4xl px-6 pt-6">
+        {hotel.logo_url && (
+          <figure className="mb-6 rounded-2xl overflow-hidden border border-slate-200 shadow-sm">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={hotel.logo_url} alt={hotel.name} className="w-full h-48 object-cover" />
+          </figure>
+        )}
+        {hotel.images && hotel.images.length > 0 && (
+          <div className="mb-6">
+            <h3 className="text-lg font-semibold text-slate-900 mb-3">Hotel photos</h3>
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+              {hotel.images.map((img) => (
+                <figure key={img.id} className="rounded-xl overflow-hidden border border-slate-200">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={img.image_url} alt="" className="w-full h-40 object-cover" />
+                </figure>
+              ))}
+            </div>
+          </div>
+        )}
         <div className="rounded-2xl bg-slate-900 p-8 text-white">
           <p className="text-xs uppercase tracking-widest text-amber-400">
             {hotel.city} {hotel.country ? `· ${hotel.country}` : ""}
           </p>
           <h1 className="mt-2 text-3xl font-bold">{hotel.name}</h1>
+          {hotel.stars !== null && hotel.stars !== undefined && (
+            <div className="mt-2">
+              <StarsDisplay stars={hotel.stars} size="lg" showLabel />
+            </div>
+          )}
           <div className="mt-4 flex flex-wrap gap-4 text-xs text-slate-300">
             <span>
               {hotel.check_in_time ?? "—"} — check-in
@@ -80,6 +106,8 @@ export default async function GuestPage({ params }: { params: { slug: string } }
           </div>
         </div>
       </section>
+
+      <GuestReviews hotel={hotel} />
     </main>
   );
 }

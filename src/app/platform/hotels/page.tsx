@@ -267,6 +267,9 @@ function EditHotelModal({
   const [tab, setTab] = useState<"info" | "rooms" | "users">("info");
   const [logo, setLogo] = useState<File | null>(null);
   const [logoPreview, setLogoPreview] = useState<string | null>(null);
+  const [images, setImages] = useState<File[]>([]);
+  const [imagePreviews, setImagePreviews] = useState<string[]>([]);
+  const [imagesToDelete, setImagesToDelete] = useState<number[]>([]);
 
   function set<K extends keyof typeof form>(key: K, value: string) {
     setForm((f) => ({ ...f, [key]: value }));
@@ -278,6 +281,19 @@ function EditHotelModal({
     setLogoPreview(file ? URL.createObjectURL(file) : null);
   }
 
+  function onImagesChange(files: FileList | null | undefined) {
+    const arr = files ? Array.from(files) : [];
+    setImages(arr);
+    const urls = arr.map((f) => URL.createObjectURL(f));
+    setImagePreviews((prev) => [...prev, ...urls]);
+  }
+
+  function onDeleteImageToggle(id: number) {
+    setImagesToDelete((prev) =>
+      prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id],
+    );
+  }
+
   async function save(e: React.FormEvent) {
     e.preventDefault();
     setBusy(true);
@@ -287,6 +303,8 @@ function EditHotelModal({
       fd.append("_method", "PUT");
       Object.entries(form).forEach(([key, value]) => fd.append(key, value));
       if (logo) fd.append("logo", logo);
+      images.forEach((img) => fd.append("images[]", img));
+      imagesToDelete.forEach((id) => fd.append("images_to_delete[]", String(id)));
       await api(`/platform/hotels/${hotel.id}`, {
         method: "POST",
         body: fd,
@@ -349,9 +367,35 @@ function EditHotelModal({
             <p className="mt-1 text-xs text-slate-500">{t("hotel_logo_hint")}</p>
           </div>
         </div>
-        <div className="grid gap-4 sm:grid-cols-2">
-          <div className="sm:col-span-2">
-            <Input label={t("hotel_name")} required value={form.name} onChange={(e) => set("name", e.target.value)} />
+<div className="grid gap-4 sm:grid-cols-2">
+           <div className="sm:col-span-2">
+             <label className="block text-sm font-medium text-slate-700 mb-1">{t("hotel_photos")}</label>
+             <input type="file" multiple accept="image/png,image/jpeg,image/webp" className="cursor-pointer file:cursor-pointer" onChange={(e) => onImagesChange(e.target.files)} />
+             <p className="mt-1 text-xs text-slate-500">{t("hotel_photos_hint")}</p>
+             {imagePreviews.length > 0 && (
+               <div className="flex flex-wrap gap-2 mt-2">
+{imagePreviews.map((src, i) => (
+                    <img key={i} src={src} alt="" className="size-16 object-cover rounded-lg border border-slate-200" />
+                  ))}
+               </div>
+             )}
+             {hotel.images && hotel.images.length > 0 && (
+               <div className="mt-3 space-y-2">
+                 <p className="text-xs font-medium text-slate-600">Existing photos:</p>
+                 <div className="flex flex-wrap gap-2">
+                   {hotel.images.map((img) => (
+                     <label key={img.id} className="flex items-center gap-1 text-xs cursor-pointer">
+                       <input type="checkbox" checked={imagesToDelete.includes(img.id)} onChange={() => onDeleteImageToggle(img.id)} className="rounded" />
+                       {/* eslint-disable-next-line @next/next/no-img-element */}
+                       <img src={img.image_url} alt="" className="size-12 object-cover rounded border border-slate-200" />
+                     </label>
+                   ))}
+                 </div>
+               </div>
+             )}
+           </div>
+           <div className="sm:col-span-2">
+             <Input label={t("hotel_name")} required value={form.name} onChange={(e) => set("name", e.target.value)} />
           </div>
           <Input label={t("legal_name_label")} value={form.legal_name} onChange={(e) => set("legal_name", e.target.value)} />
           <Input label={`${t("slug_label")} (${t("optional")})`} value={form.slug} onChange={(e) => set("slug", e.target.value)} />

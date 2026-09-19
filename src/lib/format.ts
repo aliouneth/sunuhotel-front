@@ -42,6 +42,17 @@ export function formatDate(
   return hhmm ? `${date} ${hhmm}` : date;
 }
 
+export function formatDateShort(
+  value: string | null | undefined,
+): string {
+  if (!value) return "—";
+  const m = /^(\d{4})-(\d{2})-(\d{2})/.exec(String(value).trim());
+  if (!m) return value;
+  const [, y, mo, d] = m;
+  if (!y || !mo || !d) return value;
+  return `${d}/${mo}/${y}`;
+}
+
 export function formatPercent(value: number, locale: Locale = "fr"): string {
   return new Intl.NumberFormat(locale === "fr" ? "fr-FR" : "en-US", {
     style: "percent",
