@@ -29,6 +29,7 @@ export default function ExpensesPage() {
   const qc = useQueryClient();
   const [typeFilter, setTypeFilter] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
+  const [paymentMethodFilter, setPaymentMethodFilter] = useState("");
   const [month, setMonth] = useState("");
   const [editExpense, setEditExpense] = useState<Expense | null>(null);
   const [createOpen, setCreateOpen] = useState(false);
@@ -44,11 +45,11 @@ export default function ExpensesPage() {
     : null;
 
   const { data, error, isLoading, refetch } = useQuery<Paginated<Expense>>({
-    queryKey: ["expenses", typeFilter, statusFilter, month],
+    queryKey: ["expenses", typeFilter, statusFilter, paymentMethodFilter, month],
     placeholderData: (previousData) => previousData,
     queryFn: () =>
       api<{ data: Paginated<Expense> }>(
-        `/expenses${queryString({ per_page: 50, expense_type_id: typeFilter || undefined, status: statusFilter || undefined, from: monthRange?.from, to: monthRange?.to })}`,
+        `/expenses${queryString({ per_page: 50, expense_type_id: typeFilter || undefined, status: statusFilter || undefined, payment_method: paymentMethodFilter || undefined, from: monthRange?.from, to: monthRange?.to })}`,
       ).then((b) => b.data),
   });
 
@@ -141,6 +142,12 @@ export default function ExpensesPage() {
                   <option key={sKey} value={sKey}>
                     {t(statusLabels[sKey])}
                   </option>
+                ))}
+              </Select>
+              <Select value={paymentMethodFilter} onChange={(e) => setPaymentMethodFilter(e.target.value)} className="w-40">
+                <option value="">{t("all")}</option>
+                {(["cash", "card", "bank_transfer", "mobile_money", "check"] as const).map((pm) => (
+                  <option key={pm} value={pm}>{t(`payment_${pm}`)}</option>
                 ))}
               </Select>
               <Input type="month" value={month} onChange={(e) => setMonth(e.target.value)} className="w-40" />
@@ -245,6 +252,8 @@ function ExpenseModal({
     paid_on: expense?.paid_on ?? todayISO(),
     status: (expense?.status ?? "paid") as Expense["status"],
     notes: expense?.notes ?? "",
+    paid_to: expense?.paid_to ?? "",
+    payment_method: (expense?.payment_method ?? "") as Expense["payment_method"],
   }));
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
@@ -263,6 +272,8 @@ function ExpenseModal({
         paid_on: form.paid_on || undefined,
         status: form.status,
         notes: form.notes || undefined,
+        paid_to: form.paid_to || undefined,
+        payment_method: form.payment_method || undefined,
       };
       if (expense) {
         await api(`/expenses/${expense.id}`, { method: "PUT", body: JSON.stringify(payload) });
@@ -303,6 +314,24 @@ function ExpenseModal({
               <option key={emp.id} value={emp.id}>
                 {emp.name}
               </option>
+            ))}
+          </Select>
+        </div>
+        <div className="grid grid-cols-2 gap-4">
+          <Input
+            label={t("paid_to_label")}
+            value={form.paid_to}
+            onChange={(e) => setForm({ ...form, paid_to: e.target.value })}
+            placeholder={t("expense_description_placeholder")}
+          />
+          <Select
+            label={t("payment_method_label")}
+            value={form.payment_method ?? ""}
+            onChange={(e) => setForm({ ...form, payment_method: e.target.value as Expense["payment_method"] })}
+          >
+            <option value="">{t("all")}</option>
+            {(["cash", "card", "bank_transfer", "mobile_money", "check"] as const).map((pm) => (
+              <option key={pm} value={pm}>{t(`payment_${pm}`)}</option>
             ))}
           </Select>
         </div>

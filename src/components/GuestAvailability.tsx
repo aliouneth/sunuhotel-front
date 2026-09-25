@@ -13,6 +13,8 @@ type BookableType = {
   count: number;
   nightlyTotal: number;
   nightly: number;
+  originalNightly?: number;
+  promoTitle?: string | null;
   roomId: number;
 };
 
@@ -47,20 +49,24 @@ export function GuestAvailability({ hotel, slug }: { hotel: PublicHotel; slug: s
     if (!data) return [];
     const grouped = new Map<
       number,
-      { name: string; count: number; nightlyTotal: number; roomId: number }
+      { name: string; count: number; nightlyTotal: number; originalTotal: number; promoTitle?: string | null; roomId: number }
     >();
     for (const room of data.rooms) {
       const tid = room.room_type?.id ?? 0;
       const entry =
         grouped.get(tid) ??
-        { name: room.room_type?.name ?? "—", count: 0, nightlyTotal: 0, roomId: room.id };
+        { name: room.room_type?.name ?? "—", count: 0, nightlyTotal: 0, originalTotal: 0, promoTitle: null, roomId: room.id };
       entry.count += 1;
       entry.nightlyTotal += room.rate_cents ?? 0;
+      entry.originalTotal += room.original_rate_cents ?? room.rate_cents ?? 0;
+      if (room.promo_title) entry.promoTitle = room.promo_title;
       grouped.set(tid, entry);
     }
     return Array.from(grouped.values()).map((t) => ({
       ...t,
       nightly: Math.round(t.nightlyTotal / Math.max(1, t.count)),
+      originalNightly: t.originalTotal > 0 ? Math.round(t.originalTotal / Math.max(1, t.count)) : undefined,
+      promoTitle: t.promoTitle || null,
     }));
   }, [data]);
 
@@ -163,13 +169,23 @@ export function GuestAvailability({ hotel, slug }: { hotel: PublicHotel; slug: s
           <div className="mt-3 space-y-2">
             {byType.map((t2) => {
               const total = t2.nightly * nights;
+              const isPromo = t2.promoTitle != null || (t2.originalNightly != null && t2.originalNightly > t2.nightly);
               return (
                 <div key={t2.name} className="flex items-center justify-between gap-4 rounded-lg border border-slate-100 px-4 py-3">
                   <div>
                     <p className="text-sm font-medium text-slate-900">{t2.name}</p>
                     <p className="text-xs text-slate-500">
-                      {t2.count} · {formatMoney(t2.nightly, hotel.currency, locale)} / nuit
+                      {t2.count} ·{" "}
+                      {isPromo && t2.originalNightly != null && (
+                        <span className="text-slate-400 line-through">{formatMoney(t2.originalNightly, hotel.currency, locale)} </span>
+                      )}
+                      <span className="font-semibold text-amber-700">{formatMoney(t2.nightly, hotel.currency, locale)} / nuit</span>
                     </p>
+                    {isPromo && (
+                      <span className="mt-1 inline-block rounded-full bg-amber-50 px-2 py-0.5 text-xs font-semibold text-amber-700">
+                        {t2.promoTitle || "Promotion"}
+                      </span>
+                    )}
                   </div>
                   <div className="flex items-center gap-4">
                     <p className="text-sm font-semibold text-slate-900">

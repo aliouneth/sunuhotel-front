@@ -14,7 +14,7 @@ interface Props {
 export default function MyReservations({ slug }: Props) {
   const [bookings, setBookings] = useState<GuestBooking[] | null>(null);
   const [error, setError] = useState("");
-  const [busy, setBusy] = useState(falseVerifyGuestToken);
+  const [busy, setBusy] = useState(false);
 
   const load = useCallback(async () => {
     if (!getGuestToken()) {

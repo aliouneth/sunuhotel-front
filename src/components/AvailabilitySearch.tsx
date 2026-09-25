@@ -11,9 +11,12 @@ import type { AvailableRoom, HotelSearchResult } from "@/types/dto";
 
 type RateGroup = {
   rate: number;
+  originalRate?: number;
+  promoTitle?: string | null;
   roomTypes: string[];
   count: number;
   rooms: AvailableRoom[];
+  promoted: boolean;
 };
 
 type BookingTarget = {
@@ -50,7 +53,10 @@ export function AvailabilitySearch() {
   const [target, setTarget] = useState<BookingTarget | null>(null);
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
+  const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
+  //const [email, setEmail] = useState("");
+  //const [password, setPassword] = useState("");
   const [bookBusy, setBookBusy] = useState(false);
   const [bookError, setBookError] = useState("");
   const [done, setDone] = useState<{ hotel: HotelSearchResult; booking_number: string } | null>(null);
@@ -69,11 +75,16 @@ export function AvailabilitySearch() {
     const map = new Map<number, RateGroup>();
     for (const room of hotel.available_rooms ?? []) {
       const entry =
-        map.get(room.rate_cents) ?? { rate: room.rate_cents, roomTypes: [], count: 0, rooms: [] };
+        map.get(room.rate_cents) ?? { rate: room.rate_cents, originalRate: undefined, promoTitle: null, roomTypes: [], count: 0, rooms: [], promoted: false };
       entry.count += 1;
       entry.rooms.push(room);
       const name = room.room_type?.name;
       if (name && !entry.roomTypes.includes(name)) entry.roomTypes.push(name);
+      if (room.promo_rate_cents != null) {
+        entry.promoted = true;
+        entry.originalRate = room.original_rate_cents ?? entry.originalRate;
+        entry.promoTitle = room.promo_title ?? entry.promoTitle;
+      }
       map.set(room.rate_cents, entry);
     }
     return Array.from(map.values()).sort((a, b) => a.rate - b.rate);
@@ -128,7 +139,8 @@ export function AvailabilitySearch() {
             guest: {
               first_name: firstName,
               last_name: lastName,
-              phone: phone || undefined,
+              email: email || undefined,
+              phone: phone,
             },
             check_in: checkInValue,
             check_out: checkOutValue,
@@ -152,7 +164,7 @@ export function AvailabilitySearch() {
     <div>
       <form
         onSubmit={submit}
-        className="grid gap-3 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:grid-cols-[1.2fr_1fr_1fr_auto]"
+        className="grid gap-3 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:grid-cols-[1.4fr_1.2fr_1.2fr_auto]"
       >
         <label className="flex flex-col gap-1">
           <span className="text-xs font-semibold text-slate-500">{t("city")}</span>
@@ -302,10 +314,20 @@ export function AvailabilitySearch() {
                             <p className="text-xs text-slate-500">
                               +{group.count} {t("rooms_count_label")}
                             </p>
+                            {group.promoted && (
+                              <span className="mt-1 inline-block rounded-full bg-amber-50 px-2 py-0.5 text-xs font-semibold text-amber-700">
+                                {group.promoTitle || t("promotion")}
+                              </span>
+                            )}
                           </div>
                         </div>
                         <div className="flex items-baseline gap-3 sm:flex-col sm:items-end sm:gap-0">
                           <p className="text-xl font-bold text-slate-900">
+                            {group.promoted && group.originalRate != null && (
+                              <span className="mr-1.5 text-xs font-medium text-slate-400 line-through">
+                                {formatMoney(group.originalRate, hotel.currency, locale)}
+                              </span>
+                            )}
                             {formatMoney(group.rate, hotel.currency, locale)}
                             <span className="ml-1 text-xs font-medium text-slate-400">{t("nightly")}</span>
                           </p>
@@ -341,8 +363,26 @@ export function AvailabilitySearch() {
                         <input value={lastName} onChange={(e) => setLastName(e.target.value)} required className={input} />
                       </label>
                       <label className="flex flex-col gap-1">
-                        <span className="text-xs font-semibold text-amber-800">{t("phone")}</span>
-                        <input value={phone} onChange={(e) => setPhone(e.target.value)} className={input} />
+                        <span className="text-xs font-semibold text-amber-800">{t("email")}</span>
+                        <input
+                          type="email"
+                          value={email}
+                          onChange={(e) => setEmail(e.target.value)}
+                          autoComplete="email"
+                          className={input}
+                        />
+                      </label>
+                      <label className="flex flex-col gap-1 sm:col-span-3">
+          <span className="text-xs font-semibold text-amber-800">{t("phone")} *</span>
+                            <input
+                              type="tel"
+                              value={phone}
+                              onChange={(e) => setPhone(e.target.value)}
+                              autoComplete="tel"
+                              required
+                              placeholder={t("phone_placeholder")}
+                              className={input}
+                            />
                       </label>
                     </div>
                     {bookError && <p className="mt-2 text-xs text-red-600">{bookError}</p>}

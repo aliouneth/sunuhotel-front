@@ -88,18 +88,37 @@ export default async function GuestPage({ params }: { params: { slug: string } }
           <div className="mt-4 grid gap-4 sm:grid-cols-2">
             {hotel.room_types.map((rt) => (
               <div key={rt.id} className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
-                <div className="flex items-start justify-between">
+                <div className="flex items-start justify-between gap-3">
                   <div>
                     <h3 className="font-semibold text-slate-900">{rt.name}</h3>
                     <p className="mt-0.5 text-xs text-slate-500">
                       {rt.base_capacity}–{rt.max_capacity} pers.
                     </p>
                   </div>
-                  <p className="text-sm font-bold text-amber-700">
-                    {formatMoney(rt.nightly_rate_cents ?? rt.base_rate_cents, hotel.currency)}
-                    <span className="ml-1 text-xs font-medium text-slate-400">/ nuit</span>
-                  </p>
+                  <div className="text-right">
+                    {rt.promo_rate_cents ? (
+                      <p className="text-sm font-bold text-amber-700">
+                        {formatMoney(rt.promo_rate_cents, hotel.currency)}
+                        <span className="ml-1 text-xs font-medium text-slate-400">/ nuit</span>
+                      </p>
+                    ) : (
+                      <p className="text-sm font-bold text-amber-700">
+                        {formatMoney(rt.nightly_rate_cents ?? rt.base_rate_cents, hotel.currency)}
+                        <span className="ml-1 text-xs font-medium text-slate-400">/ nuit</span>
+                      </p>
+                    )}
+                  </div>
                 </div>
+                {rt.promo_rate_cents != null && rt.original_rate_cents != null && (
+                  <p className="mt-2 flex flex-wrap items-center gap-2">
+                    <span className="text-xs text-slate-400 line-through">
+                      {formatMoney(rt.original_rate_cents, hotel.currency)}
+                    </span>
+                    <span className="inline-block rounded-full bg-amber-50 px-2 py-0.5 text-xs font-semibold text-amber-700">
+                      {rt.promo_title || "Promotion"}
+                    </span>
+                  </p>
+                )}
                 {rt.description && <p className="mt-3 text-sm text-slate-600">{rt.description}</p>}
               </div>
             ))}

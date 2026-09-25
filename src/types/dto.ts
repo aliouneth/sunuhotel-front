@@ -5,10 +5,6 @@ export interface HotelImage {
   image_url: string;
   sort_order: number;
 }
-    last_name: string;
-    email: string;
-  };
-}
 
 export interface Hotel {
   id: number;
@@ -54,6 +50,9 @@ export interface RoomType {
   max_capacity: number;
   base_rate_cents: number;
   nightly_rate_cents?: number | null;
+  original_rate_cents?: number | null;
+  promo_rate_cents?: number | null;
+  promo_title?: string | null;
   is_active: boolean;
   amenities_count?: number;
 }
@@ -73,6 +72,9 @@ export interface Room {
   capacity: number;
   daily_rate_cents?: number | null;
   rate_cents?: number;
+  original_rate_cents?: number | null;
+  promo_rate_cents?: number | null;
+  promo_title?: string | null;
   status: RoomStatus;
   keycard_code?: string | null;
   notes?: string | null;
@@ -223,12 +225,18 @@ export interface ExpenseType {
   created_at?: string | null;
 }
 
+export type ExpensePaymentType = "cash" | "card" | "bank_transfer" | "mobile_money" | "check";
+
+export type ExpensePaymentMethod = ExpensePaymentType;
+
 export interface Expense {
   id: number;
   expense_type_id?: number | null;
   employee_id?: number | null;
   description: string;
   amount_cents: number;
+  paid_to?: string | null;
+  payment_method?: ExpensePaymentMethod | null;
   incurred_on: string;
   paid_on?: string | null;
   status: "pending" | "paid" | "cancelled";
@@ -297,6 +305,9 @@ export interface AvailableRoom {
   room_number: string;
   room_type?: { id: number; name: string };
   rate_cents: number;
+  original_rate_cents?: number | null;
+  promo_rate_cents?: number | null;
+  promo_title?: string | null;
 }
 
 export interface HotelSearchResult {
@@ -358,6 +369,7 @@ export interface PlatformHotel {
   currency: string;
   timezone: string;
   status: HotelStatus;
+  tax_rate?: number;
   logo_url?: string | null;
   images?: HotelImage[];
   locale?: string | null;
@@ -396,12 +408,18 @@ export interface PlatformSummary {
   by_status: Record<HotelStatus, number>;
 }
 
-export interface GuestLoginResult {
-  token: string;
-  guest: {
-    id: number;
-    first_name: string;
-    last_name: string;
-    email: string;
-  };
+export interface GuestBooking {
+  id: number;
+  booking_number: string;
+  hotel?: { name: string } | null;
+  city?: string | null;
+  check_in: string;
+  check_out: string;
+  status: string;
+  nights: number;
+  adults: number;
+  children: number;
+  room_types?: string[];
+  total_cents: number;
+  currency: string;
 }

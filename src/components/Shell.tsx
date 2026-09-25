@@ -6,6 +6,7 @@ import { usePathname, useRouter } from "next/navigation";
 import {
   BedDouble,
   CalendarDays,
+  CreditCard,
   Home,
   LayoutDashboard,
   Layers,
@@ -33,6 +34,7 @@ const items = [
   { href: "/dashboard/employees", icon: UserRoundCog, key: "employees", perm: "employees.view" },
   { href: "/dashboard/expenses", icon: Wallet, key: "expenses", perm: "expenses.view" },
   { href: "/dashboard/expense-types", icon: Tags, key: "expense_types", perm: "expenses.view" },
+  { href: "/dashboard/billing", icon: CreditCard, key: "billing", perm: "payments.view" },
   { href: "/dashboard/reports", icon: Receipt, key: "reports", perm: "reports.view" },
 ];
 
@@ -121,9 +123,14 @@ export function Shell({ children }: { children: React.ReactNode }) {
 
       <div className="flex min-w-0 flex-1 flex-col">
         <header className="sticky top-0 z-20 flex items-center justify-between border-b border-slate-200 bg-white/90 px-6 py-3 backdrop-blur">
-          <p className="text-sm text-slate-500">
-            {user.hotel?.city ?? ""} · {user.hotel?.country ?? ""}
-          </p>
+          <div className="flex min-w-0 items-center gap-2">
+            <p className="truncate text-lg font-bold text-gray-900">{user.hotel?.name ?? ""}</p>
+            {(user.hotel?.city || user.hotel?.country) && (
+              <p className="truncate text-sm text-slate-500">
+                · {user.hotel?.city ?? ""} {user.hotel?.country ?? ""}
+              </p>
+            )}
+          </div>
           <div className="flex items-center gap-3">
             <LanguageSwitcher />
             <span className="hidden text-xs text-slate-400 sm:block">{locale.toUpperCase()}</span>

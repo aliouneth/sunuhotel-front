@@ -3,14 +3,20 @@
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
-import { Building2, Home, Layers, LogOut, Settings2 } from "lucide-react";
+import { BadgeCheck, Building2, CreditCard, Home, Layers, LogOut, Percent, Settings2, Sparkles, Users, Wallet } from "lucide-react";
 import { useAuth } from "@/context/AuthProvider";
 import { useLocale } from "@/i18n/LocaleProvider";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 
 const navItems = [
   { href: "/platform/hotels", icon: Building2, key: "platform_hotels" },
+  { href: "/platform/guests", icon: Users, key: "guests_admin" },
   { href: "/platform/room-types", icon: Layers, key: "room_types" },
+  { href: "/platform/plans", icon: BadgeCheck, key: "plans_title" },
+  { href: "/platform/subscriptions", icon: CreditCard, key: "subscriptions_title" },
+  { href: "/platform/billing", icon: Wallet, key: "billing_title" },
+  { href: "/platform/promotions", icon: Sparkles, key: "promotions_title" },
+  { href: "/platform/country-tax-rates", icon: Percent, key: "country_tax_title" },
   { href: "/platform/settings", icon: Settings2, key: "corporate_info" },
 ];
 

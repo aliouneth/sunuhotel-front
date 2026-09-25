@@ -258,6 +258,7 @@ function EditHotelModal({
     email: hotel.email ?? "",
     website: hotel.website ?? "",
     currency: hotel.currency,
+    tax_rate: hotel.tax_rate ?? 0,
     timezone: hotel.timezone,
     locale: hotel.locale ?? "en",
     status: hotel.status,
@@ -271,7 +272,7 @@ function EditHotelModal({
   const [imagePreviews, setImagePreviews] = useState<string[]>([]);
   const [imagesToDelete, setImagesToDelete] = useState<number[]>([]);
 
-  function set<K extends keyof typeof form>(key: K, value: string) {
+  function set<K extends keyof typeof form>(key: K, value: (typeof form)[K]) {
     setForm((f) => ({ ...f, [key]: value }));
   }
 
@@ -301,10 +302,10 @@ function EditHotelModal({
     try {
       const fd = new FormData();
       fd.append("_method", "PUT");
-      Object.entries(form).forEach(([key, value]) => fd.append(key, value));
+      Object.entries(form).forEach(([key, value]) => fd.append(key, `${value}`));
       if (logo) fd.append("logo", logo);
       images.forEach((img) => fd.append("images[]", img));
-      imagesToDelete.forEach((id) => fd.append("images_to_delete[]", String(id)));
+      imagesToDelete.forEach((id) => fd.append("images_to_delete[]", `${id}`));
       await api(`/platform/hotels/${hotel.id}`, {
         method: "POST",
         body: fd,
@@ -408,6 +409,7 @@ function EditHotelModal({
           <Input label={t("email")} type="email" value={form.email} onChange={(e) => set("email", e.target.value)} />
           <Input label={t("website")} value={form.website} onChange={(e) => set("website", e.target.value)} />
           <Input label={t("currency")} maxLength={3} required value={form.currency} onChange={(e) => set("currency", e.target.value.toUpperCase())} />
+          <Input label={t("tax_rate")} type="number" step="0.01" min={0} max={100} value={`${form.tax_rate ?? 0}`} onChange={(e) => set("tax_rate", Number(e.target.value))} />
           <Input label={t("timezone")} required list="tz-options" value={form.timezone} onChange={(e) => set("timezone", e.target.value)} />
           <datalist id="tz-options">
             {["UTC", "Africa/Dakar", "Africa/Abidjan", "Europe/Paris", "America/New_York", "Asia/Dubai"].map((z) => (
@@ -418,7 +420,7 @@ function EditHotelModal({
             <option value="fr">Français</option>
             <option value="en">English</option>
           </Select>
-          <Select label={t("status")} value={form.status} onChange={(e) => set("status", e.target.value)}>
+          <Select label={t("status")} value={form.status} onChange={(e) => set("status", e.target.value as HotelStatus)}>
             {(Object.keys(toneByStatus) as HotelStatus[]).map((st) => (
               <option key={st} value={st}>
                 {t(statusLabel[st])}

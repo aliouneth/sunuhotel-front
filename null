@@ -1,0 +1,2 @@
+src/i18n/dictionaries.ts(1,29): error TS2307: Cannot find module '@/types/dto' or its corresponding type declarations.
+src/i18n/dictionaries.ts(47,3): error TS1117: An object literal cannot have multiple properties with the same name.
