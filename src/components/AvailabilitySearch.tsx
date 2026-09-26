@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { BedDouble, Building2, CalendarRange, MapPin, Phone, User } from "lucide-react";
 import { api } from "@/lib/api";
 import { useLocale } from "@/i18n/LocaleProvider";
+import Image from "next/image";
 import { formatMoney, nightsBetween } from "@/lib/format";
 import { StarsDisplay } from "@/components/StarsDisplay";
 import type { AvailableRoom, HotelSearchResult } from "@/types/dto";
@@ -247,10 +248,12 @@ export function AvailabilitySearch() {
                 {hotel.images && hotel.images.length > 0 && (
                   <div className="flex gap-2 overflow-x-auto border-b border-slate-100 bg-slate-50 px-4 py-3">
                     {hotel.images.map((img) => (
-                      <image
+                      <Image
                         key={img.id}
                         src={img.image_url}
                         alt={hotel.name}
+                        width={176}
+                        height={112}
                         className="h-28 w-44 shrink-0 rounded-lg object-cover"
                       />
                     ))}

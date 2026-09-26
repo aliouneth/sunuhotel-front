@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Image from "next/image";
 import Link from "next/link";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { api, ApiError } from "@/lib/api";
@@ -155,8 +156,7 @@ export default function PlatformHotelsPage() {
                   <td className="px-5 py-3">
                     <span className="flex size-9 flex-none items-center justify-center overflow-hidden rounded-lg bg-amber-600 text-xs font-bold text-white ring-1 ring-slate-200">
                       {h.logo_url ? (
-                        // eslint-disable-next-line @next/next/no-img-element
-                        <image src={h.logo_url} alt="" className="size-full bg-white object-contain" />
+                        <Image src={h.logo_url} alt="" width={40} height={40} className="size-full bg-white object-contain" />
                       ) : (
                         h.name.charAt(0)
                       )}
@@ -351,8 +351,7 @@ function EditHotelModal({
         <div className="flex items-center gap-5">
           <div className="flex size-16 flex-none items-center justify-center overflow-hidden rounded-xl bg-white ring-1 ring-slate-200">
             {logoPreview || hotel.logo_url ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <image src={(logoPreview || hotel.logo_url) as string} alt="" className="size-full object-contain" />
+              <Image src={(logoPreview || hotel.logo_url) as string} alt="" width={160} height={160} className="size-full object-contain" />
             ) : (
               <span className="text-lg font-bold text-slate-300">S</span>
             )}
@@ -376,7 +375,7 @@ function EditHotelModal({
              {imagePreviews.length > 0 && (
                <div className="flex flex-wrap gap-2 mt-2">
 {imagePreviews.map((src, i) => (
-                    <image key={i} src={src} alt="" className="size-16 object-cover rounded-lg border border-slate-200" />
+                    <Image key={i} src={src} alt="" width={64} height={64} className="size-16 object-cover rounded-lg border border-slate-200" />
                   ))}
                </div>
              )}
@@ -387,8 +386,7 @@ function EditHotelModal({
                    {hotel.images.map((img) => (
                      <label key={img.id} className="flex items-center gap-1 text-xs cursor-pointer">
                        <input type="checkbox" checked={imagesToDelete.includes(img.id)} onChange={() => onDeleteImageToggle(img.id)} className="rounded" />
-                       {/* eslint-disable-next-line @next/next/no-img-element */}
-                       <image src={img.image_url} alt="" className="size-12 object-cover rounded border border-slate-200" />
+                       <Image src={img.image_url} alt="" width={48} height={48} className="size-12 object-cover rounded border border-slate-200" />
                      </label>
                    ))}
                  </div>
