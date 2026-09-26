@@ -78,8 +78,6 @@ export default function LoginPage() {
               {t("register_title")}
             </Link>
           </p>
-          <p className="mt-3 text-center text-xs text-slate-400">{t("demo_hint")}</p>
-          <p className="mt-1 text-center text-xs text-slate-400">{t("demo_admin_hint")}</p>
         </Card>
       </div>
     </main>
