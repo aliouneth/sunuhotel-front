@@ -156,7 +156,7 @@ export default function PlatformHotelsPage() {
                     <span className="flex size-9 flex-none items-center justify-center overflow-hidden rounded-lg bg-amber-600 text-xs font-bold text-white ring-1 ring-slate-200">
                       {h.logo_url ? (
                         // eslint-disable-next-line @next/next/no-img-element
-                        <img src={h.logo_url} alt="" className="size-full bg-white object-contain" />
+                        <image src={h.logo_url} alt="" className="size-full bg-white object-contain" />
                       ) : (
                         h.name.charAt(0)
                       )}
@@ -352,7 +352,7 @@ function EditHotelModal({
           <div className="flex size-16 flex-none items-center justify-center overflow-hidden rounded-xl bg-white ring-1 ring-slate-200">
             {logoPreview || hotel.logo_url ? (
               // eslint-disable-next-line @next/next/no-img-element
-              <img src={(logoPreview || hotel.logo_url) as string} alt="" className="size-full object-contain" />
+              <image src={(logoPreview || hotel.logo_url) as string} alt="" className="size-full object-contain" />
             ) : (
               <span className="text-lg font-bold text-slate-300">S</span>
             )}
@@ -376,7 +376,7 @@ function EditHotelModal({
              {imagePreviews.length > 0 && (
                <div className="flex flex-wrap gap-2 mt-2">
 {imagePreviews.map((src, i) => (
-                    <img key={i} src={src} alt="" className="size-16 object-cover rounded-lg border border-slate-200" />
+                    <image key={i} src={src} alt="" className="size-16 object-cover rounded-lg border border-slate-200" />
                   ))}
                </div>
              )}
@@ -388,7 +388,7 @@ function EditHotelModal({
                      <label key={img.id} className="flex items-center gap-1 text-xs cursor-pointer">
                        <input type="checkbox" checked={imagesToDelete.includes(img.id)} onChange={() => onDeleteImageToggle(img.id)} className="rounded" />
                        {/* eslint-disable-next-line @next/next/no-img-element */}
-                       <img src={img.image_url} alt="" className="size-12 object-cover rounded border border-slate-200" />
+                       <image src={img.image_url} alt="" className="size-12 object-cover rounded border border-slate-200" />
                      </label>
                    ))}
                  </div>

@@ -247,7 +247,7 @@ export function AvailabilitySearch() {
                 {hotel.images && hotel.images.length > 0 && (
                   <div className="flex gap-2 overflow-x-auto border-b border-slate-100 bg-slate-50 px-4 py-3">
                     {hotel.images.map((img) => (
-                      <img
+                      <image
                         key={img.id}
                         src={img.image_url}
                         alt={hotel.name}
