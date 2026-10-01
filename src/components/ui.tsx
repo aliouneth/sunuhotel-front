@@ -1,7 +1,7 @@
 "use client";
 
 import { AlertCircle, Loader2, X } from "lucide-react";
-import type { ButtonHTMLAttributes, InputHTMLAttributes, ReactNode, SelectHTMLAttributes } from "react";
+import type { ButtonHTMLAttributes, InputHTMLAttributes, ReactNode, SelectHTMLAttributes, TextareaHTMLAttributes } from "react";
 
 export function Button({
   variant = "primary",
@@ -84,6 +84,23 @@ export function Input({
   );
 }
 
+export function Textarea({
+  label,
+  error,
+  className = "",
+  ...props
+}: TextareaHTMLAttributes<HTMLTextAreaElement> & { label?: string; error?: string }) {
+  return (
+    <label className="block">
+      {label && <span className="mb-1 block text-xs font-medium text-slate-700">{label}</span>}
+      <textarea
+        className={`w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none transition focus:border-amber-500 focus:ring-2 focus:ring-amber-200 ${error ? "border-red-400" : ""} ${className}`}
+        {...props}
+      />
+      {error && <span className="mt-1 block text-xs text-red-600">{error}</span>}
+    </label>
+  );
+}
 export function Select({
   label,
   error,

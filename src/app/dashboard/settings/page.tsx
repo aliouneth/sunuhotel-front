@@ -5,7 +5,7 @@ import { useQuery } from "@tanstack/react-query";
 import { api } from "@/lib/api";
 import { useAuth } from "@/context/AuthProvider";
 import { useLocale } from "@/i18n/LocaleProvider";
-import { Button, Card, CardHeader, ErrorBox, Input, Spinner } from "@/components/ui";
+import { Button, Card, CardHeader, ErrorBox, Input, Spinner, Textarea } from "@/components/ui";
 import type { Hotel } from "@/types/dto";
 
 export default function SettingsPage() {
@@ -29,8 +29,12 @@ function SettingsForm({ hotel, onSaved }: { hotel: Hotel; onSaved: () => void })
     city: hotel.city ?? "",
     country: hotel.country ?? "",
     phone: hotel.phone ?? "",
+    phone_2: hotel.phone_2 ?? "",
     email: hotel.email ?? "",
     website: hotel.website ?? "",
+    description: hotel.description ?? "",
+    other_services: hotel.other_services ?? "",
+    comment: hotel.comment ?? "",
     currency: hotel.currency,
     timezone: hotel.timezone,
     tax_rate: hotel.tax_rate ?? 0,
@@ -66,8 +70,12 @@ function SettingsForm({ hotel, onSaved }: { hotel: Hotel; onSaved: () => void })
       fd.append("city", form.city);
       fd.append("country", form.country);
       fd.append("phone", form.phone);
+      fd.append("phone_2", form.phone_2);
       fd.append("email", form.email);
       fd.append("website", form.website);
+      fd.append("description", form.description);
+      fd.append("other_services", form.other_services);
+      fd.append("comment", form.comment);
       fd.append("currency", form.currency);
       fd.append("timezone", form.timezone);
       fd.append("tax_rate", String(form.tax_rate));
@@ -133,8 +141,34 @@ function SettingsForm({ hotel, onSaved }: { hotel: Hotel; onSaved: () => void })
                 placeholder="SN"
               />
               <Input label={t("phone")} value={form.phone} onChange={(e) => set("phone", e.target.value)} />
+              <Input label={t("phone_2")} value={form.phone_2} onChange={(e) => set("phone_2", e.target.value)} />
               <Input label={t("email")} type="email" value={form.email} onChange={(e) => set("email", e.target.value)} />
               <Input label="Site web" type="url" value={form.website} onChange={(e) => set("website", e.target.value)} />
+              <div className="sm:col-span-2">
+                <Textarea
+                  label={t("hotel_description")}
+                  rows={3}
+                  value={form.description}
+                  onChange={(e) => set("description", e.target.value)}
+                />
+              </div>
+              <div className="sm:col-span-2">
+                <Textarea
+                  label={t("hotel_other_services")}
+                  rows={3}
+                  value={form.other_services}
+                  onChange={(e) => set("other_services", e.target.value)}
+                />
+                <p className="mt-1 text-xs text-slate-500">{t("hotel_other_services_hint")}</p>
+              </div>
+              <div className="sm:col-span-2">
+                <Textarea
+                  label={t("hotel_comment")}
+                  rows={2}
+                  value={form.comment}
+                  onChange={(e) => set("comment", e.target.value)}
+                />
+              </div>
               <Input label={t("hotel_currency")} value={form.currency} onChange={(e) => set("currency", e.target.value)} maxLength={3} />
               <Input label="Fuseau horaire" value={form.timezone} onChange={(e) => set("timezone", e.target.value)} />
               <Input

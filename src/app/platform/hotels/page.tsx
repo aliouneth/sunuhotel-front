@@ -6,7 +6,7 @@ import Link from "next/link";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { api, ApiError } from "@/lib/api";
 import { useLocale } from "@/i18n/LocaleProvider";
-import { Badge, Button, Card, CardHeader, EmptyState, ErrorBox, Input, Modal, Select, Spinner, Table } from "@/components/ui";
+import { Badge, Button, Card, CardHeader, EmptyState, ErrorBox, Input, Modal, Select, Spinner, Table, Textarea } from "@/components/ui";
 import type { HotelStatus, Paginated, PlatformHotel, PlatformSummary } from "@/types/dto";
 import { RoomsPanel } from "@/components/platform/RoomsPanel";
 import { UsersPanel } from "@/components/platform/UsersPanel";
@@ -45,6 +45,7 @@ export default function PlatformHotelsPage() {
   const [page, setPage] = useState(1);
   const [busyId, setBusyId] = useState<number | null>(null);
   const [editing, setEditing] = useState<PlatformHotel | null>(null);
+  const [creating, setCreating] = useState(false);
 
   const { data: summary } = useQuery<{ data: PlatformSummary }>({
     queryKey: ["platform-summary"],
@@ -94,9 +95,17 @@ export default function PlatformHotelsPage() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-xl font-bold text-slate-900">{t("platform_hotels")}</h1>
-        <p className="text-sm text-slate-500">{t("platform_sub")}</p>
+      <div className="flex items-start justify-between gap-3">
+        <div>
+          <h1 className="text-xl font-bold text-slate-900">{t("platform_hotels")}</h1>
+          <p className="text-sm text-slate-500">{t("platform_sub")}</p>
+        </div>
+        <div className="flex items-center gap-2">
+          <Link href="/platform/hotels/import">
+            <Button variant="secondary">{t("import_hotels_title")}</Button>
+          </Link>
+          <Button onClick={() => setCreating(true)}>+ {t("add_hotel")}</Button>
+        </div>
       </div>
 
       <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
@@ -227,6 +236,7 @@ export default function PlatformHotelsPage() {
         )}
       </Card>
 
+      {creating && <CreateHotelModal onClose={() => setCreating(false)} />}
       {editing && <EditHotelModal hotel={editing} onClose={() => setEditing(null)} />}
 
       <p className="text-xs text-slate-400">
@@ -235,6 +245,220 @@ export default function PlatformHotelsPage() {
         </Link>
       </p>
     </div>
+  );
+}
+
+function CreateHotelModal({ onClose }: { onClose: () => void }) {
+  const { t } = useLocale();
+  const qc = useQueryClient();
+  const [form, setForm] = useState({
+    name: "",
+    legal_name: "",
+    slug: "",
+    address: "",
+    city: "",
+    country: "",
+    phone: "",
+    phone_2: "",
+    email: "",
+    website: "",
+    description: "",
+    other_services: "",
+    comment: "",
+    currency: "XOF",
+    tax_rate: 0,
+    timezone: "Africa/Dakar",
+    check_in_time: "15:00",
+    check_out_time: "11:00",
+    stars: 3,
+    locale: "en",
+    status: "active",
+  });
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState("");
+  const [logo, setLogo] = useState<File | null>(null);
+  const [logoPreview, setLogoPreview] = useState<string | null>(null);
+  const [images, setImages] = useState<File[]>([]);
+  const [imagePreviews, setImagePreviews] = useState<string[]>([]);
+
+  function set<K extends keyof typeof form>(key: K, value: (typeof form)[K]) {
+    setForm((f) => ({ ...f, [key]: value }));
+  }
+
+  function onLogoChange(file: File | undefined) {
+    setLogo(file ?? null);
+    if (logoPreview) URL.revokeObjectURL(logoPreview);
+    setLogoPreview(file ? URL.createObjectURL(file) : null);
+  }
+
+  function onImagesChange(files: FileList | null | undefined) {
+    const arr = files ? Array.from(files) : [];
+    setImages(arr);
+    setImagePreviews((prev) => [...prev, ...arr.map((f) => URL.createObjectURL(f))]);
+  }
+
+  async function save(e: React.FormEvent) {
+    e.preventDefault();
+    setBusy(true);
+    setError("");
+    try {
+      const fd = new FormData();
+      fd.append("name", form.name);
+      // Only send optional text fields that were actually filled in, so the
+      // API stores NULL instead of empty strings.
+      for (const key of [
+        "legal_name", "slug", "address", "city", "country",
+        "phone", "phone_2", "email", "website", "description", "comment",
+        "other_services",
+        "check_in_time", "check_out_time",
+      ] as const) {
+        if (form[key].trim() !== "") fd.append(key, form[key]);
+      }
+      fd.append("currency", form.currency);
+      fd.append("tax_rate", `${form.tax_rate}`);
+      fd.append("timezone", form.timezone);
+      fd.append("stars", `${form.stars}`);
+      fd.append("locale", form.locale);
+      fd.append("status", form.status);
+      if (logo) fd.append("logo", logo);
+      images.forEach((img) => fd.append("images[]", img));
+
+      await api("/platform/hotels", { method: "POST", body: fd });
+      await Promise.all([
+        qc.invalidateQueries({ queryKey: ["platform-hotels"] }),
+        qc.invalidateQueries({ queryKey: ["platform-summary"] }),
+      ]);
+      onClose();
+    } catch (err) {
+      setError((err as ApiError).message ?? t("error_generic"));
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  return (
+    <Modal open onClose={onClose} title={t("add_hotel")} size="xl">
+      <form onSubmit={save} className="space-y-4">
+        <div className="flex items-center gap-5">
+          <div className="flex size-16 flex-none items-center justify-center overflow-hidden rounded-xl bg-white ring-1 ring-slate-200">
+            {logoPreview ? (
+              <Image src={logoPreview} alt="" width={160} height={160} className="size-full object-contain" />
+            ) : (
+              <span className="text-lg font-bold text-slate-300">S</span>
+            )}
+          </div>
+          <div className="flex-1">
+            <Input
+              label={t("hotel_logo")}
+              type="file"
+              accept="image/png,image/jpeg,image/webp"
+              className="cursor-pointer file:cursor-pointer"
+              onChange={(e) => onLogoChange(e.target.files?.[0])}
+            />
+            <p className="mt-1 text-xs text-slate-500">{t("hotel_logo_hint")}</p>
+          </div>
+        </div>
+
+        <div className="grid gap-4 sm:grid-cols-2">
+          <div className="sm:col-span-2">
+            <label className="mb-1 block text-sm font-medium text-slate-700">{t("hotel_photos")}</label>
+            <input
+              type="file"
+              multiple
+              accept="image/png,image/jpeg,image/webp"
+              className="cursor-pointer file:cursor-pointer"
+              onChange={(e) => onImagesChange(e.target.files)}
+            />
+            <p className="mt-1 text-xs text-slate-500">{t("hotel_photos_hint")}</p>
+            {imagePreviews.length > 0 && (
+              <div className="mt-2 flex flex-wrap gap-2">
+                {imagePreviews.map((src, i) => (
+                  <Image key={i} src={src} alt="" width={64} height={64} className="size-16 rounded-lg border border-slate-200 object-cover" />
+                ))}
+              </div>
+            )}
+          </div>
+
+          <div className="sm:col-span-2">
+            <Input label={t("hotel_name")} required value={form.name} onChange={(e) => set("name", e.target.value)} />
+          </div>
+          <Input label={t("legal_name_label")} value={form.legal_name} onChange={(e) => set("legal_name", e.target.value)} />
+          <Input label={`${t("slug_label")} (${t("optional")})`} value={form.slug} onChange={(e) => set("slug", e.target.value)} />
+
+          <div className="sm:col-span-2">
+            <Input label={t("address")} value={form.address} onChange={(e) => set("address", e.target.value)} />
+          </div>
+          <Input label={t("city_label")} value={form.city} onChange={(e) => set("city", e.target.value)} />
+          <Input label={t("country_code")} maxLength={2} value={form.country} onChange={(e) => set("country", e.target.value.toUpperCase())} />
+          <Input label={t("phone")} value={form.phone} onChange={(e) => set("phone", e.target.value)} />
+          <Input label={t("phone_2")} value={form.phone_2} onChange={(e) => set("phone_2", e.target.value)} />
+          <Input label={t("email")} type="email" value={form.email} onChange={(e) => set("email", e.target.value)} />
+          <Input label={t("website")} value={form.website} onChange={(e) => set("website", e.target.value)} />
+
+          <div className="sm:col-span-2">
+            <Textarea
+              label={t("hotel_description")}
+              rows={3}
+              value={form.description}
+              onChange={(e) => set("description", e.target.value)}
+            />
+          </div>
+          <div className="sm:col-span-2">
+            <Textarea
+              label={t("hotel_other_services")}
+              rows={3}
+              value={form.other_services}
+              onChange={(e) => set("other_services", e.target.value)}
+            />
+            <p className="mt-1 text-xs text-slate-500">{t("hotel_other_services_hint")}</p>
+          </div>
+          <div className="sm:col-span-2">
+            <Textarea
+              label={t("hotel_comment")}
+              rows={2}
+              value={form.comment}
+              onChange={(e) => set("comment", e.target.value)}
+            />
+            <p className="mt-1 text-xs text-slate-500">{t("hotel_comment_hint")}</p>
+          </div>
+
+          <Input label={t("currency")} maxLength={3} required value={form.currency} onChange={(e) => set("currency", e.target.value.toUpperCase())} />
+          <Input label={t("tax_rate")} type="number" step="0.01" min={0} max={100} value={`${form.tax_rate}`} onChange={(e) => set("tax_rate", Number(e.target.value))} />
+          <Input label={t("stars_label")} type="number" min={1} max={5} value={`${form.stars}`} onChange={(e) => set("stars", Number(e.target.value))} />
+          <Input label={t("check_in_time")} type="time" value={form.check_in_time} onChange={(e) => set("check_in_time", e.target.value)} />
+          <Input label={t("check_out_time")} type="time" value={form.check_out_time} onChange={(e) => set("check_out_time", e.target.value)} />
+
+          <Input label={t("timezone")} required list="tz-create-options" value={form.timezone} onChange={(e) => set("timezone", e.target.value)} />
+          <datalist id="tz-create-options">
+            {["UTC", "Africa/Dakar", "Africa/Abidjan", "Europe/Paris", "America/New_York", "Asia/Dubai"].map((z) => (
+              <option key={z} value={z} />
+            ))}
+          </datalist>
+          <Select label={t("locale_label")} value={form.locale} onChange={(e) => set("locale", e.target.value)}>
+            <option value="fr">Français</option>
+            <option value="en">English</option>
+          </Select>
+          <Select label={t("status")} value={form.status} onChange={(e) => set("status", e.target.value as HotelStatus)}>
+            {(Object.keys(toneByStatus) as HotelStatus[]).map((st) => (
+              <option key={st} value={st}>
+                {t(statusLabel[st])}
+              </option>
+            ))}
+          </Select>
+        </div>
+
+        {error && <p className="text-sm text-red-600">{error}</p>}
+
+        <div className="flex justify-end gap-2 border-t border-slate-100 pt-4">
+          <Button type="button" variant="secondary" onClick={onClose}>
+            {t("cancel")}
+          </Button>
+          <Button type="submit" loading={busy} disabled={!form.name.trim()}>
+            {t("create_hotel")}
+          </Button>
+        </div>
+      </form>
+    </Modal>
   );
 }
 
@@ -255,8 +479,12 @@ function EditHotelModal({
     city: hotel.city ?? "",
     country: hotel.country ?? "",
     phone: hotel.phone ?? "",
+    phone_2: hotel.phone_2 ?? "",
     email: hotel.email ?? "",
     website: hotel.website ?? "",
+    description: hotel.description ?? "",
+    other_services: hotel.other_services ?? "",
+    comment: hotel.comment ?? "",
     currency: hotel.currency,
     tax_rate: hotel.tax_rate ?? 0,
     timezone: hotel.timezone,
@@ -404,8 +632,36 @@ function EditHotelModal({
           <Input label={t("city_label")} value={form.city} onChange={(e) => set("city", e.target.value)} />
           <Input label={t("country_code")} maxLength={2} value={form.country} onChange={(e) => set("country", e.target.value)} />
           <Input label={t("phone")} value={form.phone} onChange={(e) => set("phone", e.target.value)} />
+          <Input label={t("phone_2")} value={form.phone_2} onChange={(e) => set("phone_2", e.target.value)} />
           <Input label={t("email")} type="email" value={form.email} onChange={(e) => set("email", e.target.value)} />
           <Input label={t("website")} value={form.website} onChange={(e) => set("website", e.target.value)} />
+
+          <div className="sm:col-span-2">
+            <Textarea
+              label={t("hotel_description")}
+              rows={3}
+              value={form.description}
+              onChange={(e) => set("description", e.target.value)}
+            />
+          </div>
+          <div className="sm:col-span-2">
+            <Textarea
+              label={t("hotel_other_services")}
+              rows={3}
+              value={form.other_services}
+              onChange={(e) => set("other_services", e.target.value)}
+            />
+            <p className="mt-1 text-xs text-slate-500">{t("hotel_other_services_hint")}</p>
+          </div>
+          <div className="sm:col-span-2">
+            <Textarea
+              label={t("hotel_comment")}
+              rows={2}
+              value={form.comment}
+              onChange={(e) => set("comment", e.target.value)}
+            />
+            <p className="mt-1 text-xs text-slate-500">{t("hotel_comment_hint")}</p>
+          </div>
           <Input label={t("currency")} maxLength={3} required value={form.currency} onChange={(e) => set("currency", e.target.value.toUpperCase())} />
           <Input label={t("tax_rate")} type="number" step="0.01" min={0} max={100} value={`${form.tax_rate ?? 0}`} onChange={(e) => set("tax_rate", Number(e.target.value))} />
           <Input label={t("timezone")} required list="tz-options" value={form.timezone} onChange={(e) => set("timezone", e.target.value)} />

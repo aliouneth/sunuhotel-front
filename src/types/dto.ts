@@ -17,8 +17,12 @@ export interface Hotel {
   city?: string | null;
   country?: string | null;
   phone?: string | null;
+  phone_2?: string | null;
   email?: string | null;
   website?: string | null;
+  description?: string | null;
+  comment?: string | null;
+  other_services?: string | null;
   timezone: string;
   currency: string;
   tax_rate: number;
@@ -364,8 +368,12 @@ export interface PlatformHotel {
   city?: string | null;
   country?: string | null;
   phone?: string | null;
+  phone_2?: string | null;
   email?: string | null;
   website?: string | null;
+  description?: string | null;
+  comment?: string | null;
+  other_services?: string | null;
   currency: string;
   timezone: string;
   status: HotelStatus;
@@ -422,4 +430,76 @@ export interface GuestBooking {
   room_types?: string[];
   total_cents: number;
   currency: string;
+}
+/* --------------------- Hotel Excel import (platform) --------------------- */
+
+/** A column detected in the uploaded workbook. */
+export interface ImportColumn {
+  index: number;
+  label: string;
+  sample: string;
+}
+
+/** A hotel field a detected column can be mapped onto. */
+export interface ImportTarget {
+  key: string;
+  label: string;
+  required: boolean;
+  type: string;
+}
+
+/** Payload returned after the workbook has been uploaded and parsed. */
+export interface HotelImportDetection {
+  token: string;
+  filename: string;
+  sheet: string;
+  header_row: number;
+  total_rows: number;
+  truncated: boolean;
+  max_rows: number;
+  headers: ImportColumn[];
+  preview: { row_number: number; values: Record<string, string> }[];
+  targets: ImportTarget[];
+  required_targets: string[];
+  suggested_mapping: Record<string, string>;
+}
+
+export interface HotelImportIssue {
+  row_number: number;
+  kind: "duplicate" | "invalid";
+  reason: string;
+  data?: Record<string, string> | null;
+}
+
+export interface HotelImportSummary {
+  total_rows: number;
+  processed_rows: number;
+  created: number;
+  duplicates: number;
+  skipped: number;
+  errors: number;
+  truncated: boolean;
+  status_after_import: string;
+  duplicate_samples: { row: number; name: string; slug: string; match: string }[];
+  error_samples: { row: number; reasons: string[] }[];
+}
+
+export interface HotelImportRecord {
+  id: number;
+  token: string;
+  filename: string;
+  status: "staged" | "completed" | "failed";
+  total_rows: number;
+  mapped_fields: number;
+  created_count: number;
+  duplicate_count: number;
+  skipped_count: number;
+  error_count: number;
+  headers?: ImportColumn[] | null;
+  mapping?: Record<string, string> | null;
+  summary?: HotelImportSummary | null;
+  ip?: string | null;
+  user?: { id: number; name?: string | null; email: string } | null;
+  created_at?: string | null;
+  issues?: HotelImportIssue[];
 }
