@@ -1,8 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { api } from "@/lib/api";
+import { api, queryString } from "@/lib/api";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useLocale } from "@/i18n/LocaleProvider";
 import { formatDate } from "@/lib/format";
@@ -42,11 +42,34 @@ export default function PlatformSubscriptionsPage() {
   const [assignModal, setAssignModal] = useState<number | null>(null);
   const [selectedPlan, setSelectedPlan] = useState<number | null>(null);
   const [effectiveFrom, setEffectiveFrom] = useState("");
+  // Search is debounced into `hotelSearch` so every keystroke does not become
+  // a request; `hotelSearchInput` stays responsive.
+  const [hotelSearchInput, setHotelSearchInput] = useState("");
+  const [hotelSearch, setHotelSearch] = useState("");
+  const [hotelPage, setHotelPage] = useState(1);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setHotelSearch(hotelSearchInput.trim());
+      setHotelPage(1);
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [hotelSearchInput]);
+
+  // Alphabetical and searchable server-side: the platform has more hotels than
+  // fit in one page, so filtering the first page client-side would hide the
+  // very hotel an admin is looking for.
+  const hotelsParams = queryString({
+    search: hotelSearch,
+    search_field: "name",
+    sort: "name",
+    page: hotelPage,
+    per_page: 25,
+  });
 
   const { data: hotelsData, isLoading: hotelsLoading, error: hotelsError } = useQuery({
-    queryKey: ["platform", "hotels"],
-    queryFn: () => api<{ data: Paginated<PlatformHotel> }>(`/platform/hotels`)
-      .then((r) => r.data.data),
+    queryKey: ["platform", "hotels", hotelSearch, hotelPage],
+    queryFn: () => api<{ data: Paginated<PlatformHotel> }>(`/platform/hotels${hotelsParams}`).then((r) => r.data),
     enabled: Boolean(platformAdminToken),
   });
 
@@ -66,7 +89,8 @@ export default function PlatformSubscriptionsPage() {
 
   const plans = plansData ?? [];
   const subscriptions = subsData ?? [];
-  const hotels = hotelsData ?? [];
+  const hotels = hotelsData?.data ?? [];
+  const hotelPagination = hotelsData;
 
   const activeSubsByHotel = new Map<string, HotelSubscription>();
   for (const sub of subscriptions) {
@@ -119,7 +143,24 @@ export default function PlatformSubscriptionsPage() {
       <PageHeader title={t("subscriptions_title")} subtitle={t("subscriptions_sub")} />
 
       <Card>
-        <CardHeader title={t("subscriptions_title")} />
+        <CardHeader
+          title={t("subscriptions_title")}
+          subtitle={
+            hotelPagination
+              ? `${hotelPagination.total} ${t("platform_hotels").toLowerCase()}`
+              : undefined
+          }
+          action={
+            <div className="w-64">
+              <Input
+                value={hotelSearchInput}
+                onChange={(e) => setHotelSearchInput(e.target.value)}
+                placeholder={t("search_hotel_name_placeholder")}
+                aria-label={t("search_hotel_name_placeholder")}
+              />
+            </div>
+          }
+        />
 
         {hotelsError ? (
           <ErrorBox message={(hotelsError as Error).message} />
@@ -128,33 +169,59 @@ export default function PlatformSubscriptionsPage() {
             <Spinner label={t("loading")} />
           </div>
         ) : rows.length === 0 ? (
-          <EmptyState>{t("no_hotel")}</EmptyState>
+          <EmptyState>{hotelSearch ? t("no_hotel_matching_search") : t("no_hotel")}</EmptyState>
         ) : (
-          <Table headers={[t("hotel"), t("subscription"), t("actions")]}>
-            {rows.map(({ hotel, sub, hasSubscription }) => (
-              <tr key={hotel.id} className={!hasSubscription ? "bg-pink-50" : ""}>
-                <td>{hotel.name}</td>
-                <td>
-                  {hasSubscription && sub ? (
-                    <div>
-                      <Badge tone={sub.status === "active" ? "green" : "slate"}>
-                        {sub.status === "active" ? t("status_active") : t(`status_${sub.status}`)}
-                      </Badge>{" "}
-                      {planNames.get(sub.subscription_plan_id) ?? sub.subscription_plan_id}
-                      <div className="text-xs text-slate-500">{t("effective_from")}: {formatDate(sub.effective_from, locale)}</div>
-                    </div>
-                  ) : (
-                    <span className="text-slate-400">{t("no_subscription")}</span>
-                  )}
-                </td>
-                <td>
-                  <Button variant="secondary" onClick={() => openAssign(hotel.id)}>
-                    {t("assign_plan")}
-                  </Button>
-                </td>
-              </tr>
-            ))}
-          </Table>
+          <>
+            <Table headers={[t("hotel"), t("subscription"), t("actions")]}>
+              {rows.map(({ hotel, sub, hasSubscription }) => (
+                <tr key={hotel.id} className={!hasSubscription ? "bg-pink-50" : ""}>
+                  <td>{hotel.name}</td>
+                  <td>
+                    {hasSubscription && sub ? (
+                      <div>
+                        <Badge tone={sub.status === "active" ? "green" : "slate"}>
+                          {sub.status === "active" ? t("status_active") : t(`status_${sub.status}`)}
+                        </Badge>{" "}
+                        {planNames.get(sub.subscription_plan_id) ?? sub.subscription_plan_id}
+                        <div className="text-xs text-slate-500">{t("effective_from")}: {formatDate(sub.effective_from, locale)}</div>
+                      </div>
+                    ) : (
+                      <span className="text-slate-400">{t("no_subscription")}</span>
+                    )}
+                  </td>
+                  <td>
+                    <Button variant="secondary" onClick={() => openAssign(hotel.id)}>
+                      {t("assign_plan")}
+                    </Button>
+                  </td>
+                </tr>
+              ))}
+            </Table>
+
+            {hotelPagination && hotelPagination.last_page > 1 && (
+              <div className="flex items-center justify-end gap-2 border-t border-slate-100 px-5 py-3">
+                <Button
+                  size="sm"
+                  variant="secondary"
+                  disabled={hotelPage <= 1 || hotelsLoading}
+                  onClick={() => setHotelPage((p) => Math.max(1, p - 1))}
+                >
+                  ←
+                </Button>
+                <span className="text-xs text-slate-500">
+                  {hotelPagination.current_page} / {hotelPagination.last_page}
+                </span>
+                <Button
+                  size="sm"
+                  variant="secondary"
+                  disabled={hotelPage >= hotelPagination.last_page || hotelsLoading}
+                  onClick={() => setHotelPage((p) => p + 1)}
+                >
+                  →
+                </Button>
+              </div>
+            )}
+          </>
         )}
       </Card>
 

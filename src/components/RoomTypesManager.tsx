@@ -1,12 +1,28 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { api } from "@/lib/api";
 import { useLocale } from "@/i18n/LocaleProvider";
 import { Badge, Button, Card, CardHeader, EmptyState, ErrorBox, Input, Modal, Select, Spinner, Table } from "@/components/ui";
 import { formatMoney } from "@/lib/format";
 import type { RoomType } from "@/types/dto";
+
+/**
+ * Hotel the room-type import defaults to: the platform's own sample property,
+ * used as the reference catalogue. Matched on slug rather than the display
+ * name so renaming the hotel does not break the default.
+ */
+const DEFAULT_SOURCE_HOTEL_SLUG = "sunuhotel-dakar";
+
+/** Hotels offered as an import source, alphabetically by name. */
+export type ImportSourceOption = { id: number; name: string; slug: string };
+
+export function sortHotelsByName<T extends { name: string }>(hotels: T[]): T[] {
+  return [...hotels].sort((a, b) =>
+    a.name.localeCompare(b.name, undefined, { sensitivity: "base" })
+  );
+}
 
 export function RoomTypesManager({
   basePath,
@@ -15,7 +31,7 @@ export function RoomTypesManager({
 }: {
   basePath: string;
   currency?: string;
-  importOptions?: { id: number; name: string }[];
+  importOptions?: ImportSourceOption[];
 }) {
   const { t, locale } = useLocale();
   const qc = useQueryClient();
@@ -135,12 +151,24 @@ function ImportModal({
   onDone,
 }: {
   basePath: string;
-  options: { id: number; name: string }[];
+  options: ImportSourceOption[];
   onClose: () => void;
   onDone: () => void;
 }) {
   const { t } = useLocale();
-  const [sourceId, setSourceId] = useState<string>("");
+
+  // The platform hotel endpoint returns pending-first then newest-first, which
+  // makes for an arbitrary-looking picker. Sort alphabetically here instead.
+  const sortedOptions = useMemo(() => sortHotelsByName(options), [options]);
+
+  const defaultSourceId = useMemo(() => {
+    const preferred = sortedOptions.find((o) => o.slug === DEFAULT_SOURCE_HOTEL_SLUG);
+    // SunuHotel is normally present, but it is excluded when it is the hotel
+    // being edited — fall back to the first entry rather than nothing.
+    return String((preferred ?? sortedOptions[0])?.id ?? "");
+  }, [sortedOptions]);
+
+  const [sourceId, setSourceId] = useState<string>(defaultSourceId);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const [result, setResult] = useState<{ imported: number; skipped: number } | null>(null);
@@ -176,8 +204,8 @@ function ImportModal({
             setResult(null);
           }}
         >
-          <option value="">—</option>
-          {options.map((h) => (
+          {sortedOptions.length > 0 && <option value="">—</option>}
+          {sortedOptions.map((h) => (
             <option key={h.id} value={h.id}>
               {h.name}
             </option>

@@ -374,10 +374,12 @@ export interface PlatformHotel {
   description?: string | null;
   comment?: string | null;
   other_services?: string | null;
-  currency: string;
+currency: string;
   timezone: string;
   status: HotelStatus;
   tax_rate?: number;
+  check_in_time?: string | null;
+  check_out_time?: string | null;
   logo_url?: string | null;
   images?: HotelImage[];
   locale?: string | null;

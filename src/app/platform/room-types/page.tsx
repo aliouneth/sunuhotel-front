@@ -1,11 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { api } from "@/lib/api";
 import { useLocale } from "@/i18n/LocaleProvider";
 import { ErrorBox, Select, Spinner } from "@/components/ui";
-import { RoomTypesManager } from "@/components/RoomTypesManager";
+import { RoomTypesManager, sortHotelsByName } from "@/components/RoomTypesManager";
 import type { Paginated, PlatformHotel } from "@/types/dto";
 
 export default function PlatformRoomTypesPage() {
@@ -17,7 +17,12 @@ export default function PlatformRoomTypesPage() {
     queryFn: () => api<{ data: Paginated<PlatformHotel> }>("/platform/hotels?per_page=100"),
   });
 
-  const hotels = data?.data.data ?? [];
+  // Alphabetical, for the same reason as the import picker: the API returns
+  // pending-first then newest-first.
+  const hotels = useMemo(
+    () => sortHotelsByName(data?.data.data ?? []),
+    [data]
+  );
 
   return (
     <div className="space-y-6">
@@ -47,7 +52,9 @@ export default function PlatformRoomTypesPage() {
         <RoomTypesManager
           basePath={`/platform/hotels/${hotelId}/room-types`}
           currency={hotels.find((h) => h.id === hotelId)?.currency}
-          importOptions={hotels.filter((h) => h.id !== hotelId).map((h) => ({ id: h.id, name: h.name }))}
+          importOptions={hotels
+            .filter((h) => h.id !== hotelId)
+            .map((h) => ({ id: h.id, name: h.name, slug: h.slug }))}
         />
       )}
     </div>
