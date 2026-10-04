@@ -9,7 +9,6 @@ import { useLocale } from "@/i18n/LocaleProvider";
 import { Badge, Button, Card, CardHeader, EmptyState, ErrorBox, Input, Modal, Spinner, Table } from "@/components/ui";
 import { HotelFields, hotelToForm, statusLabelKey, type HotelFormState } from "@/components/platform/HotelFields";
 import type { HotelStatus, Paginated, PlatformHotel, PlatformSummary } from "@/types/dto";
-import { formatDate } from "@/lib/format";
 
 const toneByStatus: Record<HotelStatus, string> = {
   pending: "amber",
@@ -28,7 +27,7 @@ const tabs: { key: string; label: string }[] = [
 ];
 
 export default function PlatformHotelsPage() {
-  const { t, locale } = useLocale();
+  const { t } = useLocale();
   const qc = useQueryClient();
   const [status, setStatus] = useState("");
   const [search, setSearch] = useState("");
@@ -149,7 +148,7 @@ export default function PlatformHotelsPage() {
           <Spinner />
         ) : items && items.length ? (
           <>
-            <Table headers={["", t("platform_hotels"), t("email"), t("city_label"), t("created_on"), t("status"), ""]}>
+            <Table headers={["", t("platform_hotels"), t("owner"), t("hotel_email"), t("city_label"), t("status"), ""]}>
               {items.map((h) => (
                 <tr key={h.id} className="hover:bg-slate-50">
                   <td className="px-5 py-3">
@@ -177,8 +176,13 @@ export default function PlatformHotelsPage() {
                       "—"
                     )}
                   </td>
+                  {/* The hotel record's own address, which is what an admin
+                      edits on the hotel page. Kept separate from the owner
+                      above because the two are unrelated and often differ. */}
+                  <td className="px-5 py-3 text-slate-600">
+                    {h.email ?? "—"}
+                  </td>
                   <td className="px-5 py-3 text-slate-600">{h.city ?? "—"}</td>
-                  <td className="px-5 py-3 text-slate-600">{h.created_at ? formatDate(h.created_at, locale) : "—"}</td>
                   <td className="px-5 py-3">
                     <Badge tone={toneByStatus[h.status]}>{t(statusLabelKey[h.status])}</Badge>
                   </td>

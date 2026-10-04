@@ -29,6 +29,9 @@ const toneByStatus: Record<HotelStatus, string> = {
 
 type Tab = "info" | "rooms" | "users";
 
+/** The editable field set, derived from the mapper so it can never drift. */
+const FORM_FIELDS = Object.keys(hotelToForm({})) as (keyof HotelFormState)[];
+
 export default function PlatformHotelEditPage() {
   const { t } = useLocale();
   const router = useRouter();
@@ -184,10 +187,7 @@ function HotelForm({
 
   // Text edits only: a chosen file or a queued deletion also makes the form
   // dirty, but those are tracked separately so Save can report them.
-  const dirty = useMemo(
-    () => (Object.keys(baseline) as (keyof HotelFormState)[]).some((k) => form[k] !== baseline[k]),
-    [form, baseline]
-  );
+  const dirty = useMemo(() => FORM_FIELDS.some((k) => form[k] !== baseline[k]), [form, baseline]);
   const pendingFiles = logo !== null || images.length > 0 || imagesToDelete.length > 0;
   const canSave = (dirty || pendingFiles) && form.name.trim() !== "" && !busy;
 
@@ -255,7 +255,7 @@ function HotelForm({
       // Send only what actually changed, so the API never re-writes a field the
       // admin left alone (and so a rejected payload can't silently normalise
       // untouched values).
-      for (const key of Object.keys(baseline) as (keyof HotelFormState)[]) {
+      for (const key of FORM_FIELDS) {
         if (form[key] !== baseline[key]) fd.append(key, `${form[key]}`);
       }
       if (logo) fd.append("logo", logo);
@@ -287,12 +287,22 @@ function HotelForm({
         | undefined;
       const fieldErrors = detail?.errors;
       if (fieldErrors && Object.keys(fieldErrors).length > 0) {
-        setErrors(
-          Object.fromEntries(
-            Object.entries(fieldErrors).map(([k, v]) => [k, Array.isArray(v) ? v[0] : String(v)])
-          ) as HotelFormErrors
-        );
-        setBanner(t("hotel_save_failed"));
+        // Errors on the text fields render inline. Anything else - a rejected
+        // logo, too many photos, a bad _method - belongs to no input, so it has
+        // to reach the banner or the admin just sees "save failed" with no
+        // reason and no idea which change was dropped.
+        const inline: HotelFormErrors = {};
+        const elsewhere: string[] = [];
+        for (const [field, value] of Object.entries(fieldErrors)) {
+          const message = Array.isArray(value) ? value[0] : String(value);
+          if (FORM_FIELDS.includes(field as keyof HotelFormState)) {
+            inline[field as keyof HotelFormState] = message;
+          } else {
+            elsewhere.push(message);
+          }
+        }
+        setErrors(inline);
+        setBanner(elsewhere.length > 0 ? elsewhere.join(" ") : t("hotel_save_failed"));
       } else {
         setBanner((err as ApiError).message ?? t("error_generic"));
       }
