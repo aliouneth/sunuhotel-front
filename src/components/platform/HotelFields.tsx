@@ -1,6 +1,6 @@
 "use client";
 
-import { Input, Select, Textarea } from "@/components/ui";
+import { Checkbox, Input, Select, Textarea } from "@/components/ui";
 import { useLocale } from "@/i18n/LocaleProvider";
 import type { HotelStatus } from "@/types/dto";
 
@@ -22,6 +22,9 @@ export interface HotelFormState {
   description: string;
   other_services: string;
   comment: string;
+  has_restaurant: boolean;
+  has_spa: boolean;
+  has_leisure: boolean;
   currency: string;
   tax_rate: number;
   stars: number;
@@ -160,6 +163,26 @@ export function HotelFields({
         <p className="mt-1 text-xs text-slate-500">{t("hotel_comment_hint")}</p>
       </div>
 
+      <div className="sm:col-span-2 space-y-2">
+        <span className="block text-xs font-medium text-slate-700">{t("hotel_services_label")}</span>
+        <Checkbox
+          label={t("service_restaurant")}
+          checked={form.has_restaurant}
+          onChange={(e) => set("has_restaurant", e.target.checked)}
+        />
+        <Checkbox
+          label={t("service_spa")}
+          checked={form.has_spa}
+          onChange={(e) => set("has_spa", e.target.checked)}
+        />
+        <Checkbox
+          label={t("service_leisure")}
+          checked={form.has_leisure}
+          onChange={(e) => set("has_leisure", e.target.checked)}
+        />
+        <p className="text-xs text-slate-500">{t("hotel_services_hint")}</p>
+      </div>
+
       <Input
         label={t("currency")}
         maxLength={3}
@@ -262,6 +285,9 @@ export function hotelToForm(source: HotelFormSource): HotelFormState {
     description: source.description ?? "",
     other_services: source.other_services ?? "",
     comment: source.comment ?? "",
+    has_restaurant: source.has_restaurant ?? false,
+    has_spa: source.has_spa ?? false,
+    has_leisure: source.has_leisure ?? false,
     currency: source.currency ?? "XOF",
     tax_rate: source.tax_rate ?? 0,
     stars: source.stars ?? 3,

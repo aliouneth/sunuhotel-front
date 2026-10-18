@@ -5,7 +5,7 @@ import { useQuery } from "@tanstack/react-query";
 import { api } from "@/lib/api";
 import { useAuth } from "@/context/AuthProvider";
 import { useLocale } from "@/i18n/LocaleProvider";
-import { Button, Card, CardHeader, ErrorBox, Input, Spinner, Textarea } from "@/components/ui";
+import { Button, Card, CardHeader, Checkbox, ErrorBox, Input, Spinner, Textarea } from "@/components/ui";
 import type { Hotel } from "@/types/dto";
 
 export default function SettingsPage() {
@@ -35,6 +35,9 @@ function SettingsForm({ hotel, onSaved }: { hotel: Hotel; onSaved: () => void })
     description: hotel.description ?? "",
     other_services: hotel.other_services ?? "",
     comment: hotel.comment ?? "",
+    has_restaurant: hotel.has_restaurant ?? false,
+    has_spa: hotel.has_spa ?? false,
+    has_leisure: hotel.has_leisure ?? false,
     currency: hotel.currency,
     timezone: hotel.timezone,
     tax_rate: hotel.tax_rate ?? 0,
@@ -49,6 +52,11 @@ function SettingsForm({ hotel, onSaved }: { hotel: Hotel; onSaved: () => void })
 
   function set<K extends keyof typeof form>(key: K, value: string) {
     setForm((f) => ({ ...f, [key]: value }));
+  }
+
+  function toggle(key: "has_restaurant" | "has_spa" | "has_leisure", value: boolean) {
+    setForm((f) => ({ ...f, [key]: value }));
+    setSaved(false);
   }
 
   function onLogoChange(file: File | undefined) {
@@ -76,6 +84,9 @@ function SettingsForm({ hotel, onSaved }: { hotel: Hotel; onSaved: () => void })
       fd.append("description", form.description);
       fd.append("other_services", form.other_services);
       fd.append("comment", form.comment);
+      fd.append("has_restaurant", form.has_restaurant ? "1" : "0");
+      fd.append("has_spa", form.has_spa ? "1" : "0");
+      fd.append("has_leisure", form.has_leisure ? "1" : "0");
       fd.append("currency", form.currency);
       fd.append("timezone", form.timezone);
       fd.append("tax_rate", String(form.tax_rate));
@@ -168,6 +179,25 @@ function SettingsForm({ hotel, onSaved }: { hotel: Hotel; onSaved: () => void })
                   value={form.comment}
                   onChange={(e) => set("comment", e.target.value)}
                 />
+              </div>
+              <div className="sm:col-span-2 space-y-2">
+                <span className="block text-xs font-medium text-slate-700">{t("hotel_services_label")}</span>
+                <Checkbox
+                  label={t("service_restaurant")}
+                  checked={form.has_restaurant}
+                  onChange={(e) => toggle("has_restaurant", e.target.checked)}
+                />
+                <Checkbox
+                  label={t("service_spa")}
+                  checked={form.has_spa}
+                  onChange={(e) => toggle("has_spa", e.target.checked)}
+                />
+                <Checkbox
+                  label={t("service_leisure")}
+                  checked={form.has_leisure}
+                  onChange={(e) => toggle("has_leisure", e.target.checked)}
+                />
+                <p className="text-xs text-slate-500">{t("hotel_services_hint")}</p>
               </div>
               <Input label={t("hotel_currency")} value={form.currency} onChange={(e) => set("currency", e.target.value)} maxLength={3} />
               <Input label="Fuseau horaire" value={form.timezone} onChange={(e) => set("timezone", e.target.value)} />

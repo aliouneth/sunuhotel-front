@@ -1,5 +1,5 @@
 $ErrorActionPreference = "Stop"
-$root = "C:\Users\aliou\SunuHotelOpenCode\frontend"
+$root = $PSScriptRoot
 $ui = Join-Path $root "src\components\ui.tsx"
 
 # 1) Append a PageHeader component to the real ui barrel (CardHeader-style contract: title/subtitle/action)

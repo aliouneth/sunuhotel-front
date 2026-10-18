@@ -256,7 +256,10 @@ function HotelForm({
       // admin left alone (and so a rejected payload can't silently normalise
       // untouched values).
       for (const key of FORM_FIELDS) {
-        if (form[key] !== baseline[key]) fd.append(key, `${form[key]}`);
+        if (form[key] !== baseline[key]) {
+          const value = form[key];
+          fd.append(key, typeof value === "boolean" ? (value ? "1" : "0") : `${value}`);
+        }
       }
       if (logo) fd.append("logo", logo);
       images.forEach((img) => fd.append("images[]", img));

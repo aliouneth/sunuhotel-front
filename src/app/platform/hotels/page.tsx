@@ -295,6 +295,9 @@ function CreateHotelModal({ onClose }: { onClose: () => void }) {
       fd.append("stars", `${form.stars}`);
       fd.append("locale", form.locale);
       fd.append("status", form.status);
+      fd.append("has_restaurant", form.has_restaurant ? "1" : "0");
+      fd.append("has_spa", form.has_spa ? "1" : "0");
+      fd.append("has_leisure", form.has_leisure ? "1" : "0");
       if (logo) fd.append("logo", logo);
       images.forEach((img) => fd.append("images[]", img));
 

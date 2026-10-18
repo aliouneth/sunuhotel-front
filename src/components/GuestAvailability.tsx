@@ -30,7 +30,6 @@ export function GuestAvailability({ hotel, slug }: { hotel: PublicHotel; slug: s
   const [phone, setPhone] = useState("");
   const [busy, setBusy] = useState(false);
   const [bookError, setBookError] = useState("");
-  const [done, setDone] = useState<{ booking_number: string } | null>(null);
 
   const { data, error, isFetching, refetch } = useQuery<AvailabilityResult>({
     queryKey: ["public-availability", slug, checkIn, checkOut, roomTypeId],
@@ -78,7 +77,6 @@ export function GuestAvailability({ hotel, slug }: { hotel: PublicHotel; slug: s
   function openBooking(type: BookableType) {
     setBooking(type);
     setBookError("");
-    setDone(null);
   }
 
   async function submitBooking(e: React.FormEvent) {
@@ -87,7 +85,7 @@ export function GuestAvailability({ hotel, slug }: { hotel: PublicHotel; slug: s
     setBusy(true);
     setBookError("");
     try {
-      const result = await api<{ data: { booking_number: string } }>(`/hotels/${slug}/public/bookings`, {
+      const result = await api<{ data: { payment_url: string; token: string } }>(`/hotels/${slug}/public/bookings`, {
         method: "POST",
         body: JSON.stringify({
           guest: {
@@ -102,11 +100,13 @@ export function GuestAvailability({ hotel, slug }: { hotel: PublicHotel; slug: s
           adults: 1,
         }),
       });
-      setDone({ booking_number: result.data.booking_number });
-      setBooking(null);
+
+      if (!result.data?.payment_url) throw new Error(t("payment_start_error"));
+
+      // Payment guarantees the reservation: hand off to PayDunya's page.
+      window.location.assign(result.data.payment_url);
     } catch (err) {
       setBookError((err as { message?: string }).message ?? t("error_generic"));
-    } finally {
       setBusy(false);
     }
   }
@@ -142,19 +142,6 @@ export function GuestAvailability({ hotel, slug }: { hotel: PublicHotel; slug: s
       )}
 
       {isFetching && <Spinner />}
-
-      {done && (
-        <div className="mt-6 rounded-xl border border-green-200 bg-green-50 px-5 py-4">
-          <p className="text-sm font-semibold text-green-900">{t("reservation_sent")}</p>
-          <p className="mt-1 text-sm text-green-800">
-            {t("reservation_reference")}: <span className="font-mono font-semibold">{done.booking_number}</span>
-          </p>
-          <p className="mt-1 text-xs text-green-700">{t("pending_approval_note")}</p>
-          <Button size="sm" variant="secondary" className="mt-3" onClick={() => setDone(null)}>
-            {t("close")}
-          </Button>
-        </div>
-      )}
 
       {data && !isFetching && (
         <div className="mt-6">
@@ -222,13 +209,14 @@ export function GuestAvailability({ hotel, slug }: { hotel: PublicHotel; slug: s
               <Input label={t("last_name")} required value={lastName} onChange={(e) => setLastName(e.target.value)} />
               <Input label={t("email")} type="email" value={email} onChange={(e) => setEmail(e.target.value)} />
               <Input label={t("phone")} value={phone} onChange={(e) => setPhone(e.target.value)} />
+              <p className="rounded-lg bg-slate-50 px-3 py-2 text-xs text-slate-600">{t("payment_required_note")}</p>
               {bookError && <p className="text-sm text-red-600">{bookError}</p>}
               <div className="flex justify-end gap-2">
                 <Button type="button" variant="secondary" onClick={() => setBooking(null)}>
                   {t("cancel")}
                 </Button>
                 <Button type="submit" loading={busy}>
-                  {t("send_request")}
+                  {t("pay_to_confirm")}
                 </Button>
               </div>
             </form>

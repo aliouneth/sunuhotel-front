@@ -15,7 +15,7 @@ interface AuthContextValue {
     password: string;
     password_confirmation: string;
     locale?: string;
-    hotel: { name: string; slug?: string; country?: string; currency?: string };
+    hotel: { name: string; slug?: string; country?: string; currency?: string; has_restaurant?: boolean; has_spa?: boolean; has_leisure?: boolean };
     logo?: File | null;
   }) => Promise<User>;
   logout: () => Promise<void>;
@@ -63,6 +63,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     if (payload.hotel.slug) fd.append("hotel[slug]", payload.hotel.slug);
     if (payload.hotel.country) fd.append("hotel[country]", payload.hotel.country);
     if (payload.hotel.currency) fd.append("hotel[currency]", payload.hotel.currency);
+    fd.append("hotel[has_restaurant]", payload.hotel.has_restaurant ? "1" : "0");
+    fd.append("hotel[has_spa]", payload.hotel.has_spa ? "1" : "0");
+    fd.append("hotel[has_leisure]", payload.hotel.has_leisure ? "1" : "0");
     if (payload.logo) fd.append("logo", payload.logo);
     const body = (await api<{ token: string; user: User }>("/register", {
       method: "POST",

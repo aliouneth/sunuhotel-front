@@ -119,6 +119,29 @@ export function Select({
   );
 }
 
+export function Checkbox({
+  label,
+  hint,
+  className = "",
+  ...props
+}: InputHTMLAttributes<HTMLInputElement> & { label?: string; hint?: string }) {
+  return (
+    <label className={`flex items-start gap-2.5 ${className}`}>
+      <input
+        type="checkbox"
+        className="mt-0.5 size-4 flex-none rounded border-slate-300 accent-amber-600 focus:ring-2 focus:ring-amber-200"
+        {...props}
+      />
+      {(label || hint) && (
+        <span className="text-sm text-slate-800">
+          {label}
+          {hint && <span className="mt-0.5 block text-xs text-slate-500">{hint}</span>}
+        </span>
+      )}
+    </label>
+  );
+}
+
 export function Badge({ children, tone = "slate" }: { children: ReactNode; tone?: string }) {
   const tones: Record<string, string> = {
     slate: "bg-slate-100 text-slate-700",

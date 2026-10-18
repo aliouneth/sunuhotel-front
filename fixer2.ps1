@@ -1,5 +1,5 @@
 $ErrorActionPreference = "Stop"
-$root = "C:\Users\aliou\SunuHotelOpenCode\frontend"
+$root = $PSScriptRoot
 
 # --- Fix 1: queryString import source -> "@/lib/api" (api.ts:103 GREEN) ---
 # --- Fix 2: usePlatform import source -> "@/components/ui" (we append it) ---

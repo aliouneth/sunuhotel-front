@@ -1,5 +1,5 @@
 $ErrorActionPreference = "Stop"
-$root = "C:\Users\aliou\SunuHotelOpenCode\frontend"
+$root = $PSScriptRoot
 $ui = Join-Path $root "src\components\ui.tsx"
 
 # 1) Append real usePlatform to the ui barrel (same accepted move as PageHeader).

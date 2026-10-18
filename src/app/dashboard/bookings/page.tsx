@@ -9,6 +9,7 @@ import { useLocale } from "@/i18n/LocaleProvider";
 import { can } from "@/lib/permissions";
 import { formatDate, formatMoney, nightsBetween, toDateInput, todayISO } from "@/lib/format";
 import { Badge, Button, Card, CardHeader, EmptyState, ErrorBox, Fieldset, Input, Modal, Select, Spinner, Table } from "@/components/ui";
+import { BookingOrders, enabledCategories } from "@/components/BookingOrders";
 import type { AvailabilityResult, Booking, Paginated } from "@/types/dto";
 
 const statusTones: Record<string, string> = {
@@ -436,8 +437,17 @@ function EditBookingModal({
   );
 }
 
-function ViewBookingModal({ booking, currency, onClose }: { booking: Booking; currency?: string; onClose: () => void }) {
+function ViewBookingModal({ booking: initialBooking, currency, onClose }: { booking: Booking; currency?: string; onClose: () => void }) {
   const { t, locale } = useLocale();
+  const qc = useQueryClient();
+  const { user } = useAuth();
+  const { data: fresh } = useQuery<Booking>({
+    queryKey: ["booking", initialBooking.id],
+    queryFn: () => api<{ data: Booking }>(`/bookings/${initialBooking.id}`).then((b) => b.data),
+    initialData: initialBooking,
+  });
+  const booking = fresh ?? initialBooking;
+  const showOrders = enabledCategories(user?.hotel).length > 0;
   const guestName = booking.guest?.full_name ?? booking.guest ? `${booking.guest.first_name} ${booking.guest.last_name}` : `#${booking.guest_id}`;
   const statusLabel = booking.status === "pending" ? t("status_pending") : booking.status;
 
@@ -508,6 +518,12 @@ function ViewBookingModal({ booking, currency, onClose }: { booking: Booking; cu
             <span>{t("discount_label")}</span>
             <span>-{formatMoney(booking.discount_cents, currency, locale)}</span>
           </div>
+          {(booking.orders_cents ?? 0) > 0 && (
+            <div className="mt-1 flex items-center justify-between text-slate-600">
+              <span>{t("orders_label")}</span>
+              <span>{formatMoney(booking.orders_cents, currency, locale)}</span>
+            </div>
+          )}
           <div className="mt-2 flex items-center justify-between border-t border-slate-200 pt-2">
             <span className="font-semibold text-slate-900">{t("total_label")}</span>
             <span className="font-semibold text-slate-900">{formatMoney(booking.total_cents, currency, locale)}</span>
@@ -521,6 +537,18 @@ function ViewBookingModal({ booking, currency, onClose }: { booking: Booking; cu
             <span>{formatMoney(booking.balance_due_cents, currency, locale)}</span>
           </div>
         </div>
+
+        {showOrders && (
+          <BookingOrders
+            bookingId={booking.id}
+            bookingStatus={booking.status}
+            currency={currency}
+            onChanged={() => {
+              qc.invalidateQueries({ queryKey: ["booking", booking.id] });
+              qc.invalidateQueries({ queryKey: ["bookings"] });
+            }}
+          />
+        )}
 
         <div>
           <p className="mb-1.5 text-xs font-semibold uppercase tracking-wide text-slate-500">{t("payments")}</p>

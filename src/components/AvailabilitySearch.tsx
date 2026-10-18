@@ -60,7 +60,6 @@ export function AvailabilitySearch() {
   //const [password, setPassword] = useState("");
   const [bookBusy, setBookBusy] = useState(false);
   const [bookError, setBookError] = useState("");
-  const [done, setDone] = useState<{ hotel: HotelSearchResult; booking_number: string } | null>(null);
 
   function todayLocal() {
     const d = new Date();
@@ -123,7 +122,6 @@ export function AvailabilitySearch() {
     setLastName("");
     setPhone("");
     setBookError("");
-    setDone(null);
   }
 
   async function submitBooking(e: React.FormEvent) {
@@ -132,7 +130,7 @@ export function AvailabilitySearch() {
     setBookBusy(true);
     setBookError("");
     try {
-      const result = await api<{ data: { booking_number: string } }>(
+      const result = await api<{ data: { payment_url: string; token: string } }>(
         `/hotels/${target.hotel.slug}/public/bookings`,
         {
           method: "POST",
@@ -150,8 +148,9 @@ export function AvailabilitySearch() {
           }),
         }
       );
-      setDone({ hotel: target.hotel, booking_number: result.data.booking_number });
-      setTarget(null);
+      if (!result.data?.payment_url) throw new Error(t("payment_start_error"));
+      // Payment guarantees the reservation: hand off to PayDunya's page.
+      window.location.assign(result.data.payment_url);
     } catch (err) {
       setBookError((err as { message?: string }).message ?? t("error_generic"));
     } finally {
@@ -212,31 +211,6 @@ export function AvailabilitySearch() {
       {error && <p className="mt-3 text-center text-xs text-red-600">{error}</p>}
       {searched && !busy && !error && results !== null && results.length === 0 && (
         <p className="mt-3 text-center text-sm text-slate-500">{t("no_hotels_available")}</p>
-      )}
-
-      {done && (
-        <div className="mt-4 rounded-2xl border border-green-200 bg-gradient-to-br from-green-50 to-emerald-50 px-6 py-5 text-center shadow-sm">
-          <span className="mx-auto flex size-12 items-center justify-center rounded-full bg-green-100">
-            <User className="size-6 text-green-700" />
-          </span>
-          <p className="mt-3 text-base font-semibold text-green-900">{t("reservation_sent")}</p>
-          <p className="mt-1 text-sm text-green-800">
-            {t("reservation_reference")}: <span className="font-mono font-semibold">{done.booking_number}</span>
-          </p>
-          <p className="mt-2 text-sm text-green-800">
-            {t("call_hotel_note")
-              .replace("{hotel}", done.hotel.name)
-              .replace("{phone}", done.hotel.phone ?? "—")}
-          </p>
-          <p className="mt-1 text-xs text-green-700">{t("pending_approval_note")}</p>
-          <button
-            type="button"
-            onClick={() => setDone(null)}
-            className="mt-4 rounded-lg border border-green-300 bg-white px-4 py-1.5 text-xs font-medium text-green-800 transition hover:bg-green-100"
-          >
-            {t("close")}
-          </button>
-        </div>
       )}
 
       {results !== null && results.length > 0 && (
@@ -389,13 +363,14 @@ export function AvailabilitySearch() {
                       </label>
                     </div>
                     {bookError && <p className="mt-2 text-xs text-red-600">{bookError}</p>}
+                    <p className="mt-2 text-xs text-amber-800">{t("payment_required_note")}</p>
                     <div className="mt-4 flex items-center gap-3">
                       <button
                         type="submit"
                         disabled={bookBusy}
                         className="rounded-lg bg-amber-600 px-5 py-2 text-sm font-medium text-white transition hover:bg-amber-700 disabled:opacity-50"
                       >
-                        {bookBusy ? "…" : t("confirm_reservation")}
+                        {bookBusy ? "…" : t("pay_to_confirm")}
                       </button>
                       <button type="button" onClick={() => setTarget(null)} className="text-sm text-slate-500 hover:text-slate-700">
                         {t("cancel")}

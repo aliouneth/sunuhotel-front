@@ -1,5 +1,5 @@
 const fs = require("fs");
-const p = "C:\\Users\\aliou\\SunuHotelOpenCode\\frontend\\src\\i18n\\dictionaries.ts";
+const p = require("path").join(__dirname, "src", "i18n", "dictionaries.ts");
 let s = fs.readFileSync(p, "utf8");
 const frOld = "   hotel_logo_hint: \"PNG, JPG ou WEBP ? 2 Mo max\",";
 const frNew = "   hotel_logo_hint: \"PNG, JPG ou WEBP ? 2 Mo max\",\n   hotel_photos: \"Photos de l'h\u00f4tel\",\n   hotel_photos_hint: \"PNG, JPG ou WEBP. Maximum 5 images.\",";

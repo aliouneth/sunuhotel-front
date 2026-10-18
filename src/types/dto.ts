@@ -23,6 +23,9 @@ export interface Hotel {
   description?: string | null;
   comment?: string | null;
   other_services?: string | null;
+  has_restaurant?: boolean;
+  has_spa?: boolean;
+  has_leisure?: boolean;
   timezone: string;
   currency: string;
   tax_rate: number;
@@ -143,6 +146,30 @@ export interface Payment {
   receiver?: { id: number; name: string; email?: string } | null;
 }
 
+export type OrderCategory = "restaurant" | "spa" | "leisure";
+export type OrderStatus = "open" | "void";
+
+export interface OrderItem {
+  id: number;
+  order_id: number;
+  description: string;
+  quantity: number;
+  unit_price_cents: number;
+  line_total_cents: number;
+}
+
+export interface Order {
+  id: number;
+  booking_id: number;
+  category: OrderCategory;
+  status: OrderStatus;
+  total_cents: number;
+  notes?: string | null;
+  created_by_name?: string | null;
+  created_at?: string | null;
+  items?: OrderItem[];
+}
+
 export interface Booking {
   id: number;
   booking_number: string;
@@ -156,6 +183,7 @@ export interface Booking {
   subtotal_cents: number;
   tax_cents: number;
   discount_cents: number;
+  orders_cents: number;
   total_cents: number;
   paid_cents: number;
   notes?: string | null;
@@ -167,6 +195,7 @@ export interface Booking {
   guest?: Guest;
   rooms?: BookingRoomLine[];
   payments?: Payment[];
+  orders?: Order[];
 }
 
 export interface Paginated<T> {
@@ -374,6 +403,9 @@ export interface PlatformHotel {
   description?: string | null;
   comment?: string | null;
   other_services?: string | null;
+  has_restaurant?: boolean;
+  has_spa?: boolean;
+  has_leisure?: boolean;
 currency: string;
   timezone: string;
   status: HotelStatus;

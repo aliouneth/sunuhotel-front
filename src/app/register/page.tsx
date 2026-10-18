@@ -5,7 +5,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthProvider";
-import { Button, Card, Input } from "@/components/ui";
+import { Button, Card, Checkbox, Input } from "@/components/ui";
 import { useLocale } from "@/i18n/LocaleProvider";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 
@@ -22,6 +22,9 @@ export default function RegisterPage() {
     hotel_slug: "",
     hotel_country: "",
     hotel_currency: "EUR",
+    has_restaurant: false,
+    has_spa: false,
+    has_leisure: false,
   });
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
@@ -29,6 +32,10 @@ export default function RegisterPage() {
   const [logoPreview, setLogoPreview] = useState<string | null>(null);
 
   function set<K extends keyof typeof form>(key: K, value: string) {
+    setForm((f) => ({ ...f, [key]: value }));
+  }
+
+  function toggle(key: "has_restaurant" | "has_spa" | "has_leisure", value: boolean) {
     setForm((f) => ({ ...f, [key]: value }));
   }
 
@@ -54,6 +61,9 @@ export default function RegisterPage() {
           slug: form.hotel_slug || undefined,
           country: form.hotel_country || undefined,
           currency: form.hotel_currency,
+          has_restaurant: form.has_restaurant,
+          has_spa: form.has_spa,
+          has_leisure: form.has_leisure,
         },
         logo,
       });
@@ -140,6 +150,25 @@ export default function RegisterPage() {
               onChange={(e) => set("hotel_slug", e.target.value)}
               placeholder={t("slug_hint")}
             />
+            </div>
+            <div className="space-y-2">
+              <span className="block text-xs font-medium text-slate-700">{t("hotel_services_label")}</span>
+              <Checkbox
+                label={t("service_restaurant")}
+                checked={form.has_restaurant}
+                onChange={(e) => toggle("has_restaurant", e.target.checked)}
+              />
+              <Checkbox
+                label={t("service_spa")}
+                checked={form.has_spa}
+                onChange={(e) => toggle("has_spa", e.target.checked)}
+              />
+              <Checkbox
+                label={t("service_leisure")}
+                checked={form.has_leisure}
+                onChange={(e) => toggle("has_leisure", e.target.checked)}
+              />
+              <p className="text-xs text-slate-500">{t("hotel_services_hint")}</p>
             </div>
             <div className="flex items-center gap-4">
               <Input
