@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { useQuery } from "@tanstack/react-query";
 import { api, ApiError } from "@/lib/api";
@@ -13,14 +13,15 @@ import type { AvailabilityResult, Guest } from "@/types/dto";
 
 export default function NewBookingPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { t, locale } = useLocale();
   const { user } = useAuth();
   const currency = user?.hotel?.currency;
 
   const [guestForm, setGuestForm] = useState({ first_name: "", last_name: "", email: "", phone: "" });
   const [matchedGuest, setMatchedGuest] = useState<Guest | null>(null);
-  const [checkIn, setCheckIn] = useState(() => todayISO());
-  const [checkOut, setCheckOut] = useState(() => addDaysISO(todayISO(), 2));
+  const [checkIn, setCheckIn] = useState(() => searchParams.get("check_in") || todayISO());
+  const [checkOut, setCheckOut] = useState(() => searchParams.get("check_out") || addDaysISO(searchParams.get("check_in") || todayISO(), 2));
   const [adults, setAdults] = useState("1");
   const [selected, setSelected] = useState<number[]>([]);
   const [creating, setCreating] = useState(false);
@@ -29,6 +30,11 @@ export default function NewBookingPage() {
   const haveDates = Boolean(checkIn) && Boolean(checkOut) && checkIn < checkOut;
 
   const emailQuery = guestForm.email.trim().toLowerCase();
+
+  useEffect(() => {
+    const roomId = searchParams.get("room_id");
+    if (roomId) setSelected([Number(roomId)]);
+  }, [searchParams]);
 
   useEffect(() => {
     if (emailQuery.length < 3) {

@@ -1,13 +1,14 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { api, queryString } from "@/lib/api";
 import { useLocale } from "@/i18n/LocaleProvider";
 import { useAuth } from "@/context/AuthProvider";
 import { Badge, Button, Card, CardHeader, EmptyState, ErrorBox, Fieldset, Input, Modal, Select, Spinner, Table } from "@/components/ui";
 import { formatMoney } from "@/lib/format";
-import type { Paginated, Room, RoomType } from "@/types/dto";
+import { ViewBookingModal } from "@/app/dashboard/bookings/page";
 
 const statusTones: Record<string, string> = {
   available: "green",
@@ -18,11 +19,15 @@ const statusTones: Record<string, string> = {
 };
 
 export default function RoomsPage() {
+  const router = useRouter();
   const { t, locale } = useLocale();
   const { user } = useAuth();
   const currency = user?.hotel?.currency;
   const qc = useQueryClient();
   const [statusFilter, setStatusFilter] = useState("");
+  const [showGrid, setShowGrid] = useState(false);
+  const [viewBooking, setViewBooking] = useState<Booking | null>(null);
+  const [gridStart, setGridStart] = useState(() => { const d = new Date(); d.setDate(d.getDate() - 7); return d; });
   const [editRoom, setEditRoom] = useState<Room | null>(null);
   const [createOpen, setCreateOpen] = useState(false);
 
@@ -37,6 +42,12 @@ export default function RoomsPage() {
   const { data: types } = useQuery<RoomType[]>({
     queryKey: ["room-types"],
     queryFn: () => api<{ data: Paginated<RoomType> }>("/room-types?per_page=50").then((b) => b.data.data),
+  });
+
+  const { data: bookingsData } = useQuery<Paginated<Booking>>({
+    queryKey: ["bookings-grid"],
+    queryFn: () => api<{ data: Paginated<Booking> }>("/bookings?per_page=200").then((b) => b.data),
+    enabled: showGrid,
   });
 
   async function changeStatus(room: Room, status: string) {
@@ -55,9 +66,15 @@ export default function RoomsPage() {
           <h1 className="text-xl font-bold text-slate-900">{t("rooms")}</h1>
           <p className="text-sm text-slate-500">{data?.total ?? 0} chambres</p>
         </div>
-        <Button onClick={() => setCreateOpen(true)}>{t("create")}</Button>
+        <div className="flex gap-2">
+          <Button variant="secondary" onClick={() => setShowGrid((v) => !v)}>
+            {showGrid ? "Liste" : "Grille"}
+          </Button>
+          <Button onClick={() => setCreateOpen(true)}>{t("create")}</Button>
+        </div>
       </div>
 
+      {!showGrid && (
       <Card>
         <CardHeader
           title={t("rooms")}
@@ -114,6 +131,109 @@ export default function RoomsPage() {
           <EmptyState>{t("no_data")}</EmptyState>
         )}
       </Card>
+      )}
+
+      {showGrid && (
+        <Card>
+          <CardHeader
+            title="Planning"
+            action={
+              <div className="flex gap-2">
+                <Button size="sm" variant="secondary" onClick={() => { const d = new Date(gridStart); d.setDate(d.getDate() - 14); setGridStart(d); }}>
+                  ←
+                </Button>
+                <Button size="sm" variant="secondary" onClick={() => { const d = new Date(); d.setDate(d.getDate() - 7); setGridStart(d); }}>
+                  Aujourd'hui
+                </Button>
+                <Button size="sm" variant="secondary" onClick={() => { const d = new Date(gridStart); d.setDate(d.getDate() + 14); setGridStart(d); }}>
+                  →
+                </Button>
+              </div>
+            }
+          />
+          <div className="overflow-auto p-4">
+            {(() => {
+              const days = Array.from({ length: 14 }, (_, i) => {
+                const d = new Date(gridStart);
+                d.setDate(gridStart.getDate() + i);
+                return d.toISOString().slice(0, 10);
+              });
+              const bookings = bookingsData?.data ?? [];
+              return (
+                <table className="min-w-full border-collapse text-xs">
+                  <thead>
+                    <tr>
+                      <th className="sticky left-0 bg-white border p-2 text-left">Room</th>
+                      {days.map((d) => (
+                        <th key={d} className="border p-2 whitespace-nowrap">
+                          {d.slice(5)}
+                        </th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {(data?.data ?? []).map((room) => {
+                      const cells: any[] = [];
+                      let i = 0;
+                      while (i < days.length) {
+                        const d = days[i];
+                        const b = bookings.find(
+                          (bk) =>
+                            (bk.rooms ?? []).some((r: any) => r.room_id === room.id) &&
+                            (bk.check_in ?? "").slice(0, 10) <= d &&
+                            (bk.check_out ?? "").slice(0, 10) > d,
+                        );
+                        if (b) {
+                          const checkOut = (b.check_out ?? "").slice(0, 10);
+                          let span = 0;
+                          for (let j = i; j < days.length; j++) {
+                            if (days[j] < checkOut) span++;
+                            else break;
+                          }
+                          if (span < 1) span = 1;
+                          const todayStr = new Date().toISOString().slice(0, 10);
+                          const isPast = checkOut <= todayStr;
+                          const isPresent = (b.check_in ?? "").slice(0, 10) <= todayStr && checkOut > todayStr;
+                          const colorClass = isPast ? "bg-slate-200" : isPresent ? "bg-emerald-100" : "bg-amber-100";
+                          const name = b.guest?.full_name ?? (b.guest ? `${b.guest.first_name} ${b.guest.last_name}` : `#${b.guest_id}`);
+                          cells.push(
+                            <td key={d} colSpan={span} className={`border p-1 text-center ${colorClass} cursor-pointer hover:opacity-80`} onClick={() => setViewBooking(b)}>
+                              {name}
+                            </td>,
+                          );
+                          i += span;
+                        } else {
+                          const todayStr = new Date().toISOString().slice(0, 10);
+                          const isPast = d < todayStr;
+                          const isFuture = d > todayStr;
+                          cells.push(
+                            <td
+                              key={d}
+                              className={`border p-1 ${isPast ? "bg-gray-700" : ""} ${isFuture ? "cursor-pointer hover:bg-blue-50" : ""}`}
+                              onClick={isFuture ? () => router.push(`/dashboard/bookings/new?check_in=${d}&room_id=${room.id}`) : undefined}
+                            />,
+                          );
+                          i++;
+                        }
+                      }
+                      return (
+                        <tr key={room.id}>
+                          <td className={`sticky left-0 border p-2 font-medium ${room.status === "maintenance" ? "bg-violet-100 text-violet-700" : "bg-white"}`}>{room.room_number}</td>
+                          {cells}
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              );
+            })()}
+          </div>
+        </Card>
+      )}
+
+      {viewBooking && (
+        <ViewBookingModal booking={viewBooking} currency={currency} onClose={() => setViewBooking(null)} />
+      )}
 
       <RoomModal
         key={editRoom ? `edit-${editRoom.id}` : "new"}

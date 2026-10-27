@@ -140,6 +140,7 @@ export interface Payment {
   amount_cents: number;
   method: string;
   reference?: string | null;
+  notes?: string | null;
   status: string;
   paid_at?: string | null;
   received_by?: number | null;

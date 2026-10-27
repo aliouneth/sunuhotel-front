@@ -10,6 +10,7 @@ import { can } from "@/lib/permissions";
 import { formatDate, formatMoney, nightsBetween, toDateInput, todayISO } from "@/lib/format";
 import { Badge, Button, Card, CardHeader, EmptyState, ErrorBox, Fieldset, Input, Modal, Select, Spinner, Table } from "@/components/ui";
 import { BookingOrders, enabledCategories } from "@/components/BookingOrders";
+import { printBookingInvoice } from "@/lib/printInvoice";
 import type { AvailabilityResult, Booking, Paginated } from "@/types/dto";
 
 const statusTones: Record<string, string> = {
@@ -137,7 +138,13 @@ export default function BookingsPage() {
             {data.data.map((b) => (
               <tr
                 key={b.id}
-                className={b.status === "pending" ? "bg-orange-50 hover:bg-orange-100" : "hover:bg-slate-50"}
+                className={
+                (b.balance_due_cents ?? 0) > 0
+                  ? "bg-blue-200 hover:bg-blue-300"
+                  : b.status === "pending"
+                    ? "bg-orange-50 hover:bg-orange-100"
+                    : "hover:bg-slate-50"
+              }
               >
                 <td className="px-5 py-3 font-mono text-xs font-medium text-slate-900">{b.booking_number}</td>
                 <td className="px-5 py-3 font-medium text-slate-900">
@@ -154,6 +161,11 @@ export default function BookingsPage() {
                 </td>
                 <td className="px-5 py-3">
                   <Badge tone={statusTones[b.status]}>{statusLabel(b.status)}</Badge>
+                  {(b.payments ?? []).some((p) => p.status === "completed" && (p.notes ?? "").toLowerCase().includes("paydunya")) && (
+                    <span className="ml-2 inline-flex items-center rounded-full bg-blue-100 px-2 py-0.5 text-xs font-medium text-blue-700">
+                      PayDunya Paid
+                    </span>
+                  )}
                 </td>
                 <td className="px-5 py-3">
                   <div className="flex flex-wrap gap-1.5">
@@ -183,7 +195,7 @@ export default function BookingsPage() {
                       </Button>
                     )}
                     {b.status === "checked_in" && (
-                      <Button size="sm" variant="secondary" loading={act.isPending} onClick={() => act.mutate({ id: b.id, action: "check-out" })}>
+                      <Button size="sm" variant="secondary" loading={act.isPending} disabled={(b.balance_due_cents ?? 0) > 0} onClick={() => act.mutate({ id: b.id, action: "check-out" })}>
                         Out
                       </Button>
                     )}
@@ -437,7 +449,7 @@ function EditBookingModal({
   );
 }
 
-function ViewBookingModal({ booking: initialBooking, currency, onClose }: { booking: Booking; currency?: string; onClose: () => void }) {
+export function ViewBookingModal({ booking: initialBooking, currency, onClose }: { booking: Booking; currency?: string; onClose: () => void }) {
   const { t, locale } = useLocale();
   const qc = useQueryClient();
   const { user } = useAuth();
@@ -558,7 +570,7 @@ function ViewBookingModal({ booking: initialBooking, currency, onClose }: { book
                 <div key={p.id} className="border-b border-slate-100 bg-white px-4 py-2.5 last:border-0">
                   <div className="flex items-center justify-between text-sm">
                     <span className="font-medium text-slate-900">
-                      {methodLabels[p.method] ?? p.method}
+                      {(p.notes ?? "").toLowerCase().includes("paydunya") ? "PayDunya" : (methodLabels[p.method] ?? p.method)}
                       <span className="ml-2 text-xs font-normal text-slate-500">{p.status}</span>
                     </span>
                     <span className="font-semibold text-slate-900">{formatMoney(p.amount_cents, currency, locale)}</span>
@@ -584,7 +596,10 @@ function ViewBookingModal({ booking: initialBooking, currency, onClose }: { book
           </div>
         )}
 
-        <div className="flex justify-end pt-1">
+        <div className="flex justify-end gap-2 pt-1">
+          <Button variant="secondary" onClick={() => printBookingInvoice(booking, user?.hotel, currency, locale)}>
+            {locale === "fr" ? "Imprimer la facture" : "Print invoice"}
+          </Button>
           <Button onClick={onClose}>{t("close")}</Button>
         </div>
       </div>

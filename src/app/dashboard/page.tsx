@@ -8,7 +8,9 @@ import { useAuth } from "@/context/AuthProvider";
 import { can } from "@/lib/permissions";
 import { formatDate, formatMoney, formatPercent } from "@/lib/format";
 import { Button, Card, CardHeader, ErrorBox, Spinner } from "@/components/ui";
-import type { DashboardSummary } from "@/types/dto";
+import type { DashboardSummary, Paginated, Booking } from "@/types/dto";
+import { printDailyList } from "@/lib/printDaily";
+import { printAllBookingInvoices } from "@/lib/printAllInvoices";
 
 function MiniBars({ days }: { days: DashboardSummary["occupancy_next_7_days"] }) {
   const max = Math.max(1, ...days.map((d) => d.sold_room_nights));
@@ -42,6 +44,32 @@ export default function DashboardPage() {
 
   if (isLoading) return <Spinner />;
   if (error) return <ErrorBox message={(error as { message?: string }).message} onRetry={() => refetch()} />;
+  const handlePrintDaily = async (type: "arrivals" | "departures") => {
+    const today = new Date().toISOString().slice(0, 10);
+    const res = await api<{ data: Paginated<Booking> }>(`/bookings?per_page=200`);
+    const bookings = res.data?.data ?? [];
+    const filtered =
+      type === "arrivals"
+        ? bookings.filter((b) => (b.check_in ?? "").slice(0, 10) === today)
+        : bookings.filter((b) => (b.check_out ?? "").slice(0, 10) === today);
+    const title =
+      type === "arrivals"
+        ? locale === "fr"
+          ? "Arrivees du jour"
+          : "Daily arrivals"
+        : locale === "fr"
+          ? "Departs du jour"
+          : "Daily checkouts";
+    printDailyList(title, filtered, locale);
+  };
+
+  const handlePrintAllInvoices = async () => {
+    const today = new Date().toISOString().slice(0, 10);
+    const res = await api<{ data: Paginated<Booking> }>(`/bookings?per_page=200`);
+    const bookings = (res.data?.data ?? []).filter((b) => (b.check_out ?? "").slice(0, 10) === today);
+    printAllBookingInvoices(bookings, user?.hotel, data?.currency, locale);
+  };
+
   if (!data) return <ErrorBox message={t("error_generic")} />;
 
   const cards = [
@@ -68,9 +96,20 @@ export default function DashboardPage() {
           <p className="text-sm text-slate-500">{formatDate(new Date().toISOString().slice(0, 10), locale)}</p>
         </div>
         {can(user, "bookings.manage") && (
-          <Link href="/dashboard/bookings/new">
-            <Button>{t("new_booking")}</Button>
-          </Link>
+          <div className="flex gap-2">
+            <Button variant="secondary" onClick={() => handlePrintDaily("arrivals")}>
+              {locale === "fr" ? "Imprimer arrivees" : "Print arrivals"}
+            </Button>
+            <Button variant="secondary" onClick={() => handlePrintDaily("departures")}>
+              {locale === "fr" ? "Imprimer departs" : "Print checkouts"}
+            </Button>
+            <Button variant="secondary" onClick={handlePrintAllInvoices}>
+              {locale === "fr" ? "Imprimer toutes les factures" : "Print all invoices"}
+            </Button>
+            <Link href="/dashboard/bookings/new">
+              <Button>{t("new_booking")}</Button>
+            </Link>
+          </div>
         )}
       </div>
 
