@@ -1,16 +1,18 @@
-export function printAllBookingInvoices(bookings: any[], hotel: any, currency?: string, locale?: string) {
+import type { Booking, BookingRoomLine, Hotel, Locale } from "@/types/dto";
+
+export function printAllBookingInvoices(bookings: Booking[], hotel?: Hotel | null, currency?: string, locale?: Locale) {
   const loc = locale ?? "fr";
   const fr = loc.toLowerCase().startsWith("fr");
   const w = window.open("", "_blank", "width=900,height=700");
   if (!w) return;
   const money = (v: number) => new Intl.NumberFormat(loc, { style: "currency", currency: currency || "XOF" }).format(v / 100);
   const sections = bookings
-    .map((booking: any) => {
+    .map((booking: Booking) => {
       const guestName =
         booking.guest?.full_name ?? (booking.guest ? `${booking.guest.first_name} ${booking.guest.last_name}` : `#${booking.guest_id}`);
       const rooms = (booking.rooms ?? [])
         .map(
-          (l: any) =>
+            (l: BookingRoomLine) =>
             `<tr><td>${l.room?.room_number ?? "#" + l.room_id}</td><td>${l.nights ?? ""}</td><td>${money(l.nightly_rate_cents)}</td><td style="text-align:right">${money(l.line_total_cents)}</td></tr>`,
         )
         .join("");

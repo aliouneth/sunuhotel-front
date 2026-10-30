@@ -8,7 +8,8 @@ import { useLocale } from "@/i18n/LocaleProvider";
 import { useAuth } from "@/context/AuthProvider";
 import { Badge, Button, Card, CardHeader, EmptyState, ErrorBox, Fieldset, Input, Modal, Select, Spinner, Table } from "@/components/ui";
 import { formatMoney } from "@/lib/format";
-import { ViewBookingModal } from "@/app/dashboard/bookings/page";
+import { ViewBookingModal } from "@/components/ViewBookingModal";
+import type { Booking, BookingRoomLine, Paginated, Room, RoomType } from "@/types/dto";
 
 const statusTones: Record<string, string> = {
   available: "green",
@@ -143,7 +144,7 @@ export default function RoomsPage() {
                   ←
                 </Button>
                 <Button size="sm" variant="secondary" onClick={() => { const d = new Date(); d.setDate(d.getDate() - 7); setGridStart(d); }}>
-                  Aujourd'hui
+                  Aujourd&apos;hui
                 </Button>
                 <Button size="sm" variant="secondary" onClick={() => { const d = new Date(gridStart); d.setDate(d.getDate() + 14); setGridStart(d); }}>
                   →
@@ -173,13 +174,13 @@ export default function RoomsPage() {
                   </thead>
                   <tbody>
                     {(data?.data ?? []).map((room) => {
-                      const cells: any[] = [];
+                      const cells: React.ReactNode[] = [];
                       let i = 0;
                       while (i < days.length) {
                         const d = days[i];
                         const b = bookings.find(
                           (bk) =>
-                            (bk.rooms ?? []).some((r: any) => r.room_id === room.id) &&
+                            (bk.rooms ?? []).some((r: BookingRoomLine) => r.room_id === room.id) &&
                             (bk.check_in ?? "").slice(0, 10) <= d &&
                             (bk.check_out ?? "").slice(0, 10) > d,
                         );

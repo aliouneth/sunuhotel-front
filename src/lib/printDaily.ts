@@ -1,14 +1,14 @@
 import { formatDate } from "@/lib/format";
+import type { Booking, BookingRoomLine, Locale } from "@/types/dto";
 
-export function printDailyList(title: string, bookings: any[], locale?: string) {
+export function printDailyList(title: string, bookings: Booking[], locale?: Locale) {
   const loc = locale ?? "fr";
   const fr = loc.toLowerCase().startsWith("fr");
   const w = window.open("", "_blank", "width=900,height=700");
   if (!w) return;
   const rows = bookings
     .map(
-      (b: any) =>
-        `<tr><td>${b.booking_number}</td><td>${b.guest?.full_name ?? (b.guest ? b.guest.first_name + " " + b.guest.last_name : "#" + b.guest_id)}</td><td>${b.rooms?.map((r: any) => r.room?.room_number).join(", ") ?? "—"}</td><td>${formatDate(b.check_in, loc)}</td><td>${formatDate(b.check_out, loc)}</td></tr>`,
+      (b: Booking) =>        `<tr><td>${b.booking_number}</td><td>${b.guest?.full_name ?? (b.guest ? b.guest.first_name + " " + b.guest.last_name : "#" + b.guest_id)}</td><td>${b.rooms?.map((r: BookingRoomLine) => r.room?.room_number).join(", ") ?? "—"}</td><td>${formatDate(b.check_in, loc)}</td><td>${formatDate(b.check_out, loc)}</td></tr>`,
     )
     .join("");
   const html = `<!DOCTYPE html><html><head><meta charset="utf-8"><title>${title}</title>

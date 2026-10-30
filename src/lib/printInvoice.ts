@@ -1,6 +1,7 @@
 import { formatDate } from "@/lib/format";
+import type { Booking, BookingRoomLine, Hotel, Locale, Payment } from "@/types/dto";
 
-export function printBookingInvoice(booking: any, hotel: any, currency?: string, locale?: string) {
+export function printBookingInvoice(booking: Booking, hotel?: Hotel | null, currency?: string, locale?: Locale) {
   const loc = locale ?? "fr";
   const fr = loc.toLowerCase().startsWith("fr");
   const L = fr
@@ -51,13 +52,13 @@ export function printBookingInvoice(booking: any, hotel: any, currency?: string,
   const money = (v: number) => new Intl.NumberFormat(loc, { style: "currency", currency: currency || "XOF" }).format(v / 100);
   const rooms = (booking.rooms ?? [])
     .map(
-      (l: any) =>
+      (l: BookingRoomLine) =>
         `<tr><td>${l.room?.room_number ?? "#" + l.room_id}</td><td>${l.nights ?? ""}</td><td>${money(l.nightly_rate_cents)}</td><td style="text-align:right">${money(l.line_total_cents)}</td></tr>`,
     )
     .join("");
   const payments = (booking.payments ?? [])
     .map(
-      (p: any) =>
+      (p: Payment) =>
         `<tr><td>${(p.notes ?? "").toLowerCase().includes("paydunya") ? "PayDunya" : p.method}</td><td>${p.status}</td><td style="text-align:right">${money(p.amount_cents)}</td></tr>`,
     )
     .join("");
