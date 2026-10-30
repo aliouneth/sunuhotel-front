@@ -111,12 +111,11 @@ export default function BookingsPage() {
       <Card>
         <CardHeader title={t("bookings")} />
         <div className="flex flex-wrap items-end gap-3 border-b border-slate-100 px-5 py-3">
-          <Input
-            placeholder={t("search_placeholder")}
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="w-56"
-          />
+            <Input
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="w-56"
+            />
           <Select value={status} onChange={(e) => setStatus(e.target.value)} className="w-44">
             <option value="">{t("all")}</option>
             {statusKeys.map((s) => (
