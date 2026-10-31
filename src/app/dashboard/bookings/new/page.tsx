@@ -8,7 +8,7 @@ import { api, ApiError } from "@/lib/api";
 import { useLocale } from "@/i18n/LocaleProvider";
 import { useAuth } from "@/context/AuthProvider";
 import { addDaysISO, nightsBetween, todayISO, formatMoney } from "@/lib/format";
-import { Badge, Button, Card, CardHeader, ErrorBox, Fieldset, Input, Spinner } from "@/components/ui";
+import { Badge, Button, Card, CardHeader, ErrorBox, Fieldset, Input, PageHeader, Spinner } from "@/components/ui";
 import type { AvailabilityResult, Guest } from "@/types/dto";
 
 export default function NewBookingPage() {
@@ -140,7 +140,7 @@ export default function NewBookingPage() {
         <Link href="/dashboard/bookings" className="text-sm text-slate-500 hover:text-slate-700">
           ← {t("back")}
         </Link>
-        <h1 className="mt-1 text-xl font-bold text-slate-900">{t("new_booking")}</h1>
+        <PageHeader title={t("new_booking")} />
       </div>
 
       <Card>

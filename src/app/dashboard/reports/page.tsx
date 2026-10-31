@@ -17,7 +17,7 @@ import { api, queryString } from "@/lib/api";
 import { useAuth } from "@/context/AuthProvider";
 import { useLocale } from "@/i18n/LocaleProvider";
 import { addDaysISO, formatDate, formatMoney, formatPercent, todayISO } from "@/lib/format";
-import { Button, Card, CardHeader, ErrorBox, Input, Spinner } from "@/components/ui";
+import { Button, Card, CardHeader, ErrorBox, Input, PageHeader, Spinner } from "@/components/ui";
 import type { Kpis, OccupancyDay, RevenueMonth } from "@/types/dto";
 
 async function downloadCsv(from: string, to: string) {
@@ -87,11 +87,10 @@ export default function ReportsPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-wrap items-end justify-between gap-4">
-        <div>
-          <h1 className="text-xl font-bold text-slate-900">Rapports</h1>
-          <p className="text-sm text-slate-500">{formatDate(from, locale)} → {formatDate(to, locale)}</p>
-        </div>
+      <PageHeader
+        title="Rapports"
+        subtitle={`${formatDate(from, locale)} – ${formatDate(to, locale)}`}
+        action={
         <div className="flex items-end gap-2">
           <Input label="Du" type="date" value={from} onChange={(e) => setFrom(e.target.value)} />
           <Input label="Au" type="date" value={to} onChange={(e) => setTo(e.target.value)} />
@@ -99,7 +98,8 @@ export default function ReportsPage() {
             CSV
           </Button>
         </div>
-      </div>
+      }
+      />
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {[
@@ -110,7 +110,7 @@ export default function ReportsPage() {
         ].map((m) => (
           <Card key={m.label} className="p-5">
             <p className="text-xs font-medium uppercase tracking-wide text-slate-500">{m.label}</p>
-            <p className="mt-2 text-xl font-bold text-slate-900">{m.value}</p>
+            <p className="mt-2 text-2xl font-bold tracking-tight text-slate-900">{m.value}</p>
             <p className="mt-1 text-xs text-slate-400">
               {k.sold_room_nights} / {k.available_room_nights} nuitées
             </p>

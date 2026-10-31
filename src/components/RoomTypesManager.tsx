@@ -59,7 +59,7 @@ export function RoomTypesManager({
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <p className="text-xs text-slate-500">
           {data?.length ?? 0} {t("room_types").toLowerCase()}
         </p>
@@ -317,7 +317,7 @@ function TypeModal({
       <form onSubmit={submit} className="space-y-4">
         <Input label={t("name")} required value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} />
         <Input label={t("description")} value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} />
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <Input
             label={t("base_capacity")}
             type="number"

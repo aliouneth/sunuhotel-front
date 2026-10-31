@@ -9,7 +9,7 @@ import { useLocale } from "@/i18n/LocaleProvider";
 import { ViewBookingModal } from "@/components/ViewBookingModal";
 import { can } from "@/lib/permissions";
 import { formatDate, formatMoney, nightsBetween, toDateInput, todayISO } from "@/lib/format";
-import { Badge, Button, Card, CardHeader, EmptyState, ErrorBox, Fieldset, Input, Modal, Select, Spinner, Table } from "@/components/ui";
+import { Badge, Button, Card, CardHeader, EmptyState, ErrorBox, Fieldset, Input, Modal, PageHeader, Select, Spinner, Table } from "@/components/ui";
 
 import type { AvailabilityResult, Booking, Paginated } from "@/types/dto";
 
@@ -96,17 +96,17 @@ export default function BookingsPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-xl font-bold text-slate-900">{t("bookings")}</h1>
-          <p className="text-sm text-slate-500">{data?.total ?? 0}</p>
-        </div>
-        {can(user, "bookings.manage") && (
-          <Link href="/dashboard/bookings/new">
-            <Button>{t("new_booking")}</Button>
-          </Link>
-        )}
-      </div>
+      <PageHeader
+        title={t("bookings")}
+        subtitle={String(data?.total ?? 0)}
+        action={
+          can(user, "bookings.manage") ? (
+            <Link href="/dashboard/bookings/new">
+              <Button>{t("new_booking")}</Button>
+            </Link>
+          ) : undefined
+        }
+      />
 
       <Card>
         <CardHeader title={t("bookings")} />
@@ -114,9 +114,9 @@ export default function BookingsPage() {
             <Input
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-56"
+              className="w-full sm:w-56"
             />
-          <Select value={status} onChange={(e) => setStatus(e.target.value)} className="w-44">
+            <Select value={status} onChange={(e) => setStatus(e.target.value)} className="w-full sm:w-44">
             <option value="">{t("all")}</option>
             {statusKeys.map((s) => (
               <option key={s} value={s}>
@@ -124,8 +124,8 @@ export default function BookingsPage() {
               </option>
             ))}
           </Select>
-          <Input label={t("date_from")} type="date" value={from} onChange={(e) => setFrom(e.target.value)} className="w-40" />
-          <Input label={t("date_to")} type="date" value={to} onChange={(e) => setTo(e.target.value)} className="w-40" />
+            <Input label={t("date_from")} type="date" value={from} onChange={(e) => setFrom(e.target.value)} className="w-full sm:w-40" />
+            <Input label={t("date_to")} type="date" value={to} onChange={(e) => setTo(e.target.value)} className="w-full sm:w-40" />
           {hasFilters && (
             <Button type="button" size="sm" variant="ghost" onClick={resetFilters}>
               {t("clear_filters")}
@@ -491,11 +491,8 @@ function PayModal({
   const due = formatMoney(booking.balance_due_cents, currency, locale);
 
   return (
-    <div className="fixed inset-0 z-50 flex items-start justify-center bg-slate-900/50 p-4 pt-16" onClick={onClose}>
-      <div className="w-full max-w-md rounded-xl bg-white p-6 shadow-2xl" onClick={(e) => e.stopPropagation()}>
-        <h3 className="text-sm font-semibold text-slate-900">
-          Paiement — {booking.booking_number}
-        </h3>
+    <Modal open={true} onClose={onClose} title={`Paiement - ${booking.booking_number}`} size="md">
+      <div onClick={(e) => e.stopPropagation()}>
         {recorded ? (
           <div className="mt-4 space-y-3">
             <div className="rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm">
@@ -558,6 +555,6 @@ function PayModal({
           </>
         )}
       </div>
-    </div>
+    </Modal>
   );
 }

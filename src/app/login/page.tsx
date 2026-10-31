@@ -5,6 +5,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthProvider";
+import { api, setGuestToken } from "@/lib/api";
 import { Button, Card, Input } from "@/components/ui";
 import { useLocale } from "@/i18n/LocaleProvider";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
@@ -31,6 +32,21 @@ export default function LoginPage() {
       } else {
         router.push("/dashboard");
       }
+      return;
+    } catch {
+      // Fall through to guest login for public (guest) accounts.
+    }
+    try {
+      const res = await api<{ data: { token: string; guest?: { first_name?: string; last_name?: string } } }>("/guest/login", {
+        method: "POST",
+        body: JSON.stringify({ email, password }),
+      });
+      setGuestToken(res.data.token);
+      if (res.data.guest) {
+        const name = [res.data.guest.first_name, res.data.guest.last_name].filter(Boolean).join(" ").trim();
+        if (name) window.localStorage.setItem("sunuhotel_guest_name", name);
+      }
+      router.push("/my-reservations");
     } catch (err) {
       setError((err as { message?: string }).message ?? t("error_generic"));
     } finally {
@@ -40,7 +56,7 @@ export default function LoginPage() {
 
   return (
     <main className="flex min-h-screen flex-col bg-slate-50">
-      <header className="flex items-center justify-between px-6 py-4">
+      <header className="flex items-center justify-between px-4 py-4 sm:px-6">
         <Link href="/" className="flex items-center gap-2">
           <Image src="/logo.png" alt="Sunuhotel" width={195} height={140} className="h-[50px] w-auto rounded-md" />
         </Link>

@@ -202,7 +202,7 @@ export function BookingOrders({
 
           <div className="space-y-2">
             {items.map((item, index) => (
-              <div key={index} className="grid grid-cols-[1fr_4rem_6rem_auto] items-end gap-2">
+              <div key={index} className="grid grid-cols-1 gap-2 sm:grid-cols-[1fr_4rem_6rem_auto] sm:items-end">
                 <input
                   aria-label={t("order_item_description")}
                   placeholder={t("order_item_description")}

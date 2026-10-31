@@ -6,7 +6,7 @@ import Link from "next/link";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { api, ApiError } from "@/lib/api";
 import { useLocale } from "@/i18n/LocaleProvider";
-import { Badge, Button, Card, CardHeader, EmptyState, ErrorBox, Input, Modal, Spinner, Table } from "@/components/ui";
+import { Badge, Button, Card, CardHeader, EmptyState, ErrorBox, Input, Modal, PageHeader, Spinner, Table } from "@/components/ui";
 import { HotelFields, hotelToForm, statusLabelKey, type HotelFormState } from "@/components/platform/HotelFields";
 import type { HotelStatus, Paginated, PlatformHotel, PlatformSummary } from "@/types/dto";
 
@@ -84,18 +84,18 @@ export default function PlatformHotelsPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-start justify-between gap-3">
-        <div>
-          <h1 className="text-xl font-bold text-slate-900">{t("platform_hotels")}</h1>
-          <p className="text-sm text-slate-500">{t("platform_sub")}</p>
-        </div>
-        <div className="flex items-center gap-2">
-          <Link href="/platform/hotels/import">
-            <Button variant="secondary">{t("import_hotels_title")}</Button>
-          </Link>
-          <Button onClick={() => setCreating(true)}>+ {t("add_hotel")}</Button>
-        </div>
-      </div>
+      <PageHeader
+        title={t("platform_hotels")}
+        subtitle={t("platform_sub")}
+        action={
+          <div className="flex items-center gap-2">
+            <Link href="/platform/hotels/import">
+              <Button variant="secondary">{t("import_hotels_title")}</Button>
+            </Link>
+            <Button onClick={() => setCreating(true)}>+ {t("add_hotel")}</Button>
+          </div>
+        }
+      />
 
       <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
         {[
@@ -120,7 +120,7 @@ export default function PlatformHotelsPage() {
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 placeholder={t("search_placeholder")}
-                className="w-56"
+                className="w-full sm:w-56"
               />
               <Button type="submit" size="sm">
                 {t("search")}

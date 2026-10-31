@@ -14,6 +14,7 @@ const fr: Dict = {
   owners_title: "Propriétaires d'hôtels",
   owners_sub: "Créez votre hôtel sur la plateforme Sunuhotel et gérez réservations, employés, dépenses et tarifs depuis un seul tableau de bord.",
   owners_cta: "Créer mon hôtel",
+  owners_pricing_cta: "Voir les tarifs",
   // Pricing
   pricing_title: "Des tarifs simples et clairs",
   pricing_sub: "Choisissez le plan adapté à la taille de votre établissement.",
@@ -44,7 +45,7 @@ const fr: Dict = {
   plan_enterprise_f3: "Accès API",
   plan_enterprise_f4: "SSO & SAML",
   plan_enterprise_f5: "Gestionnaire de compte dédié",
-  plan_enterprise_cta: "Contacter l'équipe",
+  plan_enterprise_cta: "Commencer",
   paid_to_label: "Payé à (fournisseur / prestataire)",
   paid_to_placeholder: "Ex. : EDF, fournisseur de linge, peintreâ€¦",
   payment_method_label: "Mode de paiement",
@@ -560,6 +561,7 @@ const en: Dict = {
   owners_title: "Hotel owners",
   owners_sub: "Create your hotel on Sunuhotel and manage bookings, staff, expenses and rates from a single dashboard.",
   owners_cta: "Create my hotel",
+  owners_pricing_cta: "See our plans",
   // Pricing
   pricing_title: "Simple, clear pricing",
   pricing_sub: "Choose the plan that fits the size of your property.",
@@ -590,7 +592,7 @@ const en: Dict = {
   plan_enterprise_f3: "API access",
   plan_enterprise_f4: "SSO & SAML",
   plan_enterprise_f5: "Dedicated account manager",
-  plan_enterprise_cta: "Contact the team",
+  plan_enterprise_cta: "Get started",
   paid_to_label: "Paid to (vendor / contractor)",
   payment_method_label: "Payment method",
   feature_reservations: "Reservations",

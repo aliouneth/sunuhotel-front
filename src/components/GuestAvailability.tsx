@@ -1,11 +1,11 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { api, queryString } from "@/lib/api";
+import { api, getGuestToken, queryString } from "@/lib/api";
 import { useLocale } from "@/i18n/LocaleProvider";
 import { addDaysISO, formatDate, formatMoney, nightsBetween, todayISO } from "@/lib/format";
-import { Button, ErrorBox, Input, Select, Spinner } from "@/components/ui";
+import { Button, ErrorBox, Input, Modal, Select, Spinner } from "@/components/ui";
 import type { AvailabilityResult, PublicHotel } from "@/types/dto";
 
 type BookableType = {
@@ -30,6 +30,23 @@ export function GuestAvailability({ hotel, slug }: { hotel: PublicHotel; slug: s
   const [phone, setPhone] = useState("");
   const [busy, setBusy] = useState(false);
   const [bookError, setBookError] = useState("");
+
+  useEffect(() => {
+    const token = getGuestToken();
+    if (!token) return;
+    api<{ data: { first_name?: string; last_name?: string; email?: string | null; phone?: string | null } }>(
+      "/guest/me",
+      { guest: true },
+    )
+      .then((body) => {
+        const g = body.data;
+        if (g?.first_name) setFirstName(g.first_name);
+        if (g?.last_name) setLastName(g.last_name);
+        if (g?.email) setEmail(g.email);
+        if (g?.phone) setPhone(g.phone);
+      })
+      .catch(() => {});
+  }, []);
 
   const { data, error, isFetching, refetch } = useQuery<AvailabilityResult>({
     queryKey: ["public-availability", slug, checkIn, checkOut, roomTypeId],
@@ -194,13 +211,15 @@ export function GuestAvailability({ hotel, slug }: { hotel: PublicHotel; slug: s
         </div>
       )}
 
-      {booking && (
-        <div className="fixed inset-0 z-50 flex items-start justify-center bg-slate-900/50 p-4 pt-16" onClick={() => setBooking(null)}>
-          <div className="w-full max-w-md rounded-xl bg-white p-6 shadow-2xl" onClick={(e) => e.stopPropagation()}>
-            <h3 className="text-sm font-semibold text-slate-900">
-              {t("reserve")} — {booking.name}
-            </h3>
-            <p className="mt-1 text-xs text-slate-500">
+      <Modal
+        open={!!booking}
+        onClose={() => setBooking(null)}
+        title={booking ? `${t("reserve")} — ${booking.name}` : ""}
+        size="md"
+      >
+        {booking && (
+          <>
+            <p className="text-xs text-slate-500">
               {formatDate(checkIn, locale)} → {formatDate(checkOut, locale)} · {nights} {t("nights")} ·{" "}
               <span className="font-semibold text-slate-900">{formatMoney(booking.nightly * nights, hotel.currency, locale)}</span>
             </p>
@@ -220,9 +239,9 @@ export function GuestAvailability({ hotel, slug }: { hotel: PublicHotel; slug: s
                 </Button>
               </div>
             </form>
-          </div>
-        </div>
-      )}
+          </>
+        )}
+      </Modal>
     </div>
   );
 }

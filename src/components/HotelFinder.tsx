@@ -41,7 +41,6 @@ export function HotelFinder() {
           <input
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder={t("hotel_slug_placeholder")}
             className="w-full px-4 py-3 text-sm outline-none"
           />
           <button

@@ -25,9 +25,9 @@ export const StarsDisplay: FC<StarsDisplayProps> = ({ stars, size = "md", showLa
         <span key={`f${i}`} className={config.class}>{config.filled}</span>
       ))}
       {[...Array(empty)].map((_, i) => (
-        <span key={`e${i}`} className="text-gray-300">{config.empty}</span>
+        <span key={`e${i}`} className="text-slate-300">{config.empty}</span>
       ))}
-      {showLabel && filled > 0 && <span className="ml-1 text-sm text-gray-600 dark:text-gray-400">({filled}/5)</span>}
+      {showLabel && filled > 0 && <span className="ml-1 text-sm text-slate-600 dark:text-slate-400">({filled}/5)</span>}
     </span>
   );
 };

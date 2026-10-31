@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useLocale } from "@/i18n/LocaleProvider";
 import { api } from "@/lib/api";
 import { Users } from "lucide-react";
+import { Button, Modal } from "@/components/ui";
 
 type PlatformGuest = {
   id: number;
@@ -179,7 +180,7 @@ export function GuestsPanel() {
       </div>
 
       {meta.last_page > 1 && (
-        <div className="flex items-center justify-between text-sm">
+        <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between text-sm">
           <span>{t("showing_total").replace("{n}", String(meta.total))}</span>
           <div className="flex gap-2">
             <button disabled={page <= 1} onClick={() => load(page - 1)} className="rounded border border-slate-300 px-2 py-1 disabled:opacity-40">
@@ -189,33 +190,27 @@ export function GuestsPanel() {
               {t("next_page")}
             </button>
           </div>
-        </div>
-      )}
-
-      {editing && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
-          <div className="w-full max-w-md rounded-lg bg-white p-5 shadow-xl">
-            <h2 className="mb-3 text-base font-semibold">{t("edit_guest")}</h2>
-            <div className="space-y-3">
-              <div className="grid grid-cols-2 gap-2">
-                <input value={form.first_name} onChange={(e) => setForm({ ...form, first_name: e.target.value })} placeholder={t("first_name")} className="h-9 rounded border border-slate-300 px-2 text-sm" />
-                <input value={form.last_name} onChange={(e) => setForm({ ...form, last_name: e.target.value })} placeholder={t("last_name")} className="h-9 rounded border border-slate-300 px-2 text-sm" />
-              </div>
-              <input value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} placeholder={t("email_label")} className="h-9 rounded border border-slate-300 px-2 text-sm" />
-              <input value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} placeholder={t("phone_field")} className="h-9 rounded border border-slate-300 px-2 text-sm" />
-              <div className="grid grid-cols-2 gap-2">
-                <input value={form.city} onChange={(e) => setForm({ ...form, city: e.target.value })} placeholder={t("city_label")} className="h-9 rounded border border-slate-300 px-2 text-sm" />
-                <input value={form.country} onChange={(e) => setForm({ ...form, country: e.target.value })} placeholder={t("country_code")} className="h-9 rounded border border-slate-300 px-2 text-sm" />
-              </div>
-              <input value={form.nationality} onChange={(e) => setForm({ ...form, nationality: e.target.value })} placeholder={t("nationality")} className="h-9 rounded border border-slate-300 px-2 text-sm" />
-            </div>
-            <div className="mt-4 flex justify-end gap-2">
-              <button onClick={() => setEditing(null)} className="rounded border border-slate-300 px-3 py-1.5 text-sm">{t("cancel")}</button>
-              <button onClick={saveEdit} className="rounded bg-slate-900 px-3 py-1.5 text-sm text-white">{t("save")}</button>
-            </div>
           </div>
-        </div>
       )}
+      <Modal open={!!editing} onClose={() => setEditing(null)} title={t("edit_guest")}>
+        <div className="space-y-3">
+          <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+            <input value={form.first_name} onChange={(e) => setForm({ ...form, first_name: e.target.value })} placeholder={t("first_name")} className="h-9 rounded border border-slate-300 px-2 text-sm" />
+            <input value={form.last_name} onChange={(e) => setForm({ ...form, last_name: e.target.value })} placeholder={t("last_name")} className="h-9 rounded border border-slate-300 px-2 text-sm" />
+          </div>
+          <input value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} placeholder={t("email_label")} className="h-9 rounded border border-slate-300 px-2 text-sm" />
+          <input value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} placeholder={t("phone_field")} className="h-9 rounded border border-slate-300 px-2 text-sm" />
+          <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+            <input value={form.city} onChange={(e) => setForm({ ...form, city: e.target.value })} placeholder={t("city_label")} className="h-9 rounded border border-slate-300 px-2 text-sm" />
+            <input value={form.country} onChange={(e) => setForm({ ...form, country: e.target.value })} placeholder={t("country_code")} className="h-9 rounded border border-slate-300 px-2 text-sm" />
+          </div>
+          <input value={form.nationality} onChange={(e) => setForm({ ...form, nationality: e.target.value })} placeholder={t("nationality")} className="h-9 rounded border border-slate-300 px-2 text-sm" />
+        </div>
+        <div className="mt-4 flex justify-end gap-2">
+          <Button variant="secondary" onClick={() => setEditing(null)}>{t("cancel")}</Button>
+          <Button onClick={saveEdit}>{t("save")}</Button>
+        </div>
+      </Modal>
     </div>
   );
 }

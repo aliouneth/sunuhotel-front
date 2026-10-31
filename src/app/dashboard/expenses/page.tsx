@@ -6,7 +6,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { api, queryString } from "@/lib/api";
 import { useAuth } from "@/context/AuthProvider";
 import { useLocale } from "@/i18n/LocaleProvider";
-import { Badge, Button, Card, CardHeader, EmptyState, ErrorBox, Input, Modal, Select, Spinner, Table } from "@/components/ui";
+import { Badge, Button, Card, CardHeader, EmptyState, ErrorBox, Input, Modal, PageHeader, Select, Spinner, Table } from "@/components/ui";
 import { formatDate, formatMoney, todayISO } from "@/lib/format";
 import type { Employee, Expense, ExpenseSummary, ExpenseType, Paginated } from "@/types/dto";
 
@@ -82,23 +82,23 @@ export default function ExpensesPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <div>
-          <h1 className="text-xl font-bold text-slate-900">{t("expenses")}</h1>
-          <p className="text-sm text-slate-500">{expenses.length}</p>
-        </div>
-        <div className="flex gap-2">
-          <Link
-            href="/dashboard/expense-types"
-            className="inline-flex items-center justify-center gap-2 rounded-lg border border-slate-200 bg-slate-100 px-4 py-2 text-sm font-medium text-slate-800 transition-colors hover:bg-slate-200"
-          >
-            {t("manage_types")}
-          </Link>
-          <Button onClick={() => setCreateOpen(true)}>{t("add_expense")}</Button>
-        </div>
-      </div>
+      <PageHeader
+        title={t("expenses")}
+        subtitle={String(expenses.length)}
+        action={
+          <div className="flex gap-2">
+            <Link
+              href="/dashboard/expense-types"
+              className="inline-flex items-center justify-center gap-2 rounded-lg border border-slate-200 bg-slate-100 px-4 py-2 text-sm font-medium text-slate-800 transition-colors hover:bg-slate-200"
+            >
+              {t("manage_types")}
+            </Link>
+            <Button onClick={() => setCreateOpen(true)}>{t("add_expense")}</Button>
+          </div>
+        }
+      />
 
-      <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:grid-cols-4">
         <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
           <p className="inline-block rounded-full bg-amber-100 px-2.5 py-1 text-lg font-bold text-amber-800">
             {formatMoney(s?.this_month_cents ?? 0, currency, locale)}
@@ -128,7 +128,7 @@ export default function ExpensesPage() {
           title={t("expenses")}
           action={
             <div className="flex flex-wrap gap-2">
-              <Select value={typeFilter} onChange={(e) => setTypeFilter(e.target.value)} className="w-44">
+              <Select value={typeFilter} onChange={(e) => setTypeFilter(e.target.value)} className="w-full sm:w-44">
                 <option value="">{t("all")}</option>
                 {(types ?? []).map((ty) => (
                   <option key={ty.id} value={ty.id}>
@@ -136,7 +136,7 @@ export default function ExpensesPage() {
                   </option>
                 ))}
               </Select>
-              <Select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)} className="w-36">
+              <Select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)} className="w-full sm:w-36">
                 <option value="">{t("all")}</option>
                 {Object.keys(statusTones).map((sKey) => (
                   <option key={sKey} value={sKey}>
@@ -144,13 +144,13 @@ export default function ExpensesPage() {
                   </option>
                 ))}
               </Select>
-              <Select value={paymentMethodFilter} onChange={(e) => setPaymentMethodFilter(e.target.value)} className="w-40">
+              <Select value={paymentMethodFilter} onChange={(e) => setPaymentMethodFilter(e.target.value)} className="w-full sm:w-40">
                 <option value="">{t("all")}</option>
                 {(["cash", "card", "bank_transfer", "mobile_money", "check"] as const).map((pm) => (
                   <option key={pm} value={pm}>{t(`payment_${pm}`)}</option>
                 ))}
               </Select>
-              <Input type="month" value={month} onChange={(e) => setMonth(e.target.value)} className="w-40" />
+              <Input type="month" value={month} onChange={(e) => setMonth(e.target.value)} className="w-full sm:w-40" />
             </div>
           }
         />
@@ -299,7 +299,7 @@ function ExpenseModal({
           onChange={(e) => setForm({ ...form, description: e.target.value })}
           placeholder={t("expense_description_placeholder")}
         />
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <Select label={t("expense_type_label")} value={form.expense_type_id} onChange={(e) => setForm({ ...form, expense_type_id: e.target.value })}>
             <option value="">—</option>
             {types.map((ty) => (
@@ -317,7 +317,7 @@ function ExpenseModal({
             ))}
           </Select>
         </div>
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <Input
             label={t("paid_to_label")}
             value={form.paid_to}
@@ -335,7 +335,7 @@ function ExpenseModal({
             ))}
           </Select>
         </div>
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <Input
             label={t("amount")}
             type="number"
@@ -351,7 +351,7 @@ function ExpenseModal({
             <option value="cancelled">{t("status_cancelled")}</option>
           </Select>
         </div>
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <Input label={t("incurred_on")} type="date" required value={form.incurred_on} onChange={(e) => setForm({ ...form, incurred_on: e.target.value })} />
           <Input label={t("paid_on_label")} type="date" value={form.paid_on} onChange={(e) => setForm({ ...form, paid_on: e.target.value })} />
         </div>

@@ -91,10 +91,10 @@ export default function PlatformBillingPage() {
                   type="month"
                   value={monthFilter}
                   onChange={(e) => setMonthFilter(e.target.value)}
-                  className="w-44"
+                  className="w-full sm:w-44"
                   placeholder={t("invoice_month")}
                 />
-                <Select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)} className="w-36">
+                <Select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)} className="w-full sm:w-36">
                   <option value="">{t("all_statuses")}</option>
                   <option value="pending">{t("status_pending")}</option>
                   <option value="paid">{t("status_paid")}</option>
@@ -109,17 +109,17 @@ export default function PlatformBillingPage() {
           >
             {rows.map((inv) => (
               <tr key={inv.id}>
-                <td className="px-4 py-3 text-sm font-medium text-gray-900">{inv.hotel?.name ?? `#${inv.hotel_id}`}</td>
-                <td className="px-4 py-3 text-sm text-gray-600">{inv.plan?.name ?? "—"}</td>
-                <td className="px-4 py-3 text-sm text-gray-600">{inv.billing_month}</td>
-                <td className="px-4 py-3 text-sm text-gray-900">
+                <td className="px-4 py-3 text-sm font-medium text-slate-900">{inv.hotel?.name ?? `#${inv.hotel_id}`}</td>
+                <td className="px-4 py-3 text-sm text-slate-600">{inv.plan?.name ?? "—"}</td>
+                <td className="px-4 py-3 text-sm text-slate-600">{inv.billing_month}</td>
+                <td className="px-4 py-3 text-sm text-slate-900">
                   {(inv.amount_cents / 100).toLocaleString(locale, { style: "currency", currency: inv.currency, maximumFractionDigits: 0 })}
                 </td>
-                <td className="px-4 py-3 text-sm text-gray-600">
+                <td className="px-4 py-3 text-sm text-slate-600">
                   {(inv.paid_cents / 100).toLocaleString(locale, { style: "currency", currency: inv.currency, maximumFractionDigits: 0 })}
                 </td>
                 <td className="px-4 py-3"><Badge tone={badgeTone(inv.status)}>{statusLabel(inv.status)}</Badge></td>
-                <td className="px-4 py-3 text-sm text-gray-500">{inv.payment_method ?? "—"}</td>
+                <td className="px-4 py-3 text-sm text-slate-500">{inv.payment_method ?? "—"}</td>
                 <td className="px-4 py-3">
                   <Button variant="ghost" size="sm" onClick={() => setCreditFor(inv)}>{t("credit_wallet")}</Button>
                 </td>

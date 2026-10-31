@@ -7,7 +7,7 @@ import { useLocale } from "@/i18n/LocaleProvider";
 import { useAuth } from "@/context/AuthProvider";
 import { can } from "@/lib/permissions";
 import { formatDate, formatMoney, formatPercent } from "@/lib/format";
-import { Button, Card, CardHeader, ErrorBox, Spinner } from "@/components/ui";
+import { Button, Card, CardHeader, ErrorBox, PageHeader, Spinner } from "@/components/ui";
 import type { DashboardSummary, Paginated, Booking } from "@/types/dto";
 import { printDailyList } from "@/lib/printDaily";
 import { printAllBookingInvoices } from "@/lib/printAllInvoices";
@@ -90,28 +90,28 @@ export default function DashboardPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-xl font-bold text-slate-900">{t("todays_overview")}</h1>
-          <p className="text-sm text-slate-500">{formatDate(new Date().toISOString().slice(0, 10), locale)}</p>
-        </div>
-        {can(user, "bookings.manage") && (
-          <div className="flex gap-2">
-            <Button variant="secondary" onClick={() => handlePrintDaily("arrivals")}>
-              {locale === "fr" ? "Imprimer arrivees" : "Print arrivals"}
-            </Button>
-            <Button variant="secondary" onClick={() => handlePrintDaily("departures")}>
-              {locale === "fr" ? "Imprimer departs" : "Print checkouts"}
-            </Button>
-            <Button variant="secondary" onClick={handlePrintAllInvoices}>
-              {locale === "fr" ? "Imprimer toutes les factures" : "Print all invoices"}
-            </Button>
-            <Link href="/dashboard/bookings/new">
-              <Button>{t("new_booking")}</Button>
-            </Link>
-          </div>
-        )}
-      </div>
+      <PageHeader
+        title={t("todays_overview")}
+        subtitle={formatDate(new Date().toISOString().slice(0, 10), locale)}
+        action={
+          can(user, "bookings.manage") ? (
+            <div className="flex flex-wrap gap-2">
+              <Button variant="secondary" onClick={() => handlePrintDaily("arrivals")}>
+                {locale === "fr" ? "Imprimer arrivees" : "Print arrivals"}
+              </Button>
+              <Button variant="secondary" onClick={() => handlePrintDaily("departures")}>
+                {locale === "fr" ? "Imprimer departs" : "Print checkouts"}
+              </Button>
+              <Button variant="secondary" onClick={handlePrintAllInvoices}>
+                {locale === "fr" ? "Imprimer toutes les factures" : "Print all invoices"}
+              </Button>
+              <Link href="/dashboard/bookings/new">
+                <Button>{t("new_booking")}</Button>
+              </Link>
+            </div>
+          ) : undefined
+        }
+      />
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {cards.map((c) => (

@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useLocale } from "@/i18n/LocaleProvider";
 import { api } from "@/lib/api";
 import { ShieldCheck } from "lucide-react";
+import { Button, Modal } from "@/components/ui";
 
 type PlatformUser = {
   id: number;
@@ -239,16 +240,12 @@ export function PlatformUsersPanel() {
         </div>
       )}
 
-      {open && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4" onClick={close}>
-          <div
-            className="w-full max-w-md rounded-lg bg-white p-5 shadow-xl"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <h2 className="mb-1 text-base font-semibold">
-              {mode === "create" ? t("new_user") : t("edit_user")}
-            </h2>
-            {mode === "edit" && <p className="mb-3 text-xs text-slate-500">{editing?.email}</p>}
+      <Modal
+        open={open}
+        onClose={close}
+        title={mode === "create" ? t("new_user") : t("edit_user")}
+      >
+        {mode === "edit" && <p className="mb-3 text-xs text-slate-500">{editing?.email}</p>}
 
             {error && (
               <div className="mb-3 rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">{error}</div>
@@ -309,20 +306,12 @@ export function PlatformUsersPanel() {
             </div>
 
             <div className="mt-4 flex justify-end gap-2">
-              <button onClick={close} disabled={busy} className="rounded border border-slate-300 px-3 py-1.5 text-sm disabled:opacity-40">
-                {t("cancel")}
-              </button>
-              <button
-                onClick={submit}
-                disabled={busy || (mode === "create" && (!form.name || !form.email || !form.password))}
-                className="rounded bg-slate-900 px-3 py-1.5 text-sm text-white disabled:opacity-40"
-              >
+              <Button variant="secondary" onClick={close} disabled={busy}>{t("cancel")}</Button>
+              <Button onClick={submit} disabled={busy || (mode === "create" && (!form.name || !form.email || !form.password))}>
                 {mode === "create" ? t("create_user") : t("save")}
-              </button>
+              </Button>
             </div>
-          </div>
-        </div>
-      )}
+      </Modal>
     </div>
   );
 }

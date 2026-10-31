@@ -5,7 +5,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { api, queryString } from "@/lib/api";
 import { useAuth } from "@/context/AuthProvider";
 import { useLocale } from "@/i18n/LocaleProvider";
-import { Badge, Button, Card, CardHeader, EmptyState, ErrorBox, Input, Modal, Select, Spinner, Table } from "@/components/ui";
+import { Badge, Button, Card, CardHeader, EmptyState, ErrorBox, Input, Modal, PageHeader, Select, Spinner, Table } from "@/components/ui";
 import { formatDate, formatMoney, todayISO } from "@/lib/format";
 import type { Employee, Paginated } from "@/types/dto";
 
@@ -34,13 +34,11 @@ export default function EmployeesPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <div>
-          <h1 className="text-xl font-bold text-slate-900">{t("employees")}</h1>
-          <p className="text-sm text-slate-500">{active.length} {t("active_employees").toLowerCase()}</p>
-        </div>
-        <Button onClick={() => setCreateOpen(true)}>{t("add_employee")}</Button>
-      </div>
+      <PageHeader
+        title={t("employees")}
+        subtitle={`${active.length} ${t("active_employees").toLowerCase()}`}
+        action={<Button onClick={() => setCreateOpen(true)}>{t("add_employee")}</Button>}
+      />
 
       <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
         <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
@@ -176,7 +174,7 @@ function EmployeeModal({
     <Modal open={open} onClose={onClose} title={(employee ? t("edit") : t("add_employee")) + " — " + t("employee")}>
       <form onSubmit={submit} className="space-y-4">
         <Input label={t("name")} required value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} />
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <Input label={t("position")} value={form.position} onChange={(e) => setForm({ ...form, position: e.target.value })} />
           <Input
             label={t("salary")}

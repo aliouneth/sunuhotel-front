@@ -3,6 +3,7 @@ import Image from "next/image";
 import { notFound } from "next/navigation";
 import { GuestAvailability } from "@/components/GuestAvailability";
 import { GuestReviews } from "@/components/GuestReviews";
+import { SiteFooter } from "@/components/SiteFooter";
 import { StarsDisplay } from "@/components/StarsDisplay";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import { API_URL } from "@/lib/api";
@@ -31,15 +32,15 @@ export default async function GuestPage({ params }: { params: { slug: string } }
 
   return (
     <main className="min-h-screen bg-slate-50 pb-20">
-      <header className="mx-auto flex max-w-4xl items-center justify-between px-6 py-5">
+      <header className="mx-auto flex max-w-4xl flex-col items-start justify-between gap-3 px-4 py-5 sm:flex-row sm:items-center sm:px-6">
         <Link href="/" className="flex items-center gap-2">
-          <Image src="/logo.png" alt="Sunuhotel" width={195} height={140} className="h-[50px] w-auto rounded-md" />
-          <span className="font-semibold text-slate-900">{hotel.name}</span>
+    <Image src="/logo.png" alt="Sunuhotel" width={195} height={140} className="h-[60px] w-auto rounded-lg drop-shadow-md" />
+    <span className="text-lg font-semibold text-slate-900">{hotel.name}</span>
         </Link>
         <LanguageSwitcher />
       </header>
 
-      <section className="mx-auto max-w-4xl px-6 pt-6">
+      <section className="mx-auto max-w-4xl px-4 pt-6 sm:px-6">
         {hotel.logo_url && (
           <figure className="mb-6 rounded-2xl overflow-hidden border border-slate-200 shadow-sm">
             {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -59,25 +60,25 @@ export default async function GuestPage({ params }: { params: { slug: string } }
             </div>
           </div>
         )}
-        <div className="rounded-2xl bg-slate-900 p-8 text-white">
-          <p className="text-xs uppercase tracking-widest text-amber-400">
-            {hotel.city} {hotel.country ? `· ${hotel.country}` : ""}
-          </p>
-          <h1 className="mt-2 text-3xl font-bold">{hotel.name}</h1>
-          {hotel.stars !== null && hotel.stars !== undefined && (
-            <div className="mt-2">
-              <StarsDisplay stars={hotel.stars} size="lg" showLabel />
+        <div className="rounded-2xl bg-slate-900 p-6 text-white">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-widest text-amber-400">
+                {hotel.city} {hotel.country ? `· ${hotel.country}` : ""}
+              </p>
+              <h1 className="mt-1 text-3xl font-bold sm:text-4xl">{hotel.name}</h1>
+              {hotel.stars !== null && hotel.stars !== undefined && (
+                <div className="mt-2">
+                  <StarsDisplay stars={hotel.stars} size="md" showLabel />
+                </div>
+              )}
             </div>
-          )}
-          <div className="mt-4 flex flex-wrap gap-4 text-xs text-slate-300">
-            <span>
-              {hotel.check_in_time ?? "—"} — check-in
-            </span>
-            <span>
-              {hotel.check_out_time ?? "—"} — check-out
-            </span>
-            {hotel.phone && <span>{hotel.phone}</span>}
-            {hotel.email && <span>{hotel.email}</span>}
+            <div className="grid grid-cols-1 gap-x-6 gap-y-1 text-sm text-slate-300 sm:grid-cols-2 sm:text-right">
+              <span>{hotel.check_in_time ?? "—"} — check-in</span>
+              <span>{hotel.check_out_time ?? "—"} — check-out</span>
+              {hotel.phone && <span>{hotel.phone}</span>}
+              {hotel.email && <span>{hotel.email}</span>}
+            </div>
           </div>
         </div>
 
@@ -127,6 +128,7 @@ export default async function GuestPage({ params }: { params: { slug: string } }
       </section>
 
       <GuestReviews hotel={hotel} />
+      <SiteFooter />
     </main>
   );
 }

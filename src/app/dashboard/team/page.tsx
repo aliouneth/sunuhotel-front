@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { api } from "@/lib/api";
 import { useLocale } from "@/i18n/LocaleProvider";
-import { Badge, Button, Card, CardHeader, EmptyState, ErrorBox, Input, Modal, Select, Spinner, Table } from "@/components/ui";
+import { Badge, Button, Card, CardHeader, EmptyState, ErrorBox, Input, Modal, PageHeader, Select, Spinner, Table } from "@/components/ui";
 import type { TeamMember } from "@/types/dto";
 
 const roles = ["owner", "manager", "front-desk", "accountant"];
@@ -43,13 +43,11 @@ export default function TeamPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-xl font-bold text-slate-900">{t("team")}</h1>
-          <p className="text-sm text-slate-500">{data?.length ?? 0}</p>
-        </div>
-        <Button onClick={() => setInviteOpen(true)}>Inviter</Button>
-      </div>
+      <PageHeader
+        title={t("team")}
+        subtitle={String(data?.length ?? 0)}
+        action={<Button onClick={() => setInviteOpen(true)}>Inviter</Button>}
+      />
 
       <Card>
         <CardHeader title={t("team")} />
@@ -62,7 +60,7 @@ export default function TeamPage() {
                 <td className="px-5 py-3">
                   <div className="flex items-center gap-2">
                     <Select
-                      className="w-36"
+                      className="w-full sm:w-36"
                       value={member.roles?.[0] ?? ""}
                       disabled={busyId === member.id}
                       onChange={(e) => changeRole(member, e.target.value)}

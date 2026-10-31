@@ -128,15 +128,15 @@ export default function BillingPage() {
         <Card>
           <CardHeader title={t("current_plan")} />
           <div className="px-4 pb-4">
-            <p className="text-sm font-medium text-gray-900">{planName}</p>
-            <p className="text-xs text-gray-500">
+            <p className="text-sm font-medium text-slate-900">{planName}</p>
+            <p className="text-xs text-slate-500">
               {planRate ? t("plan_monthly_rate") + " · " + planRate : "—"}
             </p>
           </div>
         </Card>
         <Card>
           <CardHeader title={t("bills_due")} />
-          <p className="px-4 pb-4 text-2xl font-bold text-gray-900">
+          <p className="px-4 pb-4 text-2xl font-bold text-slate-900">
             {formatMoney(dueTotal, data.currency, locale)}
           </p>
         </Card>
@@ -154,16 +154,16 @@ export default function BillingPage() {
 
               return (
                 <tr key={inv.id}>
-                  <td className="px-4 py-3 text-sm font-medium text-gray-900">{inv.billing_month}</td>
-                  <td className="px-4 py-3 text-sm text-gray-600">{inv.plan?.name ?? "—"}</td>
-                  <td className="px-4 py-3 text-sm text-gray-900">
+                  <td className="px-4 py-3 text-sm font-medium text-slate-900">{inv.billing_month}</td>
+                  <td className="px-4 py-3 text-sm text-slate-600">{inv.plan?.name ?? "—"}</td>
+                  <td className="px-4 py-3 text-sm text-slate-900">
                     {formatMoney(inv.amount_cents, inv.currency || data.currency, locale)}
                   </td>
-                  <td className="px-4 py-3 text-sm text-gray-600">
+                  <td className="px-4 py-3 text-sm text-slate-600">
                     {formatMoney(inv.paid_cents, inv.currency || data.currency, locale)}
                   </td>
                   <td className="px-4 py-3"><Badge tone={badgeTone(inv.status)}>{statusLabel(inv.status)}</Badge></td>
-                  <td className="px-4 py-3 text-sm text-gray-500">{inv.paid_at ? inv.paid_at.slice(0, 10) : "—"}</td>
+                  <td className="px-4 py-3 text-sm text-slate-500">{inv.paid_at ? inv.paid_at.slice(0, 10) : "—"}</td>
                   <td className="px-4 py-3">
                     {payable ? (
                       <Button
@@ -178,7 +178,7 @@ export default function BillingPage() {
                         {t("pay_online")}
                       </Button>
                     ) : (
-                      <span className="text-sm text-gray-400">—</span>
+                      <span className="text-sm text-slate-400">—</span>
                     )}
                   </td>
                 </tr>

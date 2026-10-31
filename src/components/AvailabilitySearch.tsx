@@ -299,7 +299,7 @@ export function AvailabilitySearch() {
                           </div>
                         </div>
                         <div className="flex items-baseline gap-3 sm:flex-col sm:items-end sm:gap-0">
-                          <p className="text-xl font-bold text-slate-900">
+                          <p className="text-2xl font-bold tracking-tight text-slate-900">
                             {group.promoted && group.originalRate != null && (
                               <span className="mr-1.5 text-xs font-medium text-slate-400 line-through">
                                 {formatMoney(group.originalRate, hotel.currency, locale)}

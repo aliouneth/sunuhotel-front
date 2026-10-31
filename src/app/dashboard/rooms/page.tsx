@@ -6,7 +6,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { api, queryString } from "@/lib/api";
 import { useLocale } from "@/i18n/LocaleProvider";
 import { useAuth } from "@/context/AuthProvider";
-import { Badge, Button, Card, CardHeader, EmptyState, ErrorBox, Fieldset, Input, Modal, Select, Spinner, Table } from "@/components/ui";
+import { Badge, Button, Card, CardHeader, EmptyState, ErrorBox, Fieldset, Input, Modal, PageHeader, Select, Spinner, Table } from "@/components/ui";
 import { formatMoney } from "@/lib/format";
 import { ViewBookingModal } from "@/components/ViewBookingModal";
 import type { Booking, BookingRoomLine, Paginated, Room, RoomType } from "@/types/dto";
@@ -62,25 +62,25 @@ export default function RoomsPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <div>
-          <h1 className="text-xl font-bold text-slate-900">{t("rooms")}</h1>
-          <p className="text-sm text-slate-500">{data?.total ?? 0} chambres</p>
-        </div>
-        <div className="flex gap-2">
-          <Button variant="secondary" onClick={() => setShowGrid((v) => !v)}>
-            {showGrid ? "Liste" : "Grille"}
-          </Button>
-          <Button onClick={() => setCreateOpen(true)}>{t("create")}</Button>
-        </div>
-      </div>
+      <PageHeader
+        title={t("rooms")}
+        subtitle={`${data?.total ?? 0} chambres`}
+        action={
+          <div className="flex gap-2">
+            <Button variant="secondary" onClick={() => setShowGrid((v) => !v)}>
+              {showGrid ? "Liste" : "Grille"}
+            </Button>
+            <Button onClick={() => setCreateOpen(true)}>{t("create")}</Button>
+          </div>
+        }
+      />
 
       {!showGrid && (
       <Card>
         <CardHeader
           title={t("rooms")}
           action={
-            <Select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)} className="w-44">
+            <Select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)} className="w-full sm:w-44">
               <option value="">{t("all")}</option>
               {Object.keys(statusTones).map((s) => (
                 <option key={s} value={s}>
@@ -210,7 +210,7 @@ export default function RoomsPage() {
                           cells.push(
                             <td
                               key={d}
-                              className={`border p-1 ${isPast ? "bg-gray-700" : ""} ${isFuture ? "cursor-pointer hover:bg-blue-50" : ""}`}
+                              className={`border p-1 ${isPast ? "bg-slate-700" : ""} ${isFuture ? "cursor-pointer hover:bg-blue-50" : ""}`}
                               onClick={isFuture ? () => router.push(`/dashboard/bookings/new?check_in=${d}&room_id=${room.id}`) : undefined}
                             />,
                           );

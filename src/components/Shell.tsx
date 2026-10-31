@@ -3,6 +3,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
+import { useState } from "react";
 import {
   BedDouble,
   CalendarDays,
@@ -11,6 +12,7 @@ import {
   LayoutDashboard,
   Layers,
   LogOut,
+  Menu,
   Receipt,
   Settings,
   Sparkles,
@@ -18,6 +20,7 @@ import {
   UserRoundCog,
   Users,
   Wallet,
+  X,
 } from "lucide-react";
 import { useAuth } from "@/context/AuthProvider";
 import { useLocale } from "@/i18n/LocaleProvider";
@@ -48,6 +51,7 @@ export function Shell({ children }: { children: React.ReactNode }) {
   const { t, locale } = useLocale();
   const pathname = usePathname();
   const router = useRouter();
+  const [mobileOpen, setMobileOpen] = useState(false);
 
   if (loading) {
     return (
@@ -71,6 +75,7 @@ export function Shell({ children }: { children: React.ReactNode }) {
           <Link
             key={href}
             href={href}
+            onClick={() => setMobileOpen(false)}
             className={`flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition ${
               active ? "bg-amber-600 text-white" : "text-slate-300 hover:bg-slate-800 hover:text-white"
             }`}
@@ -81,52 +86,82 @@ export function Shell({ children }: { children: React.ReactNode }) {
         );
       });
 
+  const sidebarContent = (
+    <>
+      <div className="space-y-6">
+        <Link href="/dashboard" className="flex items-center gap-3 px-3 pt-1" onClick={() => setMobileOpen(false)}>
+          <Image src="/logo.png" alt="Sunuhotel" width={195} height={140} className="h-[44px] w-auto rounded-md" />
+          {user.hotel?.logo_url && (
+            <span
+              title={user.hotel.name ?? ""}
+              className="flex size-11 flex-none items-center justify-center rounded-md bg-white p-0.5 ring-1 ring-slate-700"
+            >
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src={user.hotel.logo_url} alt={user.hotel.name ?? ""} className="size-full object-contain" />
+            </span>
+          )}
+        </Link>
+        <nav className="space-y-1">{nav(items)}</nav>
+      </div>
+      <div className="space-y-3 border-t border-slate-800 pt-4">
+        <div className="px-3">
+          <p className="truncate text-xs font-medium text-slate-300">{user.name}</p>
+          <p className="truncate text-[11px] text-slate-500">{user.email}</p>
+          <p className="mt-1 text-[11px] text-slate-500">
+            {user.roles?.map((r) => r.name).join(", ") || "—"}
+          </p>
+        </div>
+        {nav(bottomItems)}
+        <button
+          onClick={() => {
+            logout();
+            router.push("/");
+          }}
+          className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-red-300 transition hover:bg-red-900/30 hover:text-red-200"
+        >
+          <LogOut className="size-4" />
+          {t("logout")}
+        </button>
+      </div>
+    </>
+  );
+
   return (
     <div className="flex min-h-screen bg-slate-50">
-      <aside className="hidden w-60 shrink-0 flex-col justify-between bg-slate-900 p-4 md:flex">
-        <div className="space-y-6">
-          <Link href="/dashboard" className="flex items-center gap-3 px-3 pt-1">
-            <Image src="/logo.png" alt="Sunuhotel" width={195} height={140} className="h-[44px] w-auto rounded-md" />
-            {user.hotel?.logo_url && (
-              <span
-                title={user.hotel.name ?? ""}
-                className="flex size-11 flex-none items-center justify-center rounded-md bg-white p-0.5 ring-1 ring-slate-700"
-              >
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={user.hotel.logo_url} alt={user.hotel.name ?? ""} className="size-full object-contain" />
-              </span>
-            )}
-          </Link>
-          <nav className="space-y-1">{nav(items)}</nav>
-        </div>
-        <div className="space-y-3 border-t border-slate-800 pt-4">
-          <div className="px-3">
-            <p className="truncate text-xs font-medium text-slate-300">{user.name}</p>
-            <p className="truncate text-[11px] text-slate-500">{user.email}</p>
-            <p className="mt-1 text-[11px] text-slate-500">
-              {user.roles?.map((r) => r.name).join(", ") || "—"}
-            </p>
-          </div>
-          {nav(bottomItems)}
-          <button
-            onClick={() => {
-              logout();
-              router.push("/");
-            }}
-            className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-red-300 transition hover:bg-red-900/30 hover:text-red-200"
+      <aside className="hidden w-60 shrink-0 flex-col justify-between bg-slate-900 p-4 md:flex">{sidebarContent}</aside>
+
+      {mobileOpen && (
+        <div className="fixed inset-0 z-40 md:hidden" onClick={() => setMobileOpen(false)}>
+          <div className="absolute inset-0 bg-slate-900/60" />
+          <aside
+            className="absolute left-0 top-0 flex h-full w-64 flex-col justify-between bg-slate-900 p-4"
+            onClick={(e) => e.stopPropagation()}
           >
-            <LogOut className="size-4" />
-            {t("logout")}
-          </button>
+            <button
+              onClick={() => setMobileOpen(false)}
+              className="mb-2 self-end rounded-lg p-1 text-slate-300 hover:bg-slate-800"
+              aria-label="Close menu"
+            >
+              <X className="size-5" />
+            </button>
+            {sidebarContent}
+          </aside>
         </div>
-      </aside>
+      )}
 
       <div className="flex min-w-0 flex-1 flex-col">
-        <header className="sticky top-0 z-20 flex items-center justify-between border-b border-slate-200 bg-white/90 px-6 py-3 backdrop-blur">
+        <header className="sticky top-0 z-20 flex items-center justify-between border-b border-slate-200 bg-white/90 px-4 py-3 backdrop-blur md:px-6">
           <div className="flex min-w-0 items-center gap-2">
-            <p className="truncate text-lg font-bold text-gray-900">{user.hotel?.name ?? ""}</p>
+            <button
+              onClick={() => setMobileOpen(true)}
+              className="rounded-lg p-1.5 text-slate-600 hover:bg-slate-100 md:hidden"
+              aria-label="Open menu"
+            >
+              <Menu className="size-5" />
+            </button>
+            <p className="truncate text-base font-bold text-slate-900 md:text-lg">{user.hotel?.name ?? ""}</p>
             {(user.hotel?.city || user.hotel?.country) && (
-              <p className="truncate text-sm text-slate-500">
+              <p className="hidden truncate text-sm text-slate-500 sm:block">
                 · {user.hotel?.city ?? ""} {user.hotel?.country ?? ""}
               </p>
             )}
@@ -136,7 +171,7 @@ export function Shell({ children }: { children: React.ReactNode }) {
             <span className="hidden text-xs text-slate-400 sm:block">{locale.toUpperCase()}</span>
           </div>
         </header>
-        <main className="mx-auto w-full max-w-6xl flex-1 px-6 py-6">{children}</main>
+        <main className="mx-auto w-full max-w-6xl flex-1 px-4 py-4 md:px-6 md:py-6">{children}</main>
       </div>
     </div>
   );

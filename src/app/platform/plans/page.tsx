@@ -83,7 +83,7 @@ api<{ data: SubscriptionPlan[] }>(
       ) : (
         <Card>
           <CardHeader title={t("platform_plans")} action={
-            <Select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)} className="w-36">
+            <Select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)} className="w-full sm:w-36">
               <option value="">{t("all_statuses")}</option>
               <option value="active">{t("status_active")}</option>
               <option value="inactive">{t("status_inactive")}</option>
@@ -94,20 +94,20 @@ api<{ data: SubscriptionPlan[] }>(
               const isEditing = editPlan?.id === plan.id;
               return (
                 <tr key={plan.id}>
-                  <td className="px-4 py-3 text-sm font-medium text-gray-900">
+                  <td className="px-4 py-3 text-sm font-medium text-slate-900">
                     {isEditing ? <Input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} /> : plan.name}
                   </td>
-                  <td className="px-4 py-3 text-sm text-gray-600">
+                  <td className="px-4 py-3 text-sm text-slate-600">
                     {isEditing ? <Input value={form.max_rooms} onChange={(e) => setForm({ ...form, max_rooms: e.target.value })} className="w-24" /> : plan.max_rooms}
                   </td>
-                  <td className="px-4 py-3 text-sm text-gray-600">
+                  <td className="px-4 py-3 text-sm text-slate-600">
                     {isEditing ? <Input value={form.monthly_rate_cents} onChange={(e) => setForm({ ...form, monthly_rate_cents: e.target.value })} className="w-32" /> : formatMoney(plan.monthly_rate_cents, plan.currency, locale)}
                   </td>
-                  <td className="px-4 py-3 text-sm text-gray-600">
+                  <td className="px-4 py-3 text-sm text-slate-600">
                     {isEditing ? <Select value={form.currency} onChange={(e) => setForm({ ...form, currency: e.target.value })} className="w-24"><option value="XOF">XOF</option><option value="EUR">EUR</option><option value="USD">USD</option></Select> : plan.currency}
                   </td>
                   <td className="px-4 py-3"><span className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${plan.is_active ? "bg-emerald-100 text-emerald-700" : "bg-slate-100 text-slate-600"}`}>{plan.is_active ? t("plan_status_active") : t("plan_status_inactive")}</span></td>
-                  <td className="px-4 py-3 text-sm text-gray-600">{plan.hotels_count ?? 0}</td>
+                  <td className="px-4 py-3 text-sm text-slate-600">{plan.hotels_count ?? 0}</td>
                   <td className="px-4 py-3"><div className="flex gap-2">
                     {isEditing ? <Button size="sm" disabled={saveMutation.isPending} onClick={() => saveMutation.mutate({ ...form, id: plan.id, max_rooms: form.max_rooms })}>{t("save")}</Button> : <Button size="sm" variant="secondary" onClick={() => { setEditPlan(plan); setForm({ name: plan.name, max_rooms: String(plan.max_rooms), monthly_rate_cents: String(plan.monthly_rate_cents / 100), currency: plan.currency, is_active: plan.is_active }); }}>{t("edit_plan")}</Button>}
                     <Button size="sm" variant="secondary" onClick={() => toggleMutation.mutate(plan)}>{plan.is_active ? t("plan_status_inactive") : t("plan_status_active")}</Button>

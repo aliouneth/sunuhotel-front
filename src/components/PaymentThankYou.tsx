@@ -176,7 +176,7 @@ function Card({
   return (
     <div className={`rounded-2xl border p-8 text-center shadow-sm ${tones[tone]}`}>
       <span className="mx-auto flex size-16 items-center justify-center rounded-full bg-white shadow-sm">{icon}</span>
-      <h1 className="mt-4 text-xl font-bold text-slate-900">{title}</h1>
+      <h1 className="mt-4 text-2xl font-bold tracking-tight text-slate-900">{title}</h1>
       <div className="text-left">{children}</div>
     </div>
   );

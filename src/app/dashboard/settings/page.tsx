@@ -5,7 +5,7 @@ import { useQuery } from "@tanstack/react-query";
 import { api } from "@/lib/api";
 import { useAuth } from "@/context/AuthProvider";
 import { useLocale } from "@/i18n/LocaleProvider";
-import { Button, Card, CardHeader, Checkbox, ErrorBox, Input, Spinner, Textarea } from "@/components/ui";
+import { Button, Card, CardHeader, Checkbox, ErrorBox, Input, PageHeader, Spinner, Textarea } from "@/components/ui";
 import type { Hotel } from "@/types/dto";
 
 export default function SettingsPage() {
@@ -111,10 +111,7 @@ function SettingsForm({ hotel, onSaved }: { hotel: Hotel; onSaved: () => void })
 
   return (
     <div className="max-w-2xl space-y-6">
-      <div>
-        <h1 className="text-xl font-bold text-slate-900">{t("settings_title")}</h1>
-        <p className="text-sm text-slate-500">{t("settings_sub")}</p>
-      </div>
+      <PageHeader title={t("settings_title")} subtitle={t("settings_sub")} />
 
       <form onSubmit={submit} className="space-y-6">
         <Card>

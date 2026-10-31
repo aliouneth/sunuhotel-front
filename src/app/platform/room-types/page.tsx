@@ -4,7 +4,7 @@ import { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { api } from "@/lib/api";
 import { useLocale } from "@/i18n/LocaleProvider";
-import { ErrorBox, Select, Spinner } from "@/components/ui";
+import { ErrorBox, PageHeader, Select, Spinner } from "@/components/ui";
 import { RoomTypesManager, sortHotelsByName } from "@/components/RoomTypesManager";
 import type { Paginated, PlatformHotel } from "@/types/dto";
 
@@ -26,10 +26,7 @@ export default function PlatformRoomTypesPage() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-xl font-bold text-slate-900">{t("room_types")}</h1>
-        <p className="text-sm text-slate-500">{t("platform_room_types_sub")}</p>
-      </div>
+      <PageHeader title={t("room_types")} subtitle={t("platform_room_types_sub")} />
 
       {error ? (
         <ErrorBox message={(error as { message?: string }).message} onRetry={() => refetch()} />

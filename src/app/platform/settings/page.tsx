@@ -5,7 +5,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Check, MapPin, Phone, Clock, Building2 } from "lucide-react";
 import { api, ApiError } from "@/lib/api";
 import { useLocale } from "@/i18n/LocaleProvider";
-import { Button, Card, CardHeader, ErrorBox, Input, Spinner } from "@/components/ui";
+import { Button, Card, CardHeader, ErrorBox, Input, PageHeader, Spinner } from "@/components/ui";
 import type { PlatformSettings as Settings } from "@/types/dto";
 
 const emptyForm: Settings = {
@@ -63,10 +63,7 @@ export default function PlatformSettingsPage() {
 
   return (
     <div className="max-w-3xl space-y-6">
-      <div>
-        <h1 className="text-xl font-bold text-slate-900">{t("corporate_info")}</h1>
-        <p className="text-sm text-slate-500">{t("platform_sub")}</p>
-      </div>
+      <PageHeader title={t("corporate_info")} subtitle={t("platform_sub")} />
 
       {loadError ? (
         <ErrorBox message={(loadError as { message?: string }).message} onRetry={() => refetch()} />

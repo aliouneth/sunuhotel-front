@@ -79,7 +79,7 @@ export default function RegisterPage() {
 
   return (
     <main className="flex min-h-screen flex-col bg-slate-50">
-      <header className="flex items-center justify-between px-6 py-4">
+      <header className="flex items-center justify-between px-4 py-4 sm:px-6">
         <Link href="/" className="flex items-center gap-2">
           <Image src="/logo.png" alt="Sunuhotel" width={195} height={140} className="h-[50px] w-auto rounded-md" />
         </Link>

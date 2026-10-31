@@ -454,7 +454,7 @@ export interface PlatformSummary {
 export interface GuestBooking {
   id: number;
   booking_number: string;
-  hotel?: { name: string } | null;
+  hotel?: { slug?: string; name: string; city?: string } | null;
   city?: string | null;
   check_in: string;
   check_out: string;
@@ -465,6 +465,8 @@ export interface GuestBooking {
   room_types?: string[];
   total_cents: number;
   currency: string;
+  reviewed?: boolean;
+  rating?: number | null;
 }
 /* --------------------- Hotel Excel import (platform) --------------------- */
 

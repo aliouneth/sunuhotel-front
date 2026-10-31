@@ -5,7 +5,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { api, queryString } from "@/lib/api";
 import { useLocale } from "@/i18n/LocaleProvider";
 import { Ban } from "lucide-react";
-import { Badge, Button, Card, CardHeader, EmptyState, ErrorBox, Fieldset, Input, Modal, Spinner, Table } from "@/components/ui";
+import { Badge, Button, Card, CardHeader, EmptyState, ErrorBox, Fieldset, Input, Modal, PageHeader, Spinner, Table } from "@/components/ui";
 import type { Guest, Paginated } from "@/types/dto";
 
 export default function GuestsPage() {
@@ -27,19 +27,17 @@ export default function GuestsPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <div>
-          <h1 className="text-xl font-bold text-slate-900">{t("guests")}</h1>
-          <p className="text-sm text-slate-500">{data?.total ?? 0}</p>
-        </div>
-        <Button onClick={() => setCreateOpen(true)}>{t("create")}</Button>
-      </div>
+      <PageHeader
+        title={t("guests")}
+        subtitle={String(data?.total ?? 0)}
+        action={<Button onClick={() => setCreateOpen(true)}>{t("create")}</Button>}
+      />
 
       <Card>
         <CardHeader
           title={t("guests")}
           action={
-            <Input value={search} onChange={(e) => setSearch(e.target.value)} placeholder={t("search_placeholder")} className="w-56" />
+            <Input value={search} onChange={(e) => setSearch(e.target.value)} placeholder={t("search_placeholder")} className="w-full sm:w-56" />
           }
         />
         {data?.data.length ? (

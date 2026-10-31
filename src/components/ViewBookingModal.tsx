@@ -48,7 +48,7 @@ export function ViewBookingModal({ booking: initialBooking, currency, onClose }:
             <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">{t("status")}</p>
             <Badge tone={statusTones[booking.status]}>{statusLabel}</Badge>
           </div>
-          <div className="mt-3 grid grid-cols-2 gap-x-4 gap-y-2 text-sm">
+          <div className="mt-3 grid grid-cols-1 gap-x-4 gap-y-2 text-sm sm:grid-cols-2">
             <div>
               <p className="text-xs text-slate-500">{t("client")}</p>
               <p className="font-medium text-slate-900">{guestName}</p>

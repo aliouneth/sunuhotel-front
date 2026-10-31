@@ -205,20 +205,20 @@ export default function PlatformPromotionsPage() {
           <Table headers={[t("promo_hotel"), t("promo_room_type"), t("promo_period"), t("invoice_amount"), t("promo_promo_rate"), t("promo_fee"), t("status"), t("actions")]}>
             {rows.map((promo) => (
               <tr key={promo.id}>
-                <td className="px-4 py-3 text-sm font-medium text-gray-900">
+                <td className="px-4 py-3 text-sm font-medium text-slate-900">
                   {promo.hotel?.name ?? `#${promo.hotel?.id ?? ""}`}
                 </td>
-                <td className="px-4 py-3 text-sm text-gray-600">{promo.room_type?.name ?? "—"}</td>
-                <td className="px-4 py-3 text-sm text-gray-600">
+                <td className="px-4 py-3 text-sm text-slate-600">{promo.room_type?.name ?? "—"}</td>
+                <td className="px-4 py-3 text-sm text-slate-600">
                   {promo.starts_on} → {promo.ends_on}
                 </td>
-                <td className="px-4 py-3 text-sm text-gray-400 line-through">
+                <td className="px-4 py-3 text-sm text-slate-400 line-through">
                   {formatMoney(promo.original_rate_cents, promo.currency, locale)}
                 </td>
                 <td className="px-4 py-3 text-sm font-semibold text-amber-700">
                   {formatMoney(promo.promo_rate_cents, promo.currency, locale)}
                 </td>
-                <td className="px-4 py-3 text-sm text-gray-600">
+                <td className="px-4 py-3 text-sm text-slate-600">
                   {promo.fee_cents > 0 ? formatMoney(promo.fee_cents, promo.currency, locale) : "—"}
                 </td>
                 <td className="px-4 py-3"><span className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${promo.is_active ? "bg-emerald-100 text-emerald-700" : "bg-slate-100 text-slate-600"}`}>{promo.is_active ? t("status_active") : t("status_inactive")}</span></td>

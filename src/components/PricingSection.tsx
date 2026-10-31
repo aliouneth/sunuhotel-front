@@ -81,7 +81,7 @@ export function PricingSection() {
               </ul>
 
               <Link
-                href={key === "enterprise" ? "/contact" : "/register"}
+                href="/register"
                 className={
                   "mt-8 rounded-lg px-5 py-2.5 text-center text-sm font-semibold text-white transition " +
                   (highlight

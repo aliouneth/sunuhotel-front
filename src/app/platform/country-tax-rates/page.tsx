@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
@@ -108,8 +108,8 @@ export default function PlatformCountryTaxPage() {
           <Table headers={[t("country_tax_country"), t("country_tax_rate_label"), t("actions")]}>
             {rows.map((row) => (
               <tr key={row.id}>
-                <td className="px-4 py-3 text-sm font-medium text-gray-900">{row.country_code}</td>
-                <td className="px-4 py-3 text-sm text-gray-600">{row.tax_rate}%</td>
+                <td className="px-4 py-3 text-sm font-medium text-slate-900">{row.country_code}</td>
+                <td className="px-4 py-3 text-sm text-slate-600">{row.tax_rate}%</td>
                 <td className="px-4 py-3">
                   <div className="flex gap-2">
                     <Button size="sm" variant="secondary" onClick={() => openEdit(row)}>{t("edit")}</Button>

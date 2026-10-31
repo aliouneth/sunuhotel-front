@@ -89,7 +89,7 @@ export default function PlatformHotelEditPage() {
             )}
           </span>
           <div>
-            <h1 className="flex items-center gap-2 text-xl font-bold text-slate-900">
+            <h1 className="flex items-center gap-2 text-2xl font-bold tracking-tight text-slate-900">
               {hotel.name}
               <Badge tone={toneByStatus[hotel.status]}>{t(statusLabelKey[hotel.status])}</Badge>
             </h1>
@@ -336,7 +336,7 @@ function HotelForm({
               </span>
             )}
           </div>
-          <div className="min-w-[16rem] flex-1">
+          <div className="min-w-0 flex-1">
             <Input
               type="file"
               accept="image/png,image/jpeg,image/webp"

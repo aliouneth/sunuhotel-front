@@ -53,7 +53,7 @@ export default function MyReservations({ slug }: Props) {
 
   return (
     <main className="min-h-screen bg-slate-50 pb-20">
-      <header className="mx-auto flex max-w-4xl items-center justify-between gap-3 px-6 py-5">
+        <header className="mx-auto flex max-w-4xl flex-col items-start justify-between gap-3 px-4 py-5 sm:flex-row sm:items-center sm:px-6">
         <Link
           href={`/guest/${slug}`}
           className="rounded-lg bg-amber-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-amber-700"
@@ -65,7 +65,7 @@ export default function MyReservations({ slug }: Props) {
         </Button>
       </header>
 
-      <section className="mx-auto max-w-4xl px-6 pt-4">
+      <section className="mx-auto max-w-4xl px-4 pt-4 sm:px-6">
         <h1 className="text-2xl font-bold text-slate-900">Mes réservations</h1>
         <p className="mt-1 text-sm text-slate-500">
           Retrouvez ici toutes vos réservations effectuées avec cette adresse e-mail.
