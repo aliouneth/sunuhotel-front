@@ -40,7 +40,7 @@ const fr: Dict = {
   plan_enterprise: "Enterprise",
   plan_enterprise_sub: "Pour les chaînes hôtelières et les groupes",
   plan_enterprise_price: "200 000 FCFA",
-  plan_enterprise_f1: "Jusqu'à âˆž chambres",
+  plan_enterprise_f1: "100+ chambres",
   plan_enterprise_f2: "Comptes personnel illimités",
   plan_enterprise_f3: "Accès API",
   plan_enterprise_f4: "SSO & SAML",
@@ -656,6 +656,54 @@ credit_wallet_sub: "Enregistrez un encaissement (versement) sur le portefeuille 
   not_found_home: "Retour à l'accueil",
   not_found_owners: "Espace hôteliers",
   not_found_help: "Besoin d'aide ?",
+  // Landing page (identité Bolt.New recréée en thème amber)
+  landing_pill: "Plateforme SaaS multi-tenant",
+  landing_title: "Gérez votre hôtel en toute confiance",
+  landing_sub:
+    "Sunuhotel est la plateforme tout-en-un pour les hôtels. Gérez les chambres, les réservations, les clients et les revenus — dans une interface élégante et bilingue.",
+  landing_footnote: "Sans installation ni matériel. Une plateforme cloud accessible partout.",
+  landing_mock_url: "app.sunuhotel.com/dashboard",
+  landing_kpi_occupancy: "Taux d'occupation",
+  landing_kpi_revenue: "Revenu (aujourd'hui)",
+  landing_kpi_adr: "ADR",
+  landing_kpi_revpar: "RevPAR",
+  landing_trend_title: "Tendance d'occupation (7 jours)",
+  landing_bookings_title: "Réservations récentes",
+  landing_room: "Chambre",
+  landing_status_confirmed: "Confirmée",
+  landing_status_checked_in: "Arrivé",
+  landing_status_pending: "En attente",
+  landing_stat_hotels: "Hôtels gérés",
+  landing_stat_bookings: "Réservations traitées",
+  landing_stat_uptime: "Disponibilité plateforme",
+  landing_stat_languages: "Langues supportées",
+  landing_features_title: "Tout ce dont votre hôtel a besoin",
+  landing_features_sub:
+    "De la réception au back-office, Sunuhotel couvre tous les aspects de la gestion hôtelière.",
+  landing_feat_rooms: "Gestion des chambres",
+  landing_feat_rooms_sub:
+    "Suivez les types de chambres, l'inventaire, les équipements et le statut en temps réel.",
+  landing_feat_booking: "Moteur de réservation",
+  landing_feat_booking_sub:
+    "Créez, modifiez et annulez des réservations avec prévention automatique des surréservations.",
+  landing_feat_guests: "Gestion des clients",
+  landing_feat_guests_sub:
+    "Créez des profils clients avec historique des séjours, préférences et vérification d'identité.",
+  landing_feat_revenue: "Revenus & paiements",
+  landing_feat_revenue_sub:
+    "Suivez les paiements, gérez les tarifs et surveillez votre santé financière.",
+  landing_feat_analytics: "Analyse & rapports",
+  landing_feat_analytics_sub:
+    "Taux d'occupation, ADR, RevPAR avec rapports exportables en JSON et CSV.",
+  landing_feat_roles: "Accès par rôle",
+  landing_feat_roles_sub:
+    "Propriétaire, Manager, Réception, Housekeeping et Comptable, avec permissions granulaires.",
+  landing_feat_tenant: "Multi-tenant sécurisé",
+  landing_feat_tenant_sub:
+    "Chaque hôtel est totalement isolé avec sécurité au niveau base de données. Hôtels et utilisateurs illimités.",
+  landing_cta_banner_title: "Prêt à transformer votre gestion hôtelière ?",
+  landing_cta_banner_sub: "Rejoignez des centaines d'hôtels qui utilisent déjà Sunuhotel.",
+  landing_cta_button: "Démarrer votre essai gratuit",
   // Form validation
   err_required: "Ce champ est obligatoire.",
   err_email_invalid: "Saisissez une adresse e-mail valide.",
@@ -709,7 +757,7 @@ const en: Dict = {
   plan_enterprise: "Enterprise",
   plan_enterprise_sub: "For hotel chains and groups",
   plan_enterprise_price: "200 000 FCFA",
-  plan_enterprise_f1: "Up to âˆž rooms",
+  plan_enterprise_f1: "100+ rooms",
   plan_enterprise_f2: "Unlimited staff users",
   plan_enterprise_f3: "API access",
   plan_enterprise_f4: "SSO & SAML",
@@ -1315,6 +1363,55 @@ const en: Dict = {
   not_found_home: "Back to home",
   not_found_owners: "For hotel owners",
   not_found_help: "Need help?",
+  // Landing page (Bolt.New identity, rebuilt in amber theme)
+  landing_pill: "Multi-tenant SaaS Platform",
+  landing_title: "Manage your hotel with confidence",
+  landing_sub:
+    "Sunuhotel is the all-in-one platform for hotels. Manage rooms, bookings, guests, and revenue — all in one beautiful, bilingual interface.",
+  landing_footnote: "No installation, no hardware. A cloud platform accessible from anywhere.",
+  landing_mock_url: "app.sunuhotel.com/dashboard",
+  landing_kpi_occupancy: "Occupancy Rate",
+  landing_kpi_revenue: "Revenue (Today)",
+  landing_kpi_adr: "ADR",
+  landing_kpi_revpar: "RevPAR",
+  landing_trend_title: "Occupancy Trend (7 days)",
+  landing_bookings_title: "Recent Bookings",
+  landing_room: "Room",
+  landing_status_confirmed: "Confirmed",
+  landing_status_checked_in: "Checked In",
+  landing_status_pending: "Pending",
+  landing_stat_hotels: "Hotels managed",
+  landing_stat_bookings: "Bookings processed",
+  landing_stat_uptime: "Platform uptime",
+  landing_stat_languages: "Languages supported",
+  landing_features_title: "Everything your hotel needs",
+  landing_features_sub:
+    "From front desk to back office, Sunuhotel covers every aspect of hotel management.",
+  landing_feat_rooms: "Room Management",
+  landing_feat_rooms_sub:
+    "Track room types, inventory, amenities, and status in real time.",
+  landing_feat_booking: "Booking Engine",
+  landing_feat_booking_sub:
+    "Create, modify, and cancel reservations with automatic overbooking prevention.",
+  landing_feat_guests: "Guest Management",
+  landing_feat_guests_sub:
+    "Build guest profiles with stay history, preferences, and ID verification.",
+  landing_feat_revenue: "Revenue & Payments",
+  landing_feat_revenue_sub:
+    "Track payments, manage rate plans, and monitor your financial health.",
+  landing_feat_analytics: "Analytics & Reports",
+  landing_feat_analytics_sub:
+    "Occupancy, ADR, RevPAR metrics with exportable JSON and CSV reports.",
+  landing_feat_roles: "Role-Based Access",
+  landing_feat_roles_sub:
+    "Owner, Manager, Front Desk, Housekeeping, and Accountant roles with granular permissions.",
+  landing_feat_tenant: "Multi-Tenant Secure",
+  landing_feat_tenant_sub:
+    "Each hotel is fully isolated with database-level security. Unlimited hotels, unlimited users.",
+  landing_cta_banner_title: "Ready to transform your hotel operations?",
+  landing_cta_banner_sub:
+    "Join hundreds of hotels already using Sunuhotel to streamline their operations.",
+  landing_cta_button: "Start your free trial",
   // Form validation
   err_required: "This field is required.",
   err_email_invalid: "Enter a valid email address.",

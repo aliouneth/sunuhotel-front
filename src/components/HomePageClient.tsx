@@ -29,7 +29,7 @@ export function HomePageClient() {
 
       <PromotionsWidget />
 
-      <HotelOwnersCta labelKey="owners_pricing_cta" href="http://localhost:8899/" />
+      <HotelOwnersCta labelKey="owners_pricing_cta" href="/landing" />
 
       <SiteFooter />
     </main>
