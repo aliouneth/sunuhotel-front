@@ -1,8 +1,11 @@
 "use client";
 
+import Link from "next/link";
 import { useQuery } from "@tanstack/react-query";
 import { Clock, Globe, Mail, MapPin, Phone } from "lucide-react";
 import { api } from "@/lib/api";
+import { openCookieConsent } from "@/lib/consent";
+import { useLocale } from "@/i18n/LocaleProvider";
 import type { PlatformSettings } from "@/types/dto";
 
 const contactRows = (s: PlatformSettings) => [
@@ -14,6 +17,7 @@ const contactRows = (s: PlatformSettings) => [
 ];
 
 export function SiteFooter() {
+  const { t } = useLocale();
   const { data } = useQuery<{ data: PlatformSettings }>({
     queryKey: ["platform-support"],
     queryFn: () => api<{ data: PlatformSettings }>("/platform/support"),
@@ -23,7 +27,7 @@ export function SiteFooter() {
 
   return (
     <footer className="border-t border-slate-200 bg-white py-8 text-sm text-slate-500">
-      <div className="mx-auto max-w-6xl px-6">
+      <div className="mx-auto max-w-6xl px-4 sm:px-6">
         {settings?.company_name && (
           <p className="text-center font-semibold text-slate-700">{settings.company_name}</p>
         )}
@@ -33,7 +37,7 @@ export function SiteFooter() {
               .filter((r) => r.active && r.value)
               .map((r) => (
                 <li key={r.value} className="flex items-start gap-2">
-                  <r.icon className="mt-0.5 size-4 shrink-0 text-slate-400" />
+                  <r.icon className="mt-0.5 size-4 shrink-0 text-slate-500" />
                   <span>
                     {r.value.startsWith("http") ? (
                       <a href={r.value} target="_blank" rel="noreferrer" className="break-all text-amber-700 hover:underline">
@@ -55,7 +59,25 @@ export function SiteFooter() {
               ))}
           </ul>
         )}
-        <p className="mt-4 text-center text-xs text-slate-400">Sunuhotel © {new Date().getFullYear()}</p>
+        <div className="mt-4 flex flex-wrap items-center justify-center gap-x-3 gap-y-1 text-xs text-slate-500">
+          <Link href="/privacy" className="hover:text-amber-700 hover:underline">
+            {t("privacy_policy")}
+          </Link>
+          <span aria-hidden="true">·</span>
+          <Link href="/terms" className="hover:text-amber-700 hover:underline">
+            {t("terms_link")}
+          </Link>
+          <span aria-hidden="true">·</span>
+          <button
+            type="button"
+            onClick={openCookieConsent}
+            className="hover:text-amber-700 hover:underline"
+          >
+            {t("cookie_manage")}
+          </button>
+          <span aria-hidden="true">·</span>
+          <span>Sunuhotel © {new Date().getFullYear()}</span>
+        </div>
       </div>
     </footer>
   );

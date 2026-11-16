@@ -164,7 +164,7 @@ export default function ExpensesPage() {
               <tr key={exp.id} className="hover:bg-slate-50">
                 <td className="px-5 py-3">
                   <p className="font-medium text-slate-900">{exp.description}</p>
-                  {exp.created_by_name && <p className="text-xs text-slate-400">{exp.created_by_name}</p>}
+                  {exp.created_by_name && <p className="text-xs text-slate-500">{exp.created_by_name}</p>}
                 </td>
                 <td className="px-5 py-3 text-slate-600">{exp.expense_type?.name ?? "—"}</td>
                 <td className="px-5 py-3 text-slate-600">{exp.employee?.name ?? "—"}</td>
@@ -300,7 +300,7 @@ function ExpenseModal({
           placeholder={t("expense_description_placeholder")}
         />
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-          <Select label={t("expense_type_label")} value={form.expense_type_id} onChange={(e) => setForm({ ...form, expense_type_id: e.target.value })}>
+          <Select label={t("expense_type_label")} required value={form.expense_type_id} onChange={(e) => setForm({ ...form, expense_type_id: e.target.value })}>
             <option value="">—</option>
             {types.map((ty) => (
               <option key={ty.id} value={ty.id}>

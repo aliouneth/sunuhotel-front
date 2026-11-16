@@ -25,7 +25,7 @@ function MiniBars({ days }: { days: DashboardSummary["occupancy_next_7_days"] })
               className={`w-full rounded-t ${d.sold_room_nights === 0 ? "bg-slate-100" : "bg-amber-500"}`}
               style={{ height: `${h}px` }}
             />
-            <span className="text-[10px] text-slate-400">{formatDate(d.date, "fr", { day: "2-digit", month: "2-digit" })}</span>
+            <span className="text-[10px] text-slate-500">{formatDate(d.date, "fr", { day: "2-digit", month: "2-digit" })}</span>
           </div>
         );
       })}
@@ -73,18 +73,18 @@ export default function DashboardPage() {
   if (!data) return <ErrorBox message={t("error_generic")} />;
 
   const cards = [
-    { label: t("today_arrivals"), value: String(data.today_arrivals), tone: "text-emerald-600" },
+    { label: t("today_arrivals"), value: String(data.today_arrivals), tone: "text-emerald-700" },
     { label: t("today_departures"), value: String(data.today_departures), tone: "text-sky-600" },
     { label: t("in_house"), value: String(data.in_house), tone: "text-violet-600" },
     {
       label: t("open_bookings_value"),
       value: formatMoney(data.open_bookings_total_cents, data.currency, locale),
-      tone: "text-amber-600",
+      tone: "text-amber-700",
     },
     {
       label: t("month_value"),
       value: formatMoney(data.current_month_value_cents, data.currency, locale),
-      tone: "text-amber-600",
+      tone: "text-amber-700",
     },
   ];
 

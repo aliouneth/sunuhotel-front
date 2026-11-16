@@ -74,7 +74,7 @@ export default function PaymentThankYou({
 
   if (!token) {
     return (
-      <Card tone="slate" icon={<XCircle className="size-8 text-slate-400" />} title={t("thank_you_missing")}>
+      <Card tone="slate" icon={<XCircle className="size-8 text-slate-500" />} title={t("thank_you_missing")}>
         <p className="mt-2 text-sm text-slate-600">{t("payment_not_completed")}</p>
         <Actions slug={slug} />
       </Card>
@@ -85,7 +85,7 @@ export default function PaymentThankYou({
     return (
       <Card
         tone="green"
-        icon={<CheckCircle2 className="size-10 text-emerald-600" />}
+        icon={<CheckCircle2 className="size-10 text-emerald-700" />}
         title={t("thank_you_title")}
       >
         <p className="mt-2 text-sm text-emerald-800">{t("thank_you_subtitle")}</p>
@@ -116,7 +116,7 @@ export default function PaymentThankYou({
 
   if (payment?.status === "failed") {
     return (
-      <Card tone="red" icon={<XCircle className="size-10 text-red-500" />} title={t("payment_not_completed")}>
+      <Card tone="red" icon={<XCircle className="size-10 text-red-600" />} title={t("payment_not_completed")}>
         <p className="mt-2 text-sm text-red-700">{t("thank_you_retry")}</p>
         <Actions slug={slug} />
       </Card>
@@ -126,7 +126,7 @@ export default function PaymentThankYou({
   return (
     <Card
       tone="amber"
-      icon={<Clock className="size-10 text-amber-500" />}
+      icon={<Clock className="size-10 text-amber-600" />}
       title={t("payment_checking")}
     >
       <p className="mt-2 text-center text-sm text-amber-900">
@@ -142,7 +142,7 @@ function Actions({ slug }: { slug: string }) {
     <div className="mt-6 flex flex-wrap gap-3">
       <Link
         href={`/guest/${slug}`}
-        className={`${buttonClass} bg-amber-600 text-white hover:bg-amber-700`}
+        className={`${buttonClass} bg-amber-700 text-white hover:bg-amber-800`}
       >
         {t("thank_you_back")}
       </Link>

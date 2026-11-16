@@ -74,11 +74,11 @@ export default function PlatformSettingsPage() {
           <CardHeader
             title={t("contact_us")}
             subtitle={t("support_intro")}
-            action={saved ? <span className="flex items-center gap-1 text-xs font-medium text-emerald-600"><Check className="size-3.5" />{t("saved")}</span> : undefined}
+            action={saved ? <span className="flex items-center gap-1 text-xs font-medium text-emerald-700"><Check className="size-3.5" />{t("saved")}</span> : undefined}
           />
           <form onSubmit={save} className="space-y-4 p-5">
             <div className="flex items-start gap-3">
-              <Building2 className="mt-2.5 size-4 text-slate-400" />
+              <Building2 className="mt-2.5 size-4 text-slate-500" />
               <div className="grid flex-1 gap-4 sm:grid-cols-2">
                 <Input label={t("company_name")} value={form.company_name} onChange={(e) => set("company_name", e.target.value)} />
                 <Input label={t("website")} value={form.website} onChange={(e) => set("website", e.target.value)} placeholder="https://…" />
@@ -86,7 +86,7 @@ export default function PlatformSettingsPage() {
             </div>
 
             <div className="flex items-start gap-3">
-              <MapPin className="mt-2.5 size-4 text-slate-400" />
+              <MapPin className="mt-2.5 size-4 text-slate-500" />
               <div className="grid flex-1 gap-4 sm:grid-cols-3">
                 <Input label={t("address")} value={form.address} onChange={(e) => set("address", e.target.value)} className="sm:col-span-2" />
                 <Input label={t("city_label")} value={form.city} onChange={(e) => set("city", e.target.value)} />
@@ -95,7 +95,7 @@ export default function PlatformSettingsPage() {
             </div>
 
             <div className="flex items-start gap-3">
-              <Phone className="mt-2.5 size-4 text-slate-400" />
+              <Phone className="mt-2.5 size-4 text-slate-500" />
               <div className="grid flex-1 gap-4 sm:grid-cols-2">
                 <Input label={t("phone")} value={form.phone} onChange={(e) => set("phone", e.target.value)} placeholder="+221 …" />
                 <Input label={t("email")} type="email" value={form.email} onChange={(e) => set("email", e.target.value)} />
@@ -103,7 +103,7 @@ export default function PlatformSettingsPage() {
             </div>
 
             <div className="flex items-start gap-3">
-              <Clock className="mt-2.5 size-4 text-slate-400" />
+              <Clock className="mt-2.5 size-4 text-slate-500" />
               <Input label={t("hours")} value={form.hours} onChange={(e) => set("hours", e.target.value)} />
             </div>
 

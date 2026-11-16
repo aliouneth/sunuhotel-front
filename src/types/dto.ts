@@ -417,6 +417,8 @@ currency: string;
   images?: HotelImage[];
   locale?: string | null;
   created_at?: string;
+  created_by?: number | null;
+  creator?: { id: number; name: string; email: string } | null;
   users_count: number;
   rooms_count: number;
   bookings_count: number;

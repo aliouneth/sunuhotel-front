@@ -60,7 +60,7 @@ export function GuestsPanel() {
   }
 
   async function resetPassword(guest: PlatformGuest) {
-    const pwd = prompt(t("new_password_prompt"), "ChangezMoi123");
+    const pwd = prompt(t("new_password_prompt"));
     if (!pwd) return;
     try {
       await api(`/platform/guests/${guest.id}/reset-password`, {
@@ -172,7 +172,7 @@ export function GuestsPanel() {
             ))}
             {!loading && rows.length === 0 && (
               <tr>
-                <td colSpan={5} className="px-3 py-6 text-center text-slate-400">{t("no_guests")}</td>
+                <td colSpan={5} className="px-3 py-6 text-center text-slate-500">{t("no_guests")}</td>
               </tr>
             )}
           </tbody>

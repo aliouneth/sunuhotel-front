@@ -53,212 +53,269 @@ export function HotelFields({
   set,
   errors = {},
   idPrefix,
+  hiddenFields = [],
 }: {
   form: HotelFormState;
   set: <K extends keyof HotelFormState>(key: K, value: HotelFormState[K]) => void;
   errors?: HotelFormErrors;
   /** Disambiguates the timezone datalist id when two forms share the screen. */
   idPrefix: string;
+  /** Fields to omit (e.g. admin-only fields on the self-service registration form). */
+  hiddenFields?: (keyof HotelFormState)[];
 }) {
   const { t } = useLocale();
 
+  const hidden = new Set(hiddenFields);
+
   return (
     <div className="grid gap-4 sm:grid-cols-2">
-      <div className="sm:col-span-2">
+      {!hidden.has("name") && (
+        <div className="sm:col-span-2">
+          <Input
+            label={t("hotel_name")}
+            required
+            value={form.name}
+            error={errors.name}
+            onChange={(e) => set("name", e.target.value)}
+          />
+        </div>
+      )}
+      {!hidden.has("legal_name") && (
         <Input
-          label={t("hotel_name")}
+          label={t("legal_name_label")}
+          value={form.legal_name}
+          error={errors.legal_name}
+          onChange={(e) => set("legal_name", e.target.value)}
+        />
+      )}
+      {!hidden.has("slug") && (
+        <Input
+          label={`${t("slug_label")} (${t("optional")})`}
+          value={form.slug}
+          error={errors.slug}
+          onChange={(e) => set("slug", e.target.value)}
+        />
+      )}
+
+      {!hidden.has("address") && (
+        <div className="sm:col-span-2">
+          <Input
+            label={t("address")}
+            value={form.address}
+            error={errors.address}
+            onChange={(e) => set("address", e.target.value)}
+          />
+        </div>
+      )}
+      {!hidden.has("city") && (
+        <Input
+          label={t("city_label")}
+          value={form.city}
+          error={errors.city}
+          onChange={(e) => set("city", e.target.value)}
+        />
+      )}
+      {!hidden.has("country") && (
+        <Input
+          label={t("country_code")}
+          maxLength={2}
+          value={form.country}
+          error={errors.country}
+          onChange={(e) => set("country", e.target.value.toUpperCase())}
+        />
+      )}
+      {!hidden.has("phone") && (
+        <Input
+          label={t("phone")}
+          value={form.phone}
+          error={errors.phone}
+          onChange={(e) => set("phone", e.target.value)}
+        />
+      )}
+      {!hidden.has("phone_2") && (
+        <Input
+          label={t("phone_2")}
+          value={form.phone_2}
+          error={errors.phone_2}
+          onChange={(e) => set("phone_2", e.target.value)}
+        />
+      )}
+      {!hidden.has("email") && (
+        <Input
+          label={t("email")}
+          type="email"
+          value={form.email}
+          error={errors.email}
+          onChange={(e) => set("email", e.target.value)}
+        />
+      )}
+      {!hidden.has("website") && (
+        <Input
+          label={t("website")}
+          value={form.website}
+          error={errors.website}
+          onChange={(e) => set("website", e.target.value)}
+        />
+      )}
+
+      {!hidden.has("description") && (
+        <div className="sm:col-span-2">
+          <Textarea
+            label={t("hotel_description")}
+            rows={3}
+            value={form.description}
+            error={errors.description}
+            onChange={(e) => set("description", e.target.value)}
+          />
+        </div>
+      )}
+      {!hidden.has("other_services") && (
+        <div className="sm:col-span-2">
+          <Textarea
+            label={t("hotel_other_services")}
+            rows={3}
+            value={form.other_services}
+            error={errors.other_services}
+            onChange={(e) => set("other_services", e.target.value)}
+          />
+          <p className="mt-1 text-xs text-slate-500">{t("hotel_other_services_hint")}</p>
+        </div>
+      )}
+      {!hidden.has("comment") && (
+        <div className="sm:col-span-2">
+          <Textarea
+            label={t("hotel_comment")}
+            rows={2}
+            value={form.comment}
+            error={errors.comment}
+            onChange={(e) => set("comment", e.target.value)}
+          />
+          <p className="mt-1 text-xs text-slate-500">{t("hotel_comment_hint")}</p>
+        </div>
+      )}
+
+      {!hidden.has("has_restaurant") && !hidden.has("has_spa") && !hidden.has("has_leisure") && (
+        <div className="sm:col-span-2 space-y-2">
+          <span className="block text-xs font-medium text-slate-700">{t("hotel_services_label")}</span>
+          {!hidden.has("has_restaurant") && (
+            <Checkbox
+              label={t("service_restaurant")}
+              checked={form.has_restaurant}
+              onChange={(e) => set("has_restaurant", e.target.checked)}
+            />
+          )}
+          {!hidden.has("has_spa") && (
+            <Checkbox
+              label={t("service_spa")}
+              checked={form.has_spa}
+              onChange={(e) => set("has_spa", e.target.checked)}
+            />
+          )}
+          {!hidden.has("has_leisure") && (
+            <Checkbox
+              label={t("service_leisure")}
+              checked={form.has_leisure}
+              onChange={(e) => set("has_leisure", e.target.checked)}
+            />
+          )}
+          <p className="text-xs text-slate-500">{t("hotel_services_hint")}</p>
+        </div>
+      )}
+
+      {!hidden.has("currency") && (
+        <Input
+          label={t("currency")}
+          maxLength={3}
           required
-          value={form.name}
-          error={errors.name}
-          onChange={(e) => set("name", e.target.value)}
+          value={form.currency}
+          error={errors.currency}
+          onChange={(e) => set("currency", e.target.value.toUpperCase())}
         />
-      </div>
-      <Input
-        label={t("legal_name_label")}
-        value={form.legal_name}
-        error={errors.legal_name}
-        onChange={(e) => set("legal_name", e.target.value)}
-      />
-      <Input
-        label={`${t("slug_label")} (${t("optional")})`}
-        value={form.slug}
-        error={errors.slug}
-        onChange={(e) => set("slug", e.target.value)}
-      />
-
-      <div className="sm:col-span-2">
+      )}
+      {!hidden.has("tax_rate") && (
         <Input
-          label={t("address")}
-          value={form.address}
-          error={errors.address}
-          onChange={(e) => set("address", e.target.value)}
+          label={t("tax_rate")}
+          type="number"
+          step="0.01"
+          min={0}
+          max={100}
+          value={`${form.tax_rate}`}
+          error={errors.tax_rate}
+          onChange={(e) => set("tax_rate", e.target.value === "" ? 0 : Number(e.target.value))}
         />
-      </div>
-      <Input
-        label={t("city_label")}
-        value={form.city}
-        error={errors.city}
-        onChange={(e) => set("city", e.target.value)}
-      />
-      <Input
-        label={t("country_code")}
-        maxLength={2}
-        value={form.country}
-        error={errors.country}
-        onChange={(e) => set("country", e.target.value.toUpperCase())}
-      />
-      <Input
-        label={t("phone")}
-        value={form.phone}
-        error={errors.phone}
-        onChange={(e) => set("phone", e.target.value)}
-      />
-      <Input
-        label={t("phone_2")}
-        value={form.phone_2}
-        error={errors.phone_2}
-        onChange={(e) => set("phone_2", e.target.value)}
-      />
-      <Input
-        label={t("email")}
-        type="email"
-        value={form.email}
-        error={errors.email}
-        onChange={(e) => set("email", e.target.value)}
-      />
-      <Input
-        label={t("website")}
-        value={form.website}
-        error={errors.website}
-        onChange={(e) => set("website", e.target.value)}
-      />
+      )}
+      {!hidden.has("stars") && (
+        <Input
+          label={t("stars_label")}
+          type="number"
+          min={1}
+          max={5}
+          value={`${form.stars}`}
+          error={errors.stars}
+          onChange={(e) => set("stars", e.target.value === "" ? 1 : Number(e.target.value))}
+        />
+      )}
+      {!hidden.has("check_in_time") && (
+        <Input
+          label={t("check_in_time")}
+          type="time"
+          value={form.check_in_time}
+          error={errors.check_in_time}
+          onChange={(e) => set("check_in_time", e.target.value)}
+        />
+      )}
+      {!hidden.has("check_out_time") && (
+        <Input
+          label={t("check_out_time")}
+          type="time"
+          value={form.check_out_time}
+          error={errors.check_out_time}
+          onChange={(e) => set("check_out_time", e.target.value)}
+        />
+      )}
 
-      <div className="sm:col-span-2">
-        <Textarea
-          label={t("hotel_description")}
-          rows={3}
-          value={form.description}
-          error={errors.description}
-          onChange={(e) => set("description", e.target.value)}
+      {!hidden.has("timezone") && (
+        <Input
+          label={t("timezone")}
+          required
+          list={`tz-${idPrefix}`}
+          value={form.timezone}
+          error={errors.timezone}
+          onChange={(e) => set("timezone", e.target.value)}
         />
-      </div>
-      <div className="sm:col-span-2">
-        <Textarea
-          label={t("hotel_other_services")}
-          rows={3}
-          value={form.other_services}
-          error={errors.other_services}
-          onChange={(e) => set("other_services", e.target.value)}
-        />
-        <p className="mt-1 text-xs text-slate-500">{t("hotel_other_services_hint")}</p>
-      </div>
-      <div className="sm:col-span-2">
-        <Textarea
-          label={t("hotel_comment")}
-          rows={2}
-          value={form.comment}
-          error={errors.comment}
-          onChange={(e) => set("comment", e.target.value)}
-        />
-        <p className="mt-1 text-xs text-slate-500">{t("hotel_comment_hint")}</p>
-      </div>
-
-      <div className="sm:col-span-2 space-y-2">
-        <span className="block text-xs font-medium text-slate-700">{t("hotel_services_label")}</span>
-        <Checkbox
-          label={t("service_restaurant")}
-          checked={form.has_restaurant}
-          onChange={(e) => set("has_restaurant", e.target.checked)}
-        />
-        <Checkbox
-          label={t("service_spa")}
-          checked={form.has_spa}
-          onChange={(e) => set("has_spa", e.target.checked)}
-        />
-        <Checkbox
-          label={t("service_leisure")}
-          checked={form.has_leisure}
-          onChange={(e) => set("has_leisure", e.target.checked)}
-        />
-        <p className="text-xs text-slate-500">{t("hotel_services_hint")}</p>
-      </div>
-
-      <Input
-        label={t("currency")}
-        maxLength={3}
-        required
-        value={form.currency}
-        error={errors.currency}
-        onChange={(e) => set("currency", e.target.value.toUpperCase())}
-      />
-      <Input
-        label={t("tax_rate")}
-        type="number"
-        step="0.01"
-        min={0}
-        max={100}
-        value={`${form.tax_rate}`}
-        error={errors.tax_rate}
-        onChange={(e) => set("tax_rate", e.target.value === "" ? 0 : Number(e.target.value))}
-      />
-      <Input
-        label={t("stars_label")}
-        type="number"
-        min={1}
-        max={5}
-        value={`${form.stars}`}
-        error={errors.stars}
-        onChange={(e) => set("stars", e.target.value === "" ? 1 : Number(e.target.value))}
-      />
-      <Input
-        label={t("check_in_time")}
-        type="time"
-        value={form.check_in_time}
-        error={errors.check_in_time}
-        onChange={(e) => set("check_in_time", e.target.value)}
-      />
-      <Input
-        label={t("check_out_time")}
-        type="time"
-        value={form.check_out_time}
-        error={errors.check_out_time}
-        onChange={(e) => set("check_out_time", e.target.value)}
-      />
-
-      <Input
-        label={t("timezone")}
-        required
-        list={`tz-${idPrefix}`}
-        value={form.timezone}
-        error={errors.timezone}
-        onChange={(e) => set("timezone", e.target.value)}
-      />
-      <datalist id={`tz-${idPrefix}`}>
-        {TIMEZONES.map((z) => (
-          <option key={z} value={z} />
-        ))}
-      </datalist>
-      <Select
-        label={t("locale_label")}
-        value={form.locale}
-        error={errors.locale}
-        onChange={(e) => set("locale", e.target.value)}
-      >
-        <option value="fr">Français</option>
-        <option value="en">English</option>
-      </Select>
-      <Select
-        label={t("status")}
-        value={form.status}
-        error={errors.status}
-        onChange={(e) => set("status", e.target.value as HotelStatus)}
-      >
-        {STATUSES.map((st) => (
-          <option key={st} value={st}>
-            {t(statusLabelKey[st])}
-          </option>
-        ))}
-      </Select>
+      )}
+      {!hidden.has("timezone") && (
+        <datalist id={`tz-${idPrefix}`}>
+          {TIMEZONES.map((z) => (
+            <option key={z} value={z} />
+          ))}
+        </datalist>
+      )}
+      {!hidden.has("locale") && (
+        <Select
+          label={t("locale_label")}
+          value={form.locale}
+          error={errors.locale}
+          onChange={(e) => set("locale", e.target.value)}
+        >
+          <option value="fr">Français</option>
+          <option value="en">English</option>
+        </Select>
+      )}
+      {!hidden.has("status") && (
+        <Select
+          label={t("status")}
+          value={form.status}
+          error={errors.status}
+          onChange={(e) => set("status", e.target.value as HotelStatus)}
+        >
+          {STATUSES.map((st) => (
+            <option key={st} value={st}>
+              {t(statusLabelKey[st])}
+            </option>
+          ))}
+        </Select>
+      )}
     </div>
   );
 }

@@ -46,7 +46,7 @@ export function HotelFinder() {
           <button
             type="submit"
             disabled={busy || !query.trim()}
-            className="bg-amber-600 px-5 text-sm font-medium text-white transition hover:bg-amber-700 disabled:opacity-50"
+            className="bg-amber-700 px-5 text-sm font-medium text-white transition hover:bg-amber-800 disabled:opacity-50"
           >
             {busy ? "…" : t("search")}
           </button>
@@ -70,7 +70,7 @@ export function HotelFinder() {
                         <span className="truncate text-sm font-medium text-slate-900 flex items-center gap-1.5">
                           {hotel.logo_url ? (
                             // eslint-disable-next-line @next/next/no-img-element
-                            <img src={hotel.logo_url} alt="" className="size-6 rounded object-cover" />
+                            <img src={hotel.logo_url} alt={hotel.name} className="size-6 rounded object-cover" />
                           ) : (
                             <span className="size-6 flex items-center justify-center rounded bg-slate-200 text-xs font-bold text-slate-500">
                               {hotel.name.charAt(0)}

@@ -195,7 +195,7 @@ export default function HotelImportPage() {
             ref={fileRef}
             type="file"
             accept=".xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-            className="block w-full text-sm text-slate-600 file:mr-3 file:rounded-lg file:border-0 file:bg-amber-500 file:px-4 file:py-2 file:text-sm file:font-medium file:text-white hover:file:bg-amber-600"
+            className="block w-full text-sm text-slate-600 file:mr-3 file:rounded-lg file:border-0 file:bg-amber-700 file:px-4 file:py-2 file:text-sm file:font-medium file:text-white hover:file:bg-amber-800"
             onChange={(e) => {
               const file = e.target.files?.[0];
               if (file) upload(file);
@@ -271,7 +271,7 @@ export default function HotelImportPage() {
                         <span className="text-sm font-medium text-slate-800">
                           {column.label}
                         </span>
-                        <span className="text-[11px] uppercase text-slate-400">
+                        <span className="text-[11px] uppercase text-slate-500">
                           {String.fromCharCode(65 + column.index)}
                         </span>
                       </div>

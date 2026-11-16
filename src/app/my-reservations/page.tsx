@@ -89,8 +89,8 @@ export default function GuestPortalPage() {
         body: JSON.stringify({
           booking_id: ratingBooking.id,
           rating: ratingValue,
-          title: ratingTitle || undefined,
-          comment: ratingComment || undefined,
+          title: ratingTitle.trim() || undefined,
+          comment: ratingComment.trim() || undefined,
         }),
       });
       setRatedIds((prev) => new Set(prev).add(ratingBooking.id));
@@ -177,11 +177,11 @@ export default function GuestPortalPage() {
                         </Button>
                       ) : (
                         <>
-                          <span className="text-xs font-medium text-emerald-600">✓ Vous avez noté cet hôtel</span>
+                          <span className="text-xs font-medium text-emerald-700">✓ Vous avez noté cet hôtel</span>
                           {b.rating != null && (
-                            <span className="flex items-center gap-0.5 text-amber-500">
+                            <span className="flex items-center gap-0.5 text-amber-600">
                               {Array.from({ length: 5 }, (_, i) => (
-                                <span key={i} className={i < (b.rating ?? 0) ? "text-amber-400" : "text-slate-300"}>★</span>
+                                <span key={i} className={i < (b.rating ?? 0) ? "text-amber-600" : "text-slate-400"}>★</span>
                               ))}
                               <span className="ml-1 text-slate-600">{b.rating}/5</span>
                             </span>
@@ -209,7 +209,7 @@ export default function GuestPortalPage() {
                     type="button"
                     key={n}
                     onClick={() => setRatingValue(n)}
-                    className={`text-2xl ${n <= ratingValue ? "text-amber-400" : "text-slate-300"}`}
+                    className={`text-2xl ${n <= ratingValue ? "text-amber-600" : "text-slate-400"}`}
                     aria-label={`${n} étoile${n > 1 ? "s" : ""}`}
                   >
                     ★
@@ -221,12 +221,14 @@ export default function GuestPortalPage() {
               label="Titre (optionnel)"
               value={ratingTitle}
               onChange={(e) => setRatingTitle(e.target.value)}
+              maxLength={191}
             />
             <Textarea
               label="Commentaire (optionnel)"
               value={ratingComment}
               onChange={(e) => setRatingComment(e.target.value)}
               rows={4}
+              maxLength={2000}
             />
             {ratingError && <p className="text-sm text-red-600">{ratingError}</p>}
             <div className="flex justify-end gap-2">

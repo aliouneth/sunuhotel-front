@@ -6,7 +6,18 @@ import { api, getGuestToken, queryString } from "@/lib/api";
 import { useLocale } from "@/i18n/LocaleProvider";
 import { addDaysISO, formatDate, formatMoney, nightsBetween, todayISO } from "@/lib/format";
 import { Button, ErrorBox, Input, Modal, Select, Spinner } from "@/components/ui";
+import { Honeypot, useSpamGuard } from "@/lib/anti-spam";
+import {
+  hasErrors,
+  isBlank,
+  isDateAfter,
+  isEmail,
+  validatePhoneField,
+  type FieldErrors,
+} from "@/lib/validation";
 import type { AvailabilityResult, PublicHotel } from "@/types/dto";
+
+type BookingErrors = FieldErrors<"firstName" | "lastName" | "email" | "phone">;
 
 type BookableType = {
   name: string;
@@ -30,6 +41,9 @@ export function GuestAvailability({ hotel, slug }: { hotel: PublicHotel; slug: s
   const [phone, setPhone] = useState("");
   const [busy, setBusy] = useState(false);
   const [bookError, setBookError] = useState("");
+  const [searchError, setSearchError] = useState("");
+  const [bookingErrors, setBookingErrors] = useState<BookingErrors>({});
+  const { honeypot, setHoneypot, isSpam } = useSpamGuard(3);
 
   useEffect(() => {
     const token = getGuestToken();
@@ -88,6 +102,11 @@ export function GuestAvailability({ hotel, slug }: { hotel: PublicHotel; slug: s
 
   function search(e: React.FormEvent) {
     e.preventDefault();
+    if (!isDateAfter(checkOut, checkIn)) {
+      setSearchError(t("dates_invalid"));
+      return;
+    }
+    setSearchError("");
     refetch();
   }
 
@@ -99,6 +118,18 @@ export function GuestAvailability({ hotel, slug }: { hotel: PublicHotel; slug: s
   async function submitBooking(e: React.FormEvent) {
     e.preventDefault();
     if (!booking) return;
+    const nextErrors: BookingErrors = {
+      firstName: isBlank(firstName) ? "err_required" : undefined,
+      lastName: isBlank(lastName) ? "err_required" : undefined,
+      email: email && !isEmail(email) ? "err_email_invalid" : undefined,
+      phone: validatePhoneField(phone) ?? undefined,
+    };
+    setBookingErrors(nextErrors);
+    if (hasErrors(nextErrors)) return;
+    if (isSpam()) {
+      setBookError(t("err_spam"));
+      return;
+    }
     setBusy(true);
     setBookError("");
     try {
@@ -106,10 +137,10 @@ export function GuestAvailability({ hotel, slug }: { hotel: PublicHotel; slug: s
         method: "POST",
         body: JSON.stringify({
           guest: {
-            first_name: firstName,
-            last_name: lastName,
-            email: email || undefined,
-            phone: phone || undefined,
+            first_name: firstName.trim(),
+            last_name: lastName.trim(),
+            email: email.trim().toLowerCase() || undefined,
+            phone: phone.trim(),
           },
           check_in: checkIn,
           check_out: checkOut,
@@ -131,8 +162,27 @@ export function GuestAvailability({ hotel, slug }: { hotel: PublicHotel; slug: s
   return (
     <div className="mt-8 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
       <form onSubmit={search} className="grid gap-4 sm:grid-cols-4">
-        <Input label={t("date_from")} type="date" value={checkIn} onChange={(e) => setCheckIn(e.target.value)} />
-        <Input label={t("date_to")} type="date" value={checkOut} onChange={(e) => setCheckOut(e.target.value)} min={checkIn} />
+        <Input
+          label={t("date_from")}
+          type="date"
+          value={checkIn}
+          onChange={(e) => {
+            setCheckIn(e.target.value);
+            if (searchError) setSearchError("");
+          }}
+          required
+        />
+        <Input
+          label={t("date_to")}
+          type="date"
+          value={checkOut}
+          onChange={(e) => {
+            setCheckOut(e.target.value);
+            if (searchError) setSearchError("");
+          }}
+          min={checkIn}
+          required
+        />
         <Select
           label={t("room_types")}
           value={roomTypeId}
@@ -151,6 +201,7 @@ export function GuestAvailability({ hotel, slug }: { hotel: PublicHotel; slug: s
           </Button>
         </div>
       </form>
+      {searchError && <p className="mt-2 text-sm text-red-600" role="alert">{searchError}</p>}
 
       {error && (
         <div className="mt-4">
@@ -181,7 +232,7 @@ export function GuestAvailability({ hotel, slug }: { hotel: PublicHotel; slug: s
                     <p className="text-xs text-slate-500">
                       {t2.count} ·{" "}
                       {isPromo && t2.originalNightly != null && (
-                        <span className="text-slate-400 line-through">{formatMoney(t2.originalNightly, hotel.currency, locale)} </span>
+                        <span className="text-slate-500 line-through">{formatMoney(t2.originalNightly, hotel.currency, locale)} </span>
                       )}
                       <span className="font-semibold text-amber-700">{formatMoney(t2.nightly, hotel.currency, locale)} / nuit</span>
                     </p>
@@ -224,10 +275,54 @@ export function GuestAvailability({ hotel, slug }: { hotel: PublicHotel; slug: s
               <span className="font-semibold text-slate-900">{formatMoney(booking.nightly * nights, hotel.currency, locale)}</span>
             </p>
             <form onSubmit={submitBooking} className="mt-5 space-y-4">
-              <Input label={t("first_name")} required value={firstName} onChange={(e) => setFirstName(e.target.value)} />
-              <Input label={t("last_name")} required value={lastName} onChange={(e) => setLastName(e.target.value)} />
-              <Input label={t("email")} type="email" value={email} onChange={(e) => setEmail(e.target.value)} />
-              <Input label={t("phone")} value={phone} onChange={(e) => setPhone(e.target.value)} />
+              <Honeypot value={honeypot} onChange={setHoneypot} />
+              <Input
+                label={t("first_name")}
+                required
+                autoComplete="given-name"
+                value={firstName}
+                onChange={(e) => {
+                  setFirstName(e.target.value);
+                  if (bookingErrors.firstName) setBookingErrors((current) => ({ ...current, firstName: undefined }));
+                }}
+                error={bookingErrors.firstName ? t(bookingErrors.firstName) : undefined}
+              />
+              <Input
+                label={t("last_name")}
+                required
+                autoComplete="family-name"
+                value={lastName}
+                onChange={(e) => {
+                  setLastName(e.target.value);
+                  if (bookingErrors.lastName) setBookingErrors((current) => ({ ...current, lastName: undefined }));
+                }}
+                error={bookingErrors.lastName ? t(bookingErrors.lastName) : undefined}
+              />
+              <Input
+                label={t("email")}
+                type="email"
+                inputMode="email"
+                autoComplete="email"
+                value={email}
+                onChange={(e) => {
+                  setEmail(e.target.value);
+                  if (bookingErrors.email) setBookingErrors((current) => ({ ...current, email: undefined }));
+                }}
+                error={bookingErrors.email ? t(bookingErrors.email) : undefined}
+              />
+              <Input
+                label={`${t("phone")} *`}
+                type="tel"
+                inputMode="tel"
+                autoComplete="tel"
+                required
+                value={phone}
+                onChange={(e) => {
+                  setPhone(e.target.value);
+                  if (bookingErrors.phone) setBookingErrors((current) => ({ ...current, phone: undefined }));
+                }}
+                error={bookingErrors.phone ? t(bookingErrors.phone) : undefined}
+              />
               <p className="rounded-lg bg-slate-50 px-3 py-2 text-xs text-slate-600">{t("payment_required_note")}</p>
               {bookError && <p className="text-sm text-red-600">{bookError}</p>}
               <div className="flex justify-end gap-2">

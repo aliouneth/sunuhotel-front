@@ -5,6 +5,11 @@ import { useLocale } from "@/i18n/LocaleProvider";
 import { api } from "@/lib/api";
 import { ShieldCheck } from "lucide-react";
 import { Button, Modal } from "@/components/ui";
+import {
+  isBlank,
+  isEmail,
+  isStrongPassword,
+} from "@/lib/validation";
 
 type PlatformUser = {
   id: number;
@@ -82,6 +87,24 @@ export function PlatformUsersPanel() {
   }
 
   async function submit() {
+    if (isBlank(form.name)) {
+      setError(t("err_required"));
+      return;
+    }
+    if (mode === "create") {
+      if (isBlank(form.email) || !isEmail(form.email)) {
+        setError(t("err_email_invalid"));
+        return;
+      }
+      if (!isStrongPassword(form.password)) {
+        setError(t("err_password_rule"));
+        return;
+      }
+      if (form.password !== form.password_confirmation) {
+        setError(t("err_password_mismatch"));
+        return;
+      }
+    }
     setBusy(true);
     setError("");
     try {
@@ -219,7 +242,7 @@ export function PlatformUsersPanel() {
             ))}
             {!loading && rows.length === 0 && (
               <tr>
-                <td colSpan={4} className="px-3 py-6 text-center text-slate-400">{t("no_users")}</td>
+                <td colSpan={4} className="px-3 py-6 text-center text-slate-500">{t("no_users")}</td>
               </tr>
             )}
           </tbody>
@@ -256,6 +279,8 @@ export function PlatformUsersPanel() {
                 value={form.name}
                 onChange={(e) => setForm({ ...form, name: e.target.value })}
                 placeholder={t("full_name")}
+                required
+                autoComplete="name"
                 className="h-9 w-full rounded border border-slate-300 px-2 text-sm"
               />
 
@@ -266,6 +291,9 @@ export function PlatformUsersPanel() {
                     value={form.email}
                     onChange={(e) => setForm({ ...form, email: e.target.value })}
                     placeholder={t("email_label")}
+                    required
+                    autoComplete="email"
+                    inputMode="email"
                     className="h-9 w-full rounded border border-slate-300 px-2 text-sm"
                   />
                   <input
@@ -273,6 +301,9 @@ export function PlatformUsersPanel() {
                     value={form.password}
                     onChange={(e) => setForm({ ...form, password: e.target.value })}
                     placeholder={t("password_field")}
+                    required
+                    minLength={10}
+                    autoComplete="new-password"
                     className="h-9 w-full rounded border border-slate-300 px-2 text-sm"
                   />
                   <input
@@ -280,6 +311,9 @@ export function PlatformUsersPanel() {
                     value={form.password_confirmation}
                     onChange={(e) => setForm({ ...form, password_confirmation: e.target.value })}
                     placeholder={t("password_confirmation")}
+                    required
+                    minLength={10}
+                    autoComplete="new-password"
                     className="h-9 w-full rounded border border-slate-300 px-2 text-sm"
                   />
                   <p className="text-xs text-slate-500">{t("password_hint")}</p>

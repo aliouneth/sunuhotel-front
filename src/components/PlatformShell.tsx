@@ -4,12 +4,13 @@ import Link from "next/link";
 import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
 import { useState } from "react";
-import { BadgeCheck, Building2, CreditCard, Home, Layers, LogOut, Menu, Percent, Settings2, ShieldCheck, Sparkles, Users, Wallet, X } from "lucide-react";
+import { BadgeCheck, BarChart3, Building2, CreditCard, Home, Layers, LogOut, Menu, Percent, Settings2, ShieldCheck, Sparkles, Users, Wallet, X } from "lucide-react";
 import { useAuth } from "@/context/AuthProvider";
 import { useLocale } from "@/i18n/LocaleProvider";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 
 const navItems = [
+  { href: "/platform/analytics", icon: BarChart3, key: "analytics_title" },
   { href: "/platform/hotels", icon: Building2, key: "platform_hotels" },
   { href: "/platform/guests", icon: Users, key: "guests_admin" },
   { href: "/platform/users", icon: ShieldCheck, key: "users_admin" },
@@ -60,7 +61,7 @@ export function PlatformShell({ children }: { children: React.ReactNode }) {
                 href={href}
                 onClick={() => setMobileOpen(false)}
                 className={`flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition ${
-                  active ? "bg-amber-600 text-white" : "text-slate-300 hover:bg-slate-800 hover:text-white"
+                  active ? "bg-amber-700 text-white" : "text-slate-300 hover:bg-slate-800 hover:text-white"
                 }`}
               >
                 <Icon className="size-4" />
@@ -73,7 +74,7 @@ export function PlatformShell({ children }: { children: React.ReactNode }) {
       <div className="space-y-3 border-t border-slate-800 pt-4">
         <div className="px-3">
           <p className="truncate text-xs font-medium text-slate-300">{user.name}</p>
-          <p className="truncate text-[11px] text-slate-500">{user.email}</p>
+          <p className="truncate text-[11px] text-slate-400">{user.email}</p>
           <p className="mt-1 text-[11px] text-amber-400">{t("platform_title")}</p>
         </div>
         <Link
@@ -135,7 +136,7 @@ export function PlatformShell({ children }: { children: React.ReactNode }) {
           </div>
           <div className="flex items-center gap-3">
             <LanguageSwitcher />
-            <span className="hidden text-xs text-slate-400 sm:block">{locale.toUpperCase()}</span>
+            <span className="hidden text-xs text-slate-500 sm:block">{locale.toUpperCase()}</span>
           </div>
         </header>
         <main className="mx-auto w-full max-w-6xl flex-1 px-4 py-4 md:px-6 md:py-6">{children}</main>

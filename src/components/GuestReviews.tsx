@@ -9,7 +9,7 @@ function Stars({ rating, size = "text-sm" }: { rating: number; size?: string }) 
   return (
     <span className={`${size} leading-none`} aria-label={`${rating} / 5`}>
       {stars.map((filled, i) => (
-        <span key={i} className={filled ? "text-amber-400" : "text-slate-300"}>
+        <span key={i} className={filled ? "text-amber-600" : "text-slate-400"}>
           ★
         </span>
       ))}
@@ -25,14 +25,14 @@ function ReviewCard({ review }: { review: PublicReview }) {
         <div>
           <p className="font-semibold text-slate-900">{review.author}</p>
           {review.verified && (
-            <p className="mt-0.5 text-xs font-medium text-emerald-600">✓ {t("verified_purchase")}</p>
+            <p className="mt-0.5 text-xs font-medium text-emerald-700">✓ {t("verified_purchase")}</p>
           )}
         </div>
         <Stars rating={review.rating} />
       </div>
       {review.title && <p className="mt-3 text-sm font-semibold text-slate-800">{review.title}</p>}
       {review.comment && <p className="mt-1.5 text-sm text-slate-600">{review.comment}</p>}
-      <p className="mt-3 text-xs text-slate-400">{formatDateShort(review.created_at)}</p>
+      <p className="mt-3 text-xs text-slate-500">{formatDateShort(review.created_at)}</p>
     </div>
   );
 }

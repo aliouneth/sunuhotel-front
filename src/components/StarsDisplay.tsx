@@ -9,9 +9,9 @@ interface StarsDisplayProps {
 }
 
 const starsConfig = {
-  sm: { filled: "★", empty: "☆", class: "text-yellow-500 text-sm" },
-  md: { filled: "★", empty: "☆", class: "text-yellow-500 text-base" },
-  lg: { filled: "★", empty: "☆", class: "text-yellow-500 text-lg" },
+  sm: { filled: "★", empty: "☆", class: "text-amber-600 text-sm" },
+  md: { filled: "★", empty: "☆", class: "text-amber-600 text-base" },
+  lg: { filled: "★", empty: "☆", class: "text-amber-600 text-lg" },
 } as const;
 
 export const StarsDisplay: FC<StarsDisplayProps> = ({ stars, size = "md", showLabel = false }) => {
@@ -25,9 +25,9 @@ export const StarsDisplay: FC<StarsDisplayProps> = ({ stars, size = "md", showLa
         <span key={`f${i}`} className={config.class}>{config.filled}</span>
       ))}
       {[...Array(empty)].map((_, i) => (
-        <span key={`e${i}`} className="text-slate-300">{config.empty}</span>
+        <span key={`e${i}`} className="text-slate-400">{config.empty}</span>
       ))}
-      {showLabel && filled > 0 && <span className="ml-1 text-sm text-slate-600 dark:text-slate-400">({filled}/5)</span>}
+      {showLabel && filled > 0 && <span className="ml-1 text-sm text-slate-600 dark:text-slate-500">({filled}/5)</span>}
     </span>
   );
 };

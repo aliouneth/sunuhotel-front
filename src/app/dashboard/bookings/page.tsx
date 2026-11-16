@@ -156,7 +156,7 @@ export default function BookingsPage() {
                 <td className="px-5 py-3 text-slate-600">{formatDate(b.check_out, locale)}</td>
                 <td className="px-5 py-3 font-medium text-slate-900">
                   {formatMoney(b.total_cents, user?.hotel?.currency, locale)}
-                  <span className="ml-1 text-xs font-normal text-slate-400">({formatMoney(b.paid_cents, user?.hotel?.currency, locale)})</span>
+                  <span className="ml-1 text-xs font-normal text-slate-500">({formatMoney(b.paid_cents, user?.hotel?.currency, locale)})</span>
                 </td>
                 <td className="px-5 py-3">
                   <Badge tone={statusTones[b.status]}>{statusLabel(b.status)}</Badge>
@@ -349,8 +349,12 @@ function EditBookingModal({
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
+    if (!haveDates) {
+      setError(t("dates_invalid"));
+      return;
+    }
     if (selected.length === 0) {
-      setError("Choisissez au moins une chambre.");
+      setError(t("err_required"));
       return;
     }
     setBusy(true);
@@ -417,7 +421,7 @@ function EditBookingModal({
                   </span>
                   <span className="text-slate-600">
                     {formatMoney(room.rate, currency, locale)}
-                    <span className="ml-1 text-xs text-slate-400">{t("per_night")}</span>
+                    <span className="ml-1 text-xs text-slate-500">{t("per_night")}</span>
                   </span>
                 </label>
               );
@@ -472,12 +476,17 @@ function PayModal({
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
+    const value = Number(amount.replace(",", "."));
+    if (!Number.isFinite(value) || value <= 0) {
+      setError(t("err_amount_invalid"));
+      return;
+    }
     setBusy(true);
     setError("");
     try {
       await api(`/bookings/${booking.id}/payments`, {
         method: "POST",
-        body: JSON.stringify({ amount_cents: Math.round(parseFloat(amount) * 100), method }),
+        body: JSON.stringify({ amount_cents: Math.round(value * 100), method }),
       });
       qc.invalidateQueries({ queryKey: ["bookings"] });
       setRecorded({ amount_cents: Math.round(parseFloat(amount) * 100), method, at: new Date().toISOString() });
@@ -529,13 +538,13 @@ function PayModal({
                 min="0.01"
                 value={amount}
                 onChange={(e) => setAmount(e.target.value)}
-                className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-200"
+                className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none focus:border-amber-700 focus:ring-2 focus:ring-amber-600"
                 required
               />
               <select
                 value={method}
                 onChange={(e) => setMethod(e.target.value)}
-                className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-200"
+                className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm outline-none focus:border-amber-700 focus:ring-2 focus:ring-amber-600"
               >
                 <option value="cash">Cash</option>
                 <option value="card">Carte</option>

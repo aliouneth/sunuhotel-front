@@ -4,6 +4,8 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useState } from "react";
 import { AuthProvider } from "@/context/AuthProvider";
 import { LocaleProvider } from "@/i18n/LocaleProvider";
+import { CookieConsent } from "@/components/CookieConsent";
+import { AnalyticsTracker } from "@/components/AnalyticsTracker";
 
 export function Providers({ children }: { children: React.ReactNode }) {
   const [client] = useState(
@@ -26,6 +28,8 @@ export function Providers({ children }: { children: React.ReactNode }) {
     <QueryClientProvider client={client}>
       <LocaleProvider>
         <AuthProvider>{children}</AuthProvider>
+        <AnalyticsTracker />
+        <CookieConsent />
       </LocaleProvider>
     </QueryClientProvider>
   );

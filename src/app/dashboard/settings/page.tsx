@@ -121,9 +121,13 @@ function SettingsForm({ hotel, onSaved }: { hotel: Hotel; onSaved: () => void })
               <div className="flex size-20 flex-none items-center justify-center overflow-hidden rounded-xl bg-white ring-1 ring-slate-200">
                 {currentLogo ? (
                   // eslint-disable-next-line @next/next/no-img-element
-                  <img src={currentLogo} alt={form.name || "logo"} className="size-full object-contain" />
+                  <img
+                src={currentLogo}
+                alt={form.name ? `Logo de ${form.name}` : "Logo de l'hôtel"}
+                className="size-full object-contain"
+              />
                 ) : (
-                  <span className="text-2xl font-bold text-slate-300">S</span>
+                  <span className="text-2xl font-bold text-slate-500">S</span>
                 )}
               </div>
               <div className="flex-1">
@@ -214,7 +218,7 @@ function SettingsForm({ hotel, onSaved }: { hotel: Hotel; onSaved: () => void })
             </div>
 
             {err && <p className="text-sm text-red-600">{err}</p>}
-            {saved && <p className="text-sm text-green-600">{t("settings_saved")}</p>}
+            {saved && <p className="text-sm text-green-700">{t("settings_saved")}</p>}
 
             <div className="flex justify-end border-t border-slate-100 pt-4">
               <Button type="submit" loading={busy}>{t("save_changes")}</Button>

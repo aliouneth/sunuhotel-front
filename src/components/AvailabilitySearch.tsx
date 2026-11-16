@@ -8,6 +8,14 @@ import { useLocale } from "@/i18n/LocaleProvider";
 import Image from "next/image";
 import { formatMoney, nightsBetween } from "@/lib/format";
 import { StarsDisplay } from "@/components/StarsDisplay";
+import { Honeypot, useSpamGuard } from "@/lib/anti-spam";
+import {
+  hasErrors,
+  isBlank,
+  isEmail,
+  validatePhoneField,
+  type FieldErrors,
+} from "@/lib/validation";
 import type { AvailableRoom, HotelSearchResult } from "@/types/dto";
 
 type RateGroup = {
@@ -24,6 +32,8 @@ type BookingTarget = {
   hotel: HotelSearchResult;
   group: RateGroup;
 };
+
+type BookingErrors = FieldErrors<"firstName" | "lastName" | "email" | "phone">;
 
 export function AvailabilitySearch() {
   const { t, locale } = useLocale();
@@ -60,6 +70,8 @@ export function AvailabilitySearch() {
   //const [password, setPassword] = useState("");
   const [bookBusy, setBookBusy] = useState(false);
   const [bookError, setBookError] = useState("");
+  const [bookingErrors, setBookingErrors] = useState<BookingErrors>({});
+  const { honeypot, setHoneypot, isSpam } = useSpamGuard(3);
 
   function todayLocal() {
     const d = new Date();
@@ -127,6 +139,18 @@ export function AvailabilitySearch() {
   async function submitBooking(e: React.FormEvent) {
     e.preventDefault();
     if (!target) return;
+    const nextErrors: BookingErrors = {
+      firstName: isBlank(firstName) ? "err_required" : undefined,
+      lastName: isBlank(lastName) ? "err_required" : undefined,
+      email: email && !isEmail(email) ? "err_email_invalid" : undefined,
+      phone: validatePhoneField(phone) ?? undefined,
+    };
+    setBookingErrors(nextErrors);
+    if (hasErrors(nextErrors)) return;
+    if (isSpam()) {
+      setBookError(t("err_spam"));
+      return;
+    }
     setBookBusy(true);
     setBookError("");
     try {
@@ -136,10 +160,10 @@ export function AvailabilitySearch() {
           method: "POST",
           body: JSON.stringify({
             guest: {
-              first_name: firstName,
-              last_name: lastName,
-              email: email || undefined,
-              phone: phone,
+              first_name: firstName.trim(),
+              last_name: lastName.trim(),
+              email: email.trim().toLowerCase() || undefined,
+              phone: phone.trim(),
             },
             check_in: checkInValue,
             check_out: checkOutValue,
@@ -158,7 +182,7 @@ export function AvailabilitySearch() {
     }
   }
 
-  const input = "w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-amber-400 focus:ring-2 focus:ring-amber-100";
+  const input = "w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 outline-none transition focus:border-amber-700 focus:ring-2 focus:ring-amber-600";
 
   return (
     <div>
@@ -202,7 +226,7 @@ export function AvailabilitySearch() {
         <button
           type="submit"
           disabled={busy}
-          className="self-end rounded-lg bg-amber-600 px-6 py-2 text-sm font-medium text-white transition hover:bg-amber-700 disabled:opacity-50"
+          className="self-end rounded-lg bg-amber-700 px-6 py-2 text-sm font-medium text-white transition hover:bg-amber-800 disabled:opacity-50"
         >
           {busy ? "…" : t("search")}
         </button>
@@ -301,12 +325,12 @@ export function AvailabilitySearch() {
                         <div className="flex items-baseline gap-3 sm:flex-col sm:items-end sm:gap-0">
                           <p className="text-2xl font-bold tracking-tight text-slate-900">
                             {group.promoted && group.originalRate != null && (
-                              <span className="mr-1.5 text-xs font-medium text-slate-400 line-through">
+                              <span className="mr-1.5 text-xs font-medium text-slate-500 line-through">
                                 {formatMoney(group.originalRate, hotel.currency, locale)}
                               </span>
                             )}
                             {formatMoney(group.rate, hotel.currency, locale)}
-                            <span className="ml-1 text-xs font-medium text-slate-400">{t("nightly")}</span>
+                            <span className="ml-1 text-xs font-medium text-slate-500">{t("nightly")}</span>
                           </p>
                           <p className="text-xs text-slate-500">
                             {t("total_label")}: {formatMoney(total, hotel.currency, locale)}
@@ -315,7 +339,7 @@ export function AvailabilitySearch() {
                         <button
                           type="button"
                           onClick={() => openBooking(hotel, group)}
-                          className="shrink-0 rounded-lg bg-amber-600 px-6 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-amber-700"
+                          className="shrink-0 rounded-lg bg-amber-700 px-6 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-amber-800"
                         >
                           {t("reserve")}
                         </button>
@@ -325,7 +349,8 @@ export function AvailabilitySearch() {
                 </div>
 
                 {target?.hotel.id === hotel.id && (
-                  <form onSubmit={submitBooking} className="border-t border-amber-200 bg-gradient-to-br from-amber-50 to-orange-50 px-6 py-5">
+                  <form onSubmit={submitBooking} className="border-t border-amber-200 bg-gradient-to-br from-amber-50 to-orange-50 px-4 py-5 sm:px-6">
+                    <Honeypot value={honeypot} onChange={setHoneypot} />
                     <p className="mb-3 flex items-center gap-2 text-sm font-semibold text-amber-900">
                       <User className="size-4" />
                       {t("guest_info")} — {target.group.roomTypes.join(" · ")}
@@ -333,33 +358,67 @@ export function AvailabilitySearch() {
                     <div className="grid gap-3 sm:grid-cols-3">
                       <label className="flex flex-col gap-1">
                         <span className="text-xs font-semibold text-amber-800">{t("first_name")}</span>
-                        <input value={firstName} onChange={(e) => setFirstName(e.target.value)} required className={input} />
+                        <input
+                          value={firstName}
+                          onChange={(e) => {
+                            setFirstName(e.target.value);
+                            if (bookingErrors.firstName) setBookingErrors((current) => ({ ...current, firstName: undefined }));
+                          }}
+                          required
+                          autoComplete="given-name"
+                          aria-invalid={Boolean(bookingErrors.firstName)}
+                          className={input}
+                        />
+                        {bookingErrors.firstName && <span className="text-xs text-red-600">{t(bookingErrors.firstName)}</span>}
                       </label>
                       <label className="flex flex-col gap-1">
                         <span className="text-xs font-semibold text-amber-800">{t("last_name")}</span>
-                        <input value={lastName} onChange={(e) => setLastName(e.target.value)} required className={input} />
+                        <input
+                          value={lastName}
+                          onChange={(e) => {
+                            setLastName(e.target.value);
+                            if (bookingErrors.lastName) setBookingErrors((current) => ({ ...current, lastName: undefined }));
+                          }}
+                          required
+                          autoComplete="family-name"
+                          aria-invalid={Boolean(bookingErrors.lastName)}
+                          className={input}
+                        />
+                        {bookingErrors.lastName && <span className="text-xs text-red-600">{t(bookingErrors.lastName)}</span>}
                       </label>
                       <label className="flex flex-col gap-1">
                         <span className="text-xs font-semibold text-amber-800">{t("email")}</span>
                         <input
                           type="email"
                           value={email}
-                          onChange={(e) => setEmail(e.target.value)}
+                          onChange={(e) => {
+                            setEmail(e.target.value);
+                            if (bookingErrors.email) setBookingErrors((current) => ({ ...current, email: undefined }));
+                          }}
                           autoComplete="email"
+                          inputMode="email"
+                          aria-invalid={Boolean(bookingErrors.email)}
                           className={input}
                         />
+                        {bookingErrors.email && <span className="text-xs text-red-600">{t(bookingErrors.email)}</span>}
                       </label>
                       <label className="flex flex-col gap-1 sm:col-span-3">
-          <span className="text-xs font-semibold text-amber-800">{t("phone")} *</span>
-                            <input
-                              type="tel"
-                              value={phone}
-                              onChange={(e) => setPhone(e.target.value)}
-                              autoComplete="tel"
-                              required
-                              placeholder={t("phone_placeholder")}
-                              className={input}
-                            />
+                        <span className="text-xs font-semibold text-amber-800">{t("phone")} *</span>
+                        <input
+                          type="tel"
+                          value={phone}
+                          onChange={(e) => {
+                            setPhone(e.target.value);
+                            if (bookingErrors.phone) setBookingErrors((current) => ({ ...current, phone: undefined }));
+                          }}
+                          autoComplete="tel"
+                          inputMode="tel"
+                          required
+                          placeholder={t("phone_placeholder")}
+                          aria-invalid={Boolean(bookingErrors.phone)}
+                          className={input}
+                        />
+                        {bookingErrors.phone && <span className="text-xs text-red-600">{t(bookingErrors.phone)}</span>}
                       </label>
                     </div>
                     {bookError && <p className="mt-2 text-xs text-red-600">{bookError}</p>}
@@ -368,7 +427,7 @@ export function AvailabilitySearch() {
                       <button
                         type="submit"
                         disabled={bookBusy}
-                        className="rounded-lg bg-amber-600 px-5 py-2 text-sm font-medium text-white transition hover:bg-amber-700 disabled:opacity-50"
+                        className="rounded-lg bg-amber-700 px-5 py-2 text-sm font-medium text-white transition hover:bg-amber-800 disabled:opacity-50"
                       >
                         {bookBusy ? "…" : t("pay_to_confirm")}
                       </button>

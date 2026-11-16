@@ -167,6 +167,7 @@ export default function PlatformBillingPage() {
             type="number"
             min="1"
             step="1"
+            required
             value={amount}
             onChange={(e) => setAmount(e.target.value)}
             placeholder={t("credit_amount_placeholder")}

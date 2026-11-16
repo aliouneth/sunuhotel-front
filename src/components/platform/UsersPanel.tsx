@@ -183,7 +183,7 @@ export function UsersPanel({ hotelId }: { hotelId: number }) {
                         </Badge>
                       ))
                     ) : (
-                      <span className="text-slate-400">—</span>
+                      <span className="text-slate-500">—</span>
                     )}
                   </div>
                 </td>

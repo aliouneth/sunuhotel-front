@@ -75,11 +75,11 @@ export default function PlatformHotelEditPage() {
 
       <div className="flex items-start justify-between gap-4">
         <div className="flex items-center gap-4">
-          <span className="flex size-12 flex-none items-center justify-center overflow-hidden rounded-xl bg-amber-600 text-sm font-bold text-white ring-1 ring-slate-200">
+          <span className="flex size-12 flex-none items-center justify-center overflow-hidden rounded-xl bg-amber-700 text-sm font-bold text-white ring-1 ring-slate-200">
             {hotel.logo_url ? (
               <Image
                 src={hotel.logo_url}
-                alt=""
+                alt={hotel.name}
                 width={48}
                 height={48}
                 className="size-full bg-white object-contain"
@@ -96,9 +96,14 @@ export default function PlatformHotelEditPage() {
             <p className="text-sm text-slate-500">
               /{hotel.slug} · #{hotel.id}
             </p>
+            {hotel.creator || hotel.owner ? (
+              <p className="mt-1 text-sm text-slate-600">
+                Registered by: {(hotel.creator ?? hotel.owner)!.name} ({(hotel.creator ?? hotel.owner)!.email})
+              </p>
+            ) : null}
           </div>
         </div>
-        <span className="text-xs text-slate-400">
+        <span className="text-xs text-slate-500">
           {isFetching ? t("loading") : null}
         </span>
       </div>
@@ -148,7 +153,7 @@ export default function PlatformHotelEditPage() {
         />
       )}
 
-      <p className="text-xs text-slate-400">
+      <p className="text-xs text-slate-500">
         <button onClick={() => router.push("/platform/hotels")} className="underline">
           {t("back")}
         </button>
@@ -325,13 +330,13 @@ function HotelForm({
             {logoPreview || hotel.logo_url ? (
               <Image
                 src={(logoPreview || hotel.logo_url) as string}
-                alt=""
+                alt={t("hotel_logo")}
                 width={160}
                 height={160}
                 className="size-full object-contain"
               />
             ) : (
-              <span className="text-xl font-bold text-slate-300">
+              <span className="text-xl font-bold text-slate-500">
                 {hotel.name.charAt(0)}
               </span>
             )}
@@ -366,11 +371,11 @@ function HotelForm({
             <div className="space-y-2">
               <p className="text-xs font-medium text-slate-600">{t("hotel_photos_new")}</p>
               <div className="flex flex-wrap gap-2">
-                {imagePreviews.map((src) => (
+                {imagePreviews.map((src, index) => (
                   <Image
                     key={src}
                     src={src}
-                    alt=""
+                    alt={`${hotel.name} — photo ${index + 1}`}
                     width={64}
                     height={64}
                     className="size-16 rounded-lg border border-emerald-300 object-cover"
@@ -384,7 +389,7 @@ function HotelForm({
             <div className="space-y-2">
               <p className="text-xs font-medium text-slate-600">{t("hotel_photos_current")}</p>
               <div className="flex flex-wrap gap-2">
-                {remainingImages.map((img) => (
+                {remainingImages.map((img, index) => (
                   <label
                     key={img.id}
                     className="flex items-center gap-1 text-xs text-slate-600"
@@ -398,7 +403,7 @@ function HotelForm({
                     />
                     <Image
                       src={img.image_url}
-                      alt=""
+                      alt={`${hotel.name} — photo ${index + 1}`}
                       width={48}
                       height={48}
                       className="size-12 rounded border border-slate-200 object-cover"

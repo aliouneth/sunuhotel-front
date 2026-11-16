@@ -56,7 +56,7 @@ export default function MyReservations({ slug }: Props) {
         <header className="mx-auto flex max-w-4xl flex-col items-start justify-between gap-3 px-4 py-5 sm:flex-row sm:items-center sm:px-6">
         <Link
           href={`/guest/${slug}`}
-          className="rounded-lg bg-amber-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-amber-700"
+          className="rounded-lg bg-amber-700 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-amber-800"
         >
           + Faire une nouvelle réservation
         </Link>

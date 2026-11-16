@@ -9,6 +9,14 @@ import { setGuestToken } from "@/lib/api";
 import { Button, Card, Input } from "@/components/ui";
 import { useLocale } from "@/i18n/LocaleProvider";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
+import {
+  hasErrors,
+  validateEmailField,
+  validatePasswordField,
+  type FieldErrors,
+} from "@/lib/validation";
+
+type LoginErrors = FieldErrors<"email" | "password">;
 
 export default function GuestLoginPage({ params }: { params: { slug: string } }) {
   const { slug } = params;
@@ -18,15 +26,22 @@ export default function GuestLoginPage({ params }: { params: { slug: string } })
   const [password, setPassword] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
+  const [errors, setErrors] = useState<LoginErrors>({});
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
+    const nextErrors: LoginErrors = {
+      email: validateEmailField(email) ?? undefined,
+      password: validatePasswordField(password) ?? undefined,
+    };
+    setErrors(nextErrors);
+    if (hasErrors(nextErrors)) return;
     setBusy(true);
     setError("");
     try {
       const res = await api<{ data: { token: string; guest?: { first_name?: string; last_name?: string } } }>(`/guest/login`, {
         method: "POST",
-        body: JSON.stringify({ email, password }),
+        body: JSON.stringify({ email: email.trim().toLowerCase(), password }),
       });
       setGuestToken(res.data.token);
       if (res.data.guest) {
@@ -58,17 +73,26 @@ export default function GuestLoginPage({ params }: { params: { slug: string } })
               label={t("email")}
               type="email"
               value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              onChange={(e) => {
+                setEmail(e.target.value);
+                if (errors.email) setErrors((current) => ({ ...current, email: undefined }));
+              }}
               required
               autoComplete="email"
+              inputMode="email"
+              error={errors.email ? t(errors.email) : undefined}
             />
             <Input
               label={t("password")}
               type="password"
               value={password}
-              onChange={(e) => setPassword(e.target.value)}
+              onChange={(e) => {
+                setPassword(e.target.value);
+                if (errors.password) setErrors((current) => ({ ...current, password: undefined }));
+              }}
               required
               autoComplete="current-password"
+              error={errors.password ? t(errors.password) : undefined}
             />
             {error && <p className="text-sm text-red-600">{error}</p>}
             <Button type="submit" loading={busy} className="w-full">
@@ -76,7 +100,7 @@ export default function GuestLoginPage({ params }: { params: { slug: string } })
             </Button>
           </form>
           <p className="mt-6 text-center text-sm text-slate-600">
-            <Link href={`/guest/${slug}`} className="font-medium text-amber-600 hover:text-amber-700">
+            <Link href={`/guest/${slug}`} className="font-medium text-amber-700 hover:text-amber-700">
               ← {t("back")}
             </Link>
           </p>

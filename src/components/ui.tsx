@@ -15,7 +15,7 @@ export function Button({
   loading?: boolean;
 }) {
   const variants: Record<string, string> = {
-    primary: "bg-amber-600 text-white hover:bg-amber-700 disabled:bg-amber-300",
+    primary: "bg-amber-700 text-white hover:bg-amber-800 disabled:bg-amber-700",
     secondary: "bg-slate-100 text-slate-800 hover:bg-slate-200 border border-slate-200",
     danger: "bg-red-600 text-white hover:bg-red-700",
     success: "bg-emerald-600 text-white hover:bg-emerald-700",
@@ -28,7 +28,7 @@ export function Button({
   };
   return (
     <button
-      className={`inline-flex items-center justify-center gap-2 font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-60 ${variants[variant]} ${sizes[size]} ${className}`}
+      className={`inline-flex items-center justify-center gap-2 font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-600 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60 ${variants[variant]} ${sizes[size]} ${className}`}
       disabled={loading || props.disabled}
       {...props}
     >
@@ -76,7 +76,7 @@ export function Input({
     <label className="block">
       {label && <span className="mb-1 block text-xs font-medium text-slate-700">{label}</span>}
       <input
-        className={`w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none transition focus:border-amber-500 focus:ring-2 focus:ring-amber-200 ${error ? "border-red-400" : ""} ${className}`}
+        className={`w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none transition focus:border-amber-700 focus:ring-2 focus:ring-amber-600 ${error ? "border-red-400" : ""} ${className}`}
         {...props}
       />
       {error && <span className="mt-1 block text-xs text-red-600">{error}</span>}
@@ -94,7 +94,7 @@ export function Textarea({
     <label className="block">
       {label && <span className="mb-1 block text-xs font-medium text-slate-700">{label}</span>}
       <textarea
-        className={`w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none transition focus:border-amber-500 focus:ring-2 focus:ring-amber-200 ${error ? "border-red-400" : ""} ${className}`}
+        className={`w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none transition focus:border-amber-700 focus:ring-2 focus:ring-amber-600 ${error ? "border-red-400" : ""} ${className}`}
         {...props}
       />
       {error && <span className="mt-1 block text-xs text-red-600">{error}</span>}
@@ -111,7 +111,7 @@ export function Select({
     <label className="block">
       {label && <span className="mb-1 block text-xs font-medium text-slate-700">{label}</span>}
       <select
-        className={`w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm outline-none transition focus:border-amber-500 focus:ring-2 focus:ring-amber-200 ${error ? "border-red-400" : ""} ${className}`}
+        className={`w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm outline-none transition focus:border-amber-700 focus:ring-2 focus:ring-amber-600 ${error ? "border-red-400" : ""} ${className}`}
         {...props}
       />
       {error && <span className="mt-1 block text-xs text-red-600">{error}</span>}
@@ -129,7 +129,7 @@ export function Checkbox({
     <label className={`flex items-start gap-2.5 ${className}`}>
       <input
         type="checkbox"
-        className="mt-0.5 size-4 flex-none rounded border-slate-300 accent-amber-600 focus:ring-2 focus:ring-amber-200"
+        className="mt-0.5 size-4 flex-none rounded border-slate-300 accent-amber-600 focus:ring-2 focus:ring-amber-600"
         {...props}
       />
       {(label || hint) && (
@@ -188,7 +188,7 @@ export function Modal({
       >
         <div className="flex items-center justify-between border-b border-slate-100 px-5 py-4">
           <h3 className="text-sm font-semibold text-slate-900">{title}</h3>
-          <button onClick={onClose} className="rounded-lg p-1 text-slate-400 hover:bg-slate-100 hover:text-slate-600">
+          <button onClick={onClose} aria-label="Fermer" className="rounded-lg p-1 text-slate-500 hover:bg-slate-100 hover:text-slate-700">
             <X className="size-4" />
           </button>
         </div>

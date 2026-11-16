@@ -186,7 +186,7 @@ export default function PlatformSubscriptionsPage() {
                         <div className="text-xs text-slate-500">{t("effective_from")}: {formatDate(sub.effective_from, locale)}</div>
                       </div>
                     ) : (
-                      <span className="text-slate-400">{t("no_subscription")}</span>
+                      <span className="text-slate-500">{t("no_subscription")}</span>
                     )}
                   </td>
                   <td>

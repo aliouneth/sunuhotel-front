@@ -1,9 +1,11 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import Image from "next/image";
 import { notFound } from "next/navigation";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import PaymentThankYou from "@/components/PaymentThankYou";
 import { API_URL } from "@/lib/api";
+import { pageMetadata } from "@/lib/seo";
 import type { PublicHotel } from "@/types/dto";
 
 async function fetchHotel(slug: string): Promise<PublicHotel | null> {
@@ -17,9 +19,21 @@ async function fetchHotel(slug: string): Promise<PublicHotel | null> {
   }
 }
 
-export async function generateMetadata({ params }: { params: { slug: string } }) {
+export async function generateMetadata({
+  params,
+}: {
+  params: { slug: string };
+}): Promise<Metadata> {
   const hotel = await fetchHotel(params.slug);
-  return { title: hotel ? `Merci — ${hotel.name}` : "Sunuhotel" };
+  return {
+    ...pageMetadata({
+      title: hotel ? `Merci — ${hotel.name}` : "Merci",
+      description: hotel
+        ? `Merci pour votre réservation à ${hotel.name}. Votre demande a bien été prise en compte.`
+        : "Merci pour votre réservation sur Sunuhotel.",
+    }),
+    robots: { index: false, follow: false },
+  };
 }
 
 export default async function ThankYouPage({ params }: { params: { slug: string } }) {

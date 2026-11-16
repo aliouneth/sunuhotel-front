@@ -33,7 +33,7 @@ function Stars({ rating }: { rating: number }) {
   return (
     <span className="leading-none" aria-label={`${rating} / 5`}>
       {stars.map((filled, i) => (
-        <span key={i} className={filled ? "text-amber-400" : "text-slate-300"}>★</span>
+        <span key={i} className={filled ? "text-amber-600" : "text-slate-400"}>★</span>
       ))}
     </span>
   );
@@ -51,7 +51,7 @@ export function PromotionsWidget() {
   if (isLoading || !data || data.length === 0) return null;
 
   return (
-    <section className="mx-auto max-w-6xl px-6 pb-12">
+    <section className="mx-auto max-w-6xl px-4 sm:px-6 pb-12">
       <h2 className="text-center text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl">
         {t("promotions_title")}
       </h2>
@@ -72,7 +72,7 @@ export function PromotionsWidget() {
                 className="h-44 w-full object-cover transition group-hover:scale-[1.02]"
               />
             ) : (
-              <div className="flex h-44 items-center justify-center bg-slate-100 text-sm font-semibold text-slate-400">
+              <div className="flex h-44 items-center justify-center bg-slate-100 text-sm font-semibold text-slate-500">
                 {promo.hotel.name}
               </div>
             )}
@@ -98,12 +98,12 @@ export function PromotionsWidget() {
               </p>
 
               <div className="mt-3 flex items-center gap-2">
-                <span className="text-sm text-slate-400 line-through">
+                <span className="text-sm text-slate-500 line-through">
                   {formatMoney(promo.original_rate_cents, promo.currency, locale)}
                 </span>
                 <span className="text-lg font-bold text-amber-700">
                   {formatMoney(promo.promo_rate_cents, promo.currency, locale)}
-                  <span className="ml-1 text-xs font-medium text-slate-400">/ {t("promo_night")}</span>
+                  <span className="ml-1 text-xs font-medium text-slate-500">/ {t("promo_night")}</span>
                 </span>
               </div>
 

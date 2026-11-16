@@ -111,7 +111,7 @@ export default function ReportsPage() {
           <Card key={m.label} className="p-5">
             <p className="text-xs font-medium uppercase tracking-wide text-slate-500">{m.label}</p>
             <p className="mt-2 text-2xl font-bold tracking-tight text-slate-900">{m.value}</p>
-            <p className="mt-1 text-xs text-slate-400">
+            <p className="mt-1 text-xs text-slate-500">
               {k.sold_room_nights} / {k.available_room_nights} nuitées
             </p>
           </Card>

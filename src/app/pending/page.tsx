@@ -57,7 +57,7 @@ export default function PendingPage() {
                   .filter((r) => r.active && r.value)
                   .map((r) => (
                     <li key={r.value} className="flex items-start gap-2.5 text-sm text-slate-700">
-                      <r.icon className="mt-0.5 size-4 shrink-0 text-slate-400" />
+                      <r.icon className="mt-0.5 size-4 shrink-0 text-slate-500" />
                       <span>
                         {r.value.startsWith("http") ? (
                           <a href={r.value} target="_blank" rel="noreferrer" className="break-all text-amber-700 hover:underline">
@@ -86,7 +86,7 @@ export default function PendingPage() {
           <Link href="/" className="font-medium text-slate-500 transition hover:text-slate-700">
             {t("back_home")}
           </Link>
-          <Link href="/login" className="font-medium text-amber-600 transition hover:text-amber-700">
+          <Link href="/login" className="font-medium text-amber-700 transition hover:text-amber-700">
             {t("to_login")}
           </Link>
         </div>

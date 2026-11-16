@@ -18,6 +18,20 @@ const config = {
         "\\.(css|less|sass|scss)$": "identity-obj-proxy",
         "\\.(jpg|jpeg|png|svg|gif|eot|otf|ttf|woff|woff2)$": "url-loader",
     },
+    transform: {
+        "^.+\\.(t|j)sx?$": [
+            "babel-jest",
+            {
+                configFile: false,
+                babelrc: false,
+                presets: [
+                    ["@babel/preset-env", { targets: { node: "current" }, modules: "commonjs" }],
+                    ["@babel/preset-react", { runtime: "automatic" }],
+                    "@babel/preset-typescript",
+                ],
+            },
+        ],
+    },
     setupFilesAfterEnv: ["<rootDir>/jest.setup.ts"],
     collectCoverageFrom: [],
 };

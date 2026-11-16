@@ -87,7 +87,7 @@ export function RoomTypesManager({
               <tr key={rt.id} className="hover:bg-slate-50">
                 <td className="px-5 py-3">
                   <p className="font-medium text-slate-900">{rt.name}</p>
-                  {rt.description && <p className="text-xs text-slate-400">{rt.description}</p>}
+                  {rt.description && <p className="text-xs text-slate-500">{rt.description}</p>}
                 </td>
                 <td className="px-5 py-3 text-slate-600">
                   {rt.base_capacity}
@@ -213,7 +213,7 @@ function ImportModal({
         </Select>
         <p className="text-xs text-slate-500">{t("import_room_types_hint")}</p>
         {result && (
-          <p className="text-sm text-green-600">
+          <p className="text-sm text-green-700">
             {t("imported_count")
               .replace("{imported}", String(result.imported))
               .replace("{skipped}", String(result.skipped))}

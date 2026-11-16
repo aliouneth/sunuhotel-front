@@ -74,6 +74,7 @@ export default function PlatformPromotionsPage() {
   const [form, setForm] = useState<FormState>(emptyForm);
   const [createOpen, setCreateOpen] = useState(false);
   const [editPromo, setEditPromo] = useState<PlatformPromotion | null>(null);
+  const [formError, setFormError] = useState("");
 
   const { data, isLoading, error } = useQuery({
     queryKey: ["platform", "promotions"],
@@ -165,6 +166,7 @@ export default function PlatformPromotionsPage() {
   const openCreate = () => {
     setForm(emptyForm);
     setEditPromo(null);
+    setFormError("");
     setCreateOpen(true);
   };
 
@@ -182,6 +184,7 @@ export default function PlatformPromotionsPage() {
       is_active: promo.is_active,
     });
     setEditPromo(promo);
+    setFormError("");
     setCreateOpen(true);
   };
 
@@ -212,7 +215,7 @@ export default function PlatformPromotionsPage() {
                 <td className="px-4 py-3 text-sm text-slate-600">
                   {promo.starts_on} → {promo.ends_on}
                 </td>
-                <td className="px-4 py-3 text-sm text-slate-400 line-through">
+                <td className="px-4 py-3 text-sm text-slate-500 line-through">
                   {formatMoney(promo.original_rate_cents, promo.currency, locale)}
                 </td>
                 <td className="px-4 py-3 text-sm font-semibold text-amber-700">
@@ -239,12 +242,36 @@ export default function PlatformPromotionsPage() {
         <Modal open onClose={() => setCreateOpen(false)} size="lg" title={editPromo ? t("edit_promotion") : t("new_promotion")}>
           <form
             className="space-y-4"
-            onSubmit={(e) => { e.preventDefault(); saveMutation.mutate({ ...form, id: editPromo?.id }); }}
+            onSubmit={(e) => {
+              e.preventDefault();
+              if (!form.hotel_id || !form.room_type_id) {
+                setFormError(t("err_required"));
+                return;
+              }
+              if (!form.starts_on || !form.ends_on || form.ends_on < form.starts_on) {
+                setFormError(t("dates_invalid"));
+                return;
+              }
+              const original = Number(form.original_rate_cents);
+              const promo = Number(form.promo_rate_cents);
+              if (
+                !Number.isFinite(original) ||
+                original <= 0 ||
+                !Number.isFinite(promo) ||
+                promo <= 0 ||
+                promo >= original
+              ) {
+                setFormError(t("err_amount_invalid"));
+                return;
+              }
+              setFormError("");
+              saveMutation.mutate({ ...form, id: editPromo?.id });
+            }}
           >
             <div className="grid gap-4 sm:grid-cols-2">
               <div>
                 <label className="mb-1 block text-xs font-medium text-slate-600">{t("promo_hotel")}</label>
-                <Select value={form.hotel_id} onChange={(e) => setForm({ ...form, hotel_id: e.target.value, room_type_id: "" })}>
+                <Select required value={form.hotel_id} onChange={(e) => setForm({ ...form, hotel_id: e.target.value, room_type_id: "" })}>
                   <option value="">{t("promo_select_hotel")}</option>
                   {hotels.map((h) => (
                     <option key={h.id} value={String(h.id)}>{h.name}</option>
@@ -253,7 +280,7 @@ export default function PlatformPromotionsPage() {
               </div>
               <div>
                 <label className="mb-1 block text-xs font-medium text-slate-600">{t("promo_room_type")}</label>
-                <Select value={form.room_type_id} onChange={(e) => setForm({ ...form, room_type_id: e.target.value })}>
+                <Select required value={form.room_type_id} onChange={(e) => setForm({ ...form, room_type_id: e.target.value })}>
                   <option value="">{t("promo_select_room_type")}</option>
                   {roomTypes.map((rt) => (
                     <option key={rt.id} value={String(rt.id)}>{rt.name}</option>
@@ -265,13 +292,13 @@ export default function PlatformPromotionsPage() {
             <Input label={t("promo_title")} value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} placeholder={t("promo_title_placeholder")} />
 
             <div className="grid gap-4 sm:grid-cols-2">
-              <Input label={t("promo_starts_on")} type="date" value={form.starts_on} onChange={(e) => setForm({ ...form, starts_on: e.target.value })} />
-              <Input label={t("promo_ends_on")} type="date" value={form.ends_on} onChange={(e) => setForm({ ...form, ends_on: e.target.value })} />
+              <Input label={t("promo_starts_on")} type="date" required value={form.starts_on} onChange={(e) => setForm({ ...form, starts_on: e.target.value })} />
+              <Input label={t("promo_ends_on")} type="date" required min={form.starts_on} value={form.ends_on} onChange={(e) => setForm({ ...form, ends_on: e.target.value })} />
             </div>
 
             <div className="grid gap-4 sm:grid-cols-3">
-              <Input label={t("promo_original_rate")} type="number" min="0" step="1" value={form.original_rate_cents} onChange={(e) => setForm({ ...form, original_rate_cents: e.target.value })} />
-              <Input label={t("promo_promo_rate")} type="number" min="0" step="1" value={form.promo_rate_cents} onChange={(e) => setForm({ ...form, promo_rate_cents: e.target.value })} />
+              <Input label={t("promo_original_rate")} type="number" min="1" step="1" required value={form.original_rate_cents} onChange={(e) => setForm({ ...form, original_rate_cents: e.target.value })} />
+              <Input label={t("promo_promo_rate")} type="number" min="1" step="1" required value={form.promo_rate_cents} onChange={(e) => setForm({ ...form, promo_rate_cents: e.target.value })} />
               <Input label={t("promo_fee")} type="number" min="0" step="1" value={form.fee_cents} onChange={(e) => setForm({ ...form, fee_cents: e.target.value })} />
             </div>
 
@@ -294,6 +321,7 @@ export default function PlatformPromotionsPage() {
               </div>
             </div>
 
+            {formError && <p className="text-sm text-red-600" role="alert">{formError}</p>}
             <Button type="submit" disabled={saveMutation.isPending}>{saveMutation.isPending ? t("processing") : t("save")}</Button>
           </form>
         </Modal>

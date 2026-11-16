@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import Image from "next/image";
 import { notFound } from "next/navigation";
@@ -8,6 +9,7 @@ import { StarsDisplay } from "@/components/StarsDisplay";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import { API_URL } from "@/lib/api";
 import { formatMoney } from "@/lib/format";
+import { pageMetadata } from "@/lib/seo";
 import type { PublicHotel } from "@/types/dto";
 
 async function fetchHotel(slug: string): Promise<PublicHotel | null> {
@@ -21,9 +23,31 @@ async function fetchHotel(slug: string): Promise<PublicHotel | null> {
   }
 }
 
-export async function generateMetadata({ params }: { params: { slug: string } }) {
+export async function generateMetadata({
+  params,
+}: {
+  params: { slug: string };
+}): Promise<Metadata> {
   const hotel = await fetchHotel(params.slug);
-  return { title: hotel ? `${hotel.name} — Sunuhotel` : "Hôtel introuvable — Sunuhotel" };
+  if (!hotel) {
+    return {
+      title: "Hôtel introuvable",
+      description: "Cet hôtel n'est pas disponible sur Sunuhotel.",
+      robots: { index: false, follow: false },
+    };
+  }
+
+  const location = [hotel.city, hotel.country].filter(Boolean).join(", ");
+  const rating = hotel.rating?.average
+    ? ` Noté ${hotel.rating.average}/5 par ${hotel.rating.count} voyageur(s).`
+    : "";
+
+  return pageMetadata({
+    title: hotel.name,
+    description: `Réservez votre séjour à ${hotel.name}${location ? ` (${location})` : ""} : chambres, tarifs et disponibilités en temps réel.${rating}`,
+    path: `/guest/${params.slug}`,
+    image: hotel.images?.[0]?.image_url ?? hotel.logo_url ?? undefined,
+  });
 }
 
 export default async function GuestPage({ params }: { params: { slug: string } }) {
@@ -51,10 +75,14 @@ export default async function GuestPage({ params }: { params: { slug: string } }
           <div className="mb-6">
             <h3 className="text-lg font-semibold text-slate-900 mb-3">Hotel photos</h3>
             <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-              {hotel.images.map((img) => (
+              {hotel.images.map((img, index) => (
                 <figure key={img.id} className="rounded-xl overflow-hidden border border-slate-200">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={img.image_url} alt="" className="w-full h-40 object-cover" />
+                  <img
+                    src={img.image_url}
+                    alt={`${hotel.name} — photo ${index + 1}`}
+                    className="w-full h-40 object-cover"
+                  />
                 </figure>
               ))}
             </div>
@@ -100,19 +128,19 @@ export default async function GuestPage({ params }: { params: { slug: string } }
                     {rt.promo_rate_cents ? (
                       <p className="text-sm font-bold text-amber-700">
                         {formatMoney(rt.promo_rate_cents, hotel.currency)}
-                        <span className="ml-1 text-xs font-medium text-slate-400">/ nuit</span>
+                        <span className="ml-1 text-xs font-medium text-slate-500">/ nuit</span>
                       </p>
                     ) : (
                       <p className="text-sm font-bold text-amber-700">
                         {formatMoney(rt.nightly_rate_cents ?? rt.base_rate_cents, hotel.currency)}
-                        <span className="ml-1 text-xs font-medium text-slate-400">/ nuit</span>
+                        <span className="ml-1 text-xs font-medium text-slate-500">/ nuit</span>
                       </p>
                     )}
                   </div>
                 </div>
                 {rt.promo_rate_cents != null && rt.original_rate_cents != null && (
                   <p className="mt-2 flex flex-wrap items-center gap-2">
-                    <span className="text-xs text-slate-400 line-through">
+                    <span className="text-xs text-slate-500 line-through">
                       {formatMoney(rt.original_rate_cents, hotel.currency)}
                     </span>
                     <span className="inline-block rounded-full bg-amber-50 px-2 py-0.5 text-xs font-semibold text-amber-700">

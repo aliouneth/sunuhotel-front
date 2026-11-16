@@ -133,7 +133,7 @@ export default function PlatformCountryTaxPage() {
           >
             <div>
               <label className="mb-1 block text-xs font-medium text-slate-600">{t("country_tax_country")}</label>
-              <Select value={form.country_code} onChange={(e) => setForm({ ...form, country_code: e.target.value })}>
+              <Select required value={form.country_code} onChange={(e) => setForm({ ...form, country_code: e.target.value })}>
                 <option value="">{t("country_tax_select_country")}</option>
                 <option value="SN">SN · Sénégal</option>
                 <option value="CI">CI · Côte d&apos;Ivoire</option>
@@ -147,6 +147,7 @@ export default function PlatformCountryTaxPage() {
               label={t("country_tax_rate_label")}
               type="number"
               min="0"
+              max="100"
               step="0.1"
               value={form.tax_rate}
               onChange={(e) => setForm({ ...form, tax_rate: e.target.value })}

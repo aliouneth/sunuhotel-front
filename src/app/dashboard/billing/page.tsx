@@ -1,8 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { api } from "@/lib/api";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { useLocale } from "@/i18n/LocaleProvider";
 import { useAuth } from "@/context/AuthProvider";
 import { can } from "@/lib/permissions";
@@ -42,9 +42,7 @@ const badgeTone = (status: string) =>
 export default function BillingPage() {
   const { t, locale } = useLocale();
   const { user } = useAuth();
-  const qc = useQueryClient();
   const [payError, setPayError] = useState<string | null>(null);
-  const [returned, setReturned] = useState(false);
 
   const canPay = can(user, "payments.manage");
 
@@ -63,18 +61,6 @@ export default function BillingPage() {
     },
     onError: (e) => setPayError((e as Error).message || t("payment_start_error")),
   });
-
-  // PayDunya redirects back here with ?token=... after checkout. The IPN that
-  // actually settles the invoice can land a beat later, so refresh a few times.
-  useEffect(() => {
-    const token = new URLSearchParams(window.location.search).get("token");
-    if (!token) return;
-    setReturned(true);
-    const timers = [1200, 3000, 6000].map((ms) =>
-      window.setTimeout(() => qc.invalidateQueries({ queryKey: ["billing"] }), ms),
-    );
-    return () => timers.forEach((id) => window.clearTimeout(id));
-  }, [qc]);
 
   const statusLabel = (status: string) =>
     status === "paid"
@@ -117,11 +103,6 @@ export default function BillingPage() {
     <div className="space-y-6">
       <PageHeader title={t("billing_title")} subtitle={t("billing_sub")} />
 
-      {returned ? (
-        <div className="rounded-lg border border-blue-200 bg-blue-50 px-4 py-3 text-sm text-blue-700">
-          {t("payment_checking")}
-        </div>
-      ) : null}
       {payError ? <ErrorBox message={payError} /> : null}
 
       <div className="grid gap-4 md:grid-cols-2">
@@ -178,7 +159,7 @@ export default function BillingPage() {
                         {t("pay_online")}
                       </Button>
                     ) : (
-                      <span className="text-sm text-slate-400">—</span>
+                      <span className="text-sm text-slate-500">—</span>
                     )}
                   </td>
                 </tr>

@@ -10,6 +10,7 @@ import { useAuth } from "@/context/AuthProvider";
 import { addDaysISO, nightsBetween, todayISO, formatMoney } from "@/lib/format";
 import { Badge, Button, Card, CardHeader, ErrorBox, Fieldset, Input, PageHeader, Spinner } from "@/components/ui";
 import type { AvailabilityResult, Guest } from "@/types/dto";
+import { isEmail } from "@/lib/validation";
 
 export default function NewBookingPage() {
   const router = useRouter();
@@ -91,8 +92,16 @@ export default function NewBookingPage() {
   async function submit(e: React.FormEvent) {
     e.preventDefault();
     const isReturning = matchedGuest !== null;
+    if (!haveDates) {
+      setError(t("dates_invalid"));
+      return;
+    }
     if (!isReturning && (!guestForm.first_name.trim() || !guestForm.last_name.trim())) {
-      setError("Saisissez le prénom et le nom du client.");
+      setError(t("err_required"));
+      return;
+    }
+    if (guestForm.email.trim() && !isEmail(guestForm.email)) {
+      setError(t("err_email_invalid"));
       return;
     }
     if (selected.length === 0) {
@@ -161,10 +170,10 @@ export default function NewBookingPage() {
           )}
 
           <Fieldset>
-            <Input label={t("persons")} type="number" min={1} max={50} value={adults} onChange={(e) => setAdults(e.target.value)} />
+            <Input label={t("persons")} type="number" min={1} max={50} required value={adults} onChange={(e) => setAdults(e.target.value)} />
             <div className="grid gap-3 sm:grid-cols-2">
-              <Input label={t("date_from")} type="date" value={checkIn} onChange={(e) => { setCheckIn(e.target.value); setSelected([]); }} />
-              <Input label={t("date_to")} type="date" value={checkOut} onChange={(e) => { setCheckOut(e.target.value); setSelected([]); }} min={checkIn} />
+              <Input label={t("date_from")} type="date" required value={checkIn} onChange={(e) => { setCheckIn(e.target.value); setSelected([]); }} />
+              <Input label={t("date_to")} type="date" required value={checkOut} onChange={(e) => { setCheckOut(e.target.value); setSelected([]); }} min={checkIn} />
             </div>
           </Fieldset>
 
@@ -208,7 +217,7 @@ export default function NewBookingPage() {
                         </span>
                         <span className="mr-3 text-sm font-medium text-slate-700">
                           {formatMoney(room.rate_cents ?? 0, currency, locale)}
-                          <span className="ml-1 text-xs font-normal text-slate-400">{t("per_night")}</span>
+                          <span className="ml-1 text-xs font-normal text-slate-500">{t("per_night")}</span>
                         </span>
                         <Badge tone={room.status === "dirty" ? "amber" : "green"}>{room.status}</Badge>
                       </label>

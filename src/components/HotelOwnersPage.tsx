@@ -23,15 +23,15 @@ export function HotelOwnersPage() {
   return (
     <main className="min-h-screen bg-slate-50">
       <SiteHeader />
-      <section className="mx-auto max-w-6xl px-6 pb-4 pt-10">
-        <h1 className="text-center text-3xl font-bold tracking-tight text-amber-600 sm:text-4xl">
+      <section className="mx-auto max-w-6xl px-4 sm:px-6 pb-4 pt-10">
+        <h1 className="text-center text-3xl font-bold tracking-tight text-amber-700 sm:text-4xl">
           {t("owners_title")}
         </h1>
         <p className="mx-auto mt-4 max-w-xl text-center text-lg text-slate-600">
           {t("owners_sub")}
         </p>
       </section>
-      <section className="mx-auto max-w-6xl px-6 pb-12">
+      <section className="mx-auto max-w-6xl px-4 sm:px-6 pb-12">
         <h2 className="text-center text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl">
           {t("features_title")}
         </h2>

@@ -21,7 +21,7 @@ export function PricingSection() {
   };
 
   return (
-    <section id="pricing" className="mx-auto max-w-6xl px-6 pb-12">
+    <section id="pricing" className="mx-auto max-w-6xl px-4 sm:px-6 pb-12">
       <div className="text-center">
         <h2 className="text-balance text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl">
           {t("pricing_title")}
@@ -66,7 +66,7 @@ export function PricingSection() {
                       fill="currentColor"
                       className={
                         "mt-0.5 h-4 w-4 shrink-0 " +
-                        (highlight ? "text-amber-600" : "text-emerald-500")
+                        (highlight ? "text-amber-700" : "text-emerald-700")
                       }
                     >
                       <path
@@ -85,7 +85,7 @@ export function PricingSection() {
                 className={
                   "mt-8 rounded-lg px-5 py-2.5 text-center text-sm font-semibold text-white transition " +
                   (highlight
-                    ? "bg-amber-600 hover:bg-amber-700"
+                    ? "bg-amber-700 hover:bg-amber-800"
                     : "bg-slate-900 hover:bg-slate-800")
                 }
               >

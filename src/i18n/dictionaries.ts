@@ -1,4 +1,4 @@
-﻿import type { Locale } from "@/types/dto";
+import type { Locale } from "@/types/dto";
 
 type Dict = Record<string, string | Record<string, string>>;
 
@@ -14,7 +14,7 @@ const fr: Dict = {
   owners_title: "Propriétaires d'hôtels",
   owners_sub: "Créez votre hôtel sur la plateforme Sunuhotel et gérez réservations, employés, dépenses et tarifs depuis un seul tableau de bord.",
   owners_cta: "Créer mon hôtel",
-  owners_pricing_cta: "Voir les tarifs",
+  owners_pricing_cta: "Commencer ici",
   // Pricing
   pricing_title: "Des tarifs simples et clairs",
   pricing_sub: "Choisissez le plan adapté à la taille de votre établissement.",
@@ -83,6 +83,7 @@ const fr: Dict = {
   slug_hint: "Laissez vide pour un code automatique.",
   hotel_country: "Pays (code ISO, ex : SN)",
   hotel_currency: "Devise (ex : EUR)",
+  hotel_slug: "Code de l'hôtel (URL)",
   hotel_logo: "Logo de l'hôtel (optionnel)",
   hotel_logo_hint: "PNG, JPG ou WEBP — 2 Mo max",
   hotel_photos: "Photos de l'hotel",
@@ -260,6 +261,21 @@ const fr: Dict = {
   // Platform administration
   platform_title: "Plateforme",
   platform_sub: "Administration de la plateforme Sunuhotel",
+  analytics_title: "Mesure d'audience",
+  analytics_sub: "Trafic du site public et visiteurs uniques.",
+  analytics_views: "Pages vues",
+  analytics_visitors: "Visiteurs uniques",
+  analytics_today: "Aujourd'hui",
+  analytics_avg_daily: "Vues par jour",
+  analytics_trend: "Évolution du trafic",
+  analytics_top_pages: "Pages les plus consultées",
+  analytics_referrers: "Sources de trafic",
+  analytics_direct: "Accès direct",
+  analytics_empty: "Aucune donnée pour cette période. Les visites sont mesurées uniquement après consentement.",
+  analytics_days: "jours",
+  analytics_views_label: "Vues",
+  analytics_visitors_label: "Visiteurs",
+  analytics_previous: "vs période précédente",
   platform_hotels: "Hôtels",
   platform_guests: 'Clients',
   platform_plans: "Plans d'abonnement",
@@ -285,6 +301,13 @@ const fr: Dict = {
   thank_you_my_reservations: "Voir mes réservations",
   thank_you_missing: "Aucune information de paiement trouvée.",
   thank_you_retry: "Vous pouvez réessayer votre réservation.",
+  billing_thank_you_title: "Merci pour votre paiement",
+  billing_thank_you_subtitle: "Le paiement de votre facture de plateforme a bien été reçu.",
+  billing_thank_you_back: "Retour à la facturation",
+  billing_thank_you_retry: "Vous pouvez réessayer le paiement depuis la facturation.",
+  billing_thank_you_cta_billing: "Voir ma facturation",
+  billing_thank_you_cta_retry: "Réessayer le paiement",
+  billing_thank_you_cta_back: "Revenir à la facturation",
   hotel_label: "Hôtel",
   status_overdue: "En retard",
   status_suspended: "Suspendu",
@@ -380,8 +403,6 @@ const fr: Dict = {
   edit_user: "Modifier l'utilisateur",
   created_on: "Créé le",
   back_to_platform: "Retour à la plateforme",
-  demo_hint: "Démo : owner@sunuhotel.example / password",
-  demo_admin_hint: "Admin plateforme : admin@sunuhotel.example / password",
   edit_hotel: "Modifier l'hôtel",
   save_changes: "Enregistrer les modifications",
   settings_title: "Paramètres",
@@ -547,6 +568,107 @@ credit_wallet_sub: "Enregistrez un encaissement (versement) sur le portefeuille 
   import_history_by: "Par",
   import_history_date: "Date",
   import_history_result_value: "{created} créé(s), {duplicates} doublon(s), {skipped} ignoré(s)",
+  // Privacy policy
+  privacy_policy: "Politique de confidentialité",
+  privacy_title: "Politique de confidentialité",
+  privacy_updated: "Dernière mise à jour : 15 novembre 2026",
+  privacy_intro:
+    "La présente politique décrit la manière dont Sunuhotel collecte, utilise et protège les données personnelles des utilisateurs de la plateforme — propriétaires et personnel hôtelier, clients et visiteurs. En utilisant Sunuhotel, vous acceptez les pratiques décrites ci-dessous.",
+  privacy_data_title: "1. Données que nous collectons",
+  privacy_data_body:
+    "Nous collectons les données que vous nous fournissez directement (nom, adresse e-mail, numéro de téléphone, informations de connexion, données de votre établissement, réservations et profils clients) ainsi que les données générées par l'utilisation du service (journaux techniques, adresse IP, type de navigateur, pages consultées).",
+  privacy_data_body2:
+    "Les données de paiement liées à l'abonnement sont traitées par nos prestataires de paiement ; nous ne stockons pas les numéros de carte bancaire.",
+  privacy_use_title: "2. Utilisation des données",
+  privacy_use_body:
+    "Vos données sont utilisées pour fournir et sécuriser le service, gérer les réservations et les comptes, assurer la facturation de l'abonnement, répondre à vos demandes d'assistance, vous informer des évolutions du service et respecter nos obligations légales. Nous ne vendons pas vos données personnelles.",
+  privacy_legal_title: "3. Base légale",
+  privacy_legal_body:
+    "Le traitement repose sur l'exécution du contrat qui vous lie à Sunuhotel, sur notre intérêt légitime à améliorer et sécuriser le service, sur votre consentement lorsque la loi l'exige, et sur le respect de nos obligations légales.",
+  privacy_sharing_title: "4. Partage des données",
+  privacy_sharing_body:
+    "Les données peuvent être partagées avec nos sous-traitants (hébergement, paiement, envoi d'e-mails) agissant sur nos instructions, avec l'hôtel concerné pour la gestion d'une réservation, et avec les autorités lorsque la loi l'exige. Ces prestataires sont tenus à des obligations de confidentialité et de sécurité.",
+  privacy_retention_title: "5. Conservation des données",
+  privacy_retention_body:
+    "Les données sont conservées pendant la durée de votre compte puis pendant les délais légaux applicables (notamment comptables et fiscaux). À l'issue de ces périodes, elles sont supprimées ou anonymisées.",
+  privacy_security_title: "6. Sécurité",
+  privacy_security_body:
+    "Nous mettons en œuvre des mesures techniques et organisationnelles appropriées (contrôle d'accès, chiffrement des communications, sauvegardes) pour protéger vos données contre tout accès, modification ou divulgation non autorisés.",
+  privacy_cookies_title: "7. Cookies et stockage local",
+  privacy_cookies_body:
+    "Sunuhotel n'utilise pas de cookies publicitaires. Des cookies techniques et le stockage local du navigateur sont utilisés pour l'authentification, la sécurité et la mémorisation de votre langue. Votre choix de consentement y est également conservé. Vous pouvez les supprimer à tout moment via les paramètres de votre navigateur ou via le lien « Gérer les cookies » en bas de page.",
+  privacy_analytics_body:
+    "Lorsque vous acceptez la mesure d'audience, nous enregistrons de façon anonyme la page consultée, la source de trafic et un identifiant de visite dérivé d'un hachage éphémère, sans conserver votre adresse IP en clair. Ces données servent uniquement à produire des statistiques agrégées pour l'administrateur de la plateforme et sont supprimées après treize mois.",
+  privacy_rights_title: "8. Vos droits",
+  privacy_rights_body:
+    "Vous disposez d'un droit d'accès, de rectification, d'effacement, de limitation, d'opposition et de portabilité de vos données. Pour exercer ces droits, contactez-nous via les coordonnées ci-dessous. Vous pouvez également introduire une réclamation auprès de l'autorité de protection des données compétente.",
+  privacy_contact_title: "9. Contact",
+  privacy_contact_body:
+    "Pour toute question relative à cette politique ou à vos données personnelles, écrivez-nous en utilisant les coordonnées indiquées dans le pied de page.",
+  // Terms of use
+  terms_link: "Conditions générales d'utilisation",
+  terms_title: "Conditions générales d'utilisation",
+  terms_updated: "Dernière mise à jour : 15 novembre 2026",
+  terms_intro:
+    "Les présentes conditions générales d'utilisation (CGU) régissent l'accès et l'utilisation de la plateforme Sunuhotel, service de gestion hôtelière destiné aux établissements hôteliers et à leurs clients. En créant un compte ou en utilisant la plateforme, vous acceptez sans réserve les présentes conditions.",
+  terms_account_title: "1. Compte et accès",
+  terms_account_body:
+    "La création d'un compte est réservée aux personnes disposant de la capacité juridique nécessaire. Vous vous engagez à fournir des informations exactes et à jour, à préserver la confidentialité de vos identifiants et à nous notifier sans délai toute utilisation non autorisée de votre compte.",
+  terms_service_title: "2. Description du service",
+  terms_service_body:
+    "Sunuhotel met à disposition un ensemble d'outils de gestion hôtelière : réservations, chambres, tarifs, employés, dépenses et rapports. Le service est fourni « en l'état » ; nous pouvons le faire évoluer, suspendre certaines fonctionnalités ou en modifier les caractéristiques, dans la mesure permise par la loi.",
+  terms_pricing_title: "3. Abonnements et paiement",
+  terms_pricing_body:
+    "L'accès à certaines fonctionnalités est soumis à un abonnement payant dont les tarifs sont indiqués sur la plateforme. Les abonnements sont facturés à l'avance et ne sont pas remboursables sauf disposition légale contraire. Le défaut de paiement peut entraîner la suspension du compte.",
+  terms_obligations_title: "4. Obligations de l'utilisateur",
+  terms_obligations_body:
+    "Vous vous engagez à utiliser la plateforme conformément à la loi et aux présentes conditions, à ne pas porter atteinte aux droits de tiers, à ne pas tenter d'accéder à des données non autorisées et à ne pas perturber le fonctionnement du service. Vous êtes responsable des données que vous enregistrez, y compris les données de vos clients.",
+  terms_ip_title: "5. Propriété intellectuelle",
+  terms_ip_body:
+    "La plateforme, son code, ses marques et ses contenus restent la propriété exclusive de Sunuhotel ou de ses partenaires. Aucune disposition des présentes ne vous confère un droit de propriété sur ces éléments. Les données que vous enregistrez demeurent votre propriété.",
+  terms_liability_title: "6. Responsabilité",
+  terms_liability_body:
+    "Nous nous efforçons d'assurer la disponibilité et la fiabilité du service, sans garantie d'absence d'interruption ou d'erreur. Dans les limites permises par la loi, Sunuhotel ne saurait être tenu responsable des dommages indirects résultant de l'utilisation ou de l'impossibilité d'utiliser la plateforme.",
+  terms_termination_title: "7. Suspension et résiliation",
+  terms_termination_body:
+    "Nous pouvons suspendre ou résilier votre accès en cas de violation des présentes conditions, de non-paiement ou d'utilisation frauduleuse. Vous pouvez résilier votre compte à tout moment. La résiliation prend effet à la fin de la période d'abonnement en cours.",
+  terms_changes_title: "8. Modification des conditions",
+  terms_changes_body:
+    "Nous pouvons modifier les présentes conditions à tout moment. Les modifications substantielles vous seront notifiées avant leur entrée en vigueur. La poursuite de l'utilisation du service après cette date vaut acceptation des nouvelles conditions.",
+  terms_law_title: "9. Droit applicable",
+  terms_law_body:
+    "Les présentes conditions sont soumises au droit sénégalais. En cas de litige, les parties s'efforceront de trouver une solution amiable avant toute action judiciaire devant les juridictions compétentes.",
+  terms_contact_title: "10. Contact",
+  terms_contact_body:
+    "Pour toute question relative aux présentes conditions, contactez-nous via les coordonnées indiquées dans le pied de page.",
+  // Cookie consent
+  cookie_banner_title: "Cookies et confidentialité",
+  cookie_banner_text:
+    "Sunuhotel utilise des cookies techniques et le stockage local nécessaires à votre connexion, à la sécurité et à la mémorisation de votre langue. Avec votre accord, nous mesurons aussi l'audience du site de façon anonyme, sans cookie publicitaire. Vous pouvez tout accepter ou conserver uniquement les cookies essentiels.",
+  cookie_accept: "Tout accepter",
+  cookie_reject: "Cookies essentiels uniquement",
+  cookie_manage: "Gérer les cookies",
+  // 404
+  not_found_eyebrow: "Erreur 404",
+  not_found_title: "Cette page n'existe pas",
+  not_found_text:
+    "La page que vous cherchez a peut-être été déplacée, renommée ou n'a jamais existé. Pas d'inquiétude : votre prochaine réservation est à un clic.",
+  not_found_home: "Retour à l'accueil",
+  not_found_owners: "Espace hôteliers",
+  not_found_help: "Besoin d'aide ?",
+  // Form validation
+  err_required: "Ce champ est obligatoire.",
+  err_email_invalid: "Saisissez une adresse e-mail valide.",
+  err_password_rule: "Au moins 10 caractères, avec des lettres et des chiffres.",
+  err_password_mismatch: "Les mots de passe ne correspondent pas.",
+  err_phone_invalid: "Saisissez un numéro de téléphone valide (chiffres, espaces, +).",
+  err_slug_invalid: "Utilisez uniquement des minuscules, chiffres et tirets.",
+  err_country_invalid: "Saisissez un code pays à 2 lettres (ex. SN).",
+  err_currency_invalid: "Saisissez un code devise à 3 lettres (ex. EUR).",
+  err_logo_invalid: "Le logo doit être un PNG, JPG ou WebP de 2 Mo maximum.",
+  err_spam: "Votre demande a été bloquée. Patientez quelques secondes puis réessayez.",
+  err_rating_required: "Sélectionnez une note entre 1 et 5 étoiles.",
+  err_amount_invalid: "Saisissez un montant valide supérieur à 0.",
 };
 
 const en: Dict = {
@@ -622,6 +744,7 @@ const en: Dict = {
   slug_hint: "Leave empty to auto-generate a code.",
   hotel_country: "Country (ISO code, e.g. SN)",
   hotel_currency: "Currency (e.g. EUR)",
+  hotel_slug: "Hotel code (URL)",
   hotel_photos: "Hotel photos",
   hotel_photos_hint: "PNG, JPG or WEBP. Maximum 5 images.",
   hotel_logo: "Hotel logo (optional)",
@@ -806,6 +929,21 @@ const en: Dict = {
   // Platform administration
   platform_title: "Platform",
   platform_sub: "Sunuhotel platform administration",
+  analytics_title: "Audience",
+  analytics_sub: "Public site traffic and unique visitors.",
+  analytics_views: "Page views",
+  analytics_visitors: "Unique visitors",
+  analytics_today: "Today",
+  analytics_avg_daily: "Views per day",
+  analytics_trend: "Traffic trend",
+  analytics_top_pages: "Top pages",
+  analytics_referrers: "Traffic sources",
+  analytics_direct: "Direct",
+  analytics_empty: "No data for this period. Visits are measured only after consent.",
+  analytics_days: "days",
+  analytics_views_label: "Views",
+  analytics_visitors_label: "Visitors",
+  analytics_previous: "vs previous period",
   platform_hotels: "Hotels",
   platform_guests: 'Guests',
   platform_plans: "Subscription plans",
@@ -832,6 +970,13 @@ const en: Dict = {
   thank_you_my_reservations: "View my reservations",
   thank_you_missing: "No payment information found.",
   thank_you_retry: "You can try booking again.",
+  billing_thank_you_title: "Thank you for your payment",
+  billing_thank_you_subtitle: "Your platform invoice payment has been received.",
+  billing_thank_you_back: "Back to billing",
+  billing_thank_you_retry: "You can try the payment again from billing.",
+  billing_thank_you_cta_billing: "View my billing",
+  billing_thank_you_cta_retry: "Try payment again",
+  billing_thank_you_cta_back: "Return to billing",
   hotel_label: "Hotel",
   status_overdue: "Overdue",
   status_suspended: "Suspended",
@@ -926,8 +1071,6 @@ const en: Dict = {
   edit_user: "Edit user",
   created_on: "Created",
   back_to_platform: "Back to platform",
-  demo_hint: "Demo: owner@sunuhotel.example / password",
-  demo_admin_hint: "Platform admin: admin@sunuhotel.example / password",
   edit_hotel: "Edit hotel",
   save_changes: "Save changes",
   settings_title: "Settings",
@@ -1084,6 +1227,107 @@ const en: Dict = {
   import_history_by: "By",
   import_history_date: "Date",
   import_history_result_value: "{created} created, {duplicates} duplicate(s), {skipped} skipped",
+  // Privacy policy
+  privacy_policy: "Privacy policy",
+  privacy_title: "Privacy policy",
+  privacy_updated: "Last updated: November 15, 2026",
+  privacy_intro:
+    "This policy describes how Sunuhotel collects, uses and protects the personal data of platform users — hotel owners and staff, guests and visitors. By using Sunuhotel, you accept the practices described below.",
+  privacy_data_title: "1. Data we collect",
+  privacy_data_body:
+    "We collect data you provide directly (name, email address, phone number, login information, your property's data, bookings and guest profiles) as well as data generated by your use of the service (technical logs, IP address, browser type, pages visited).",
+  privacy_data_body2:
+    "Subscription payment data is processed by our payment providers; we do not store card numbers.",
+  privacy_use_title: "2. How we use data",
+  privacy_use_body:
+    "Your data is used to provide and secure the service, manage bookings and accounts, handle subscription billing, respond to your support requests, inform you about service updates and comply with our legal obligations. We do not sell your personal data.",
+  privacy_legal_title: "3. Legal basis",
+  privacy_legal_body:
+    "Processing is based on the performance of the contract between you and Sunuhotel, our legitimate interest in improving and securing the service, your consent where required by law, and compliance with our legal obligations.",
+  privacy_sharing_title: "4. Data sharing",
+  privacy_sharing_body:
+    "Data may be shared with our processors (hosting, payment, email delivery) acting on our instructions, with the relevant hotel for managing a booking, and with authorities where required by law. These providers are bound by confidentiality and security obligations.",
+  privacy_retention_title: "5. Data retention",
+  privacy_retention_body:
+    "Data is kept for the lifetime of your account and then for the applicable legal periods (in particular accounting and tax). After these periods, it is deleted or anonymised.",
+  privacy_security_title: "6. Security",
+  privacy_security_body:
+    "We implement appropriate technical and organisational measures (access control, encrypted communications, backups) to protect your data against unauthorised access, modification or disclosure.",
+  privacy_cookies_title: "7. Cookies and local storage",
+  privacy_cookies_body:
+    "Sunuhotel does not use advertising cookies. Technical cookies and browser local storage are used for authentication, security and remembering your language. Your consent choice is also stored there. You can delete them at any time in your browser settings or via the “Manage cookies” link in the footer.",
+  privacy_analytics_body:
+    "When you accept audience measurement, we anonymously record the page viewed, the traffic source and a visit identifier derived from an ephemeral hash, without storing your IP address in clear text. This data is used only to produce aggregate statistics for the platform administrator and is deleted after thirteen months.",
+  privacy_rights_title: "8. Your rights",
+  privacy_rights_body:
+    "You have the right to access, rectify, erase, restrict, object to and port your data. To exercise these rights, contact us using the details below. You may also lodge a complaint with the competent data protection authority.",
+  privacy_contact_title: "9. Contact",
+  privacy_contact_body:
+    "For any question about this policy or your personal data, write to us using the contact details shown in the footer.",
+  // Terms of use
+  terms_link: "Terms of use",
+  terms_title: "Terms of use",
+  terms_updated: "Last updated: November 15, 2026",
+  terms_intro:
+    "These terms of use govern access to and use of the Sunuhotel platform, a hotel management service for hotel establishments and their guests. By creating an account or using the platform, you fully accept these terms.",
+  terms_account_title: "1. Account and access",
+  terms_account_body:
+    "Accounts may only be created by persons with the required legal capacity. You agree to provide accurate and up-to-date information, keep your credentials confidential and notify us promptly of any unauthorised use of your account.",
+  terms_service_title: "2. Service description",
+  terms_service_body:
+    "Sunuhotel provides a set of hotel management tools: bookings, rooms, rates, staff, expenses and reports. The service is provided \"as is\"; we may evolve it, suspend certain features or change its characteristics to the extent permitted by law.",
+  terms_pricing_title: "3. Subscriptions and payment",
+  terms_pricing_body:
+    "Access to certain features requires a paid subscription, the prices of which are shown on the platform. Subscriptions are billed in advance and are non-refundable unless required by law. Failure to pay may result in account suspension.",
+  terms_obligations_title: "4. User obligations",
+  terms_obligations_body:
+    "You agree to use the platform in accordance with the law and these terms, not to infringe the rights of third parties, not to attempt to access unauthorised data and not to disrupt the operation of the service. You are responsible for the data you record, including your guests' data.",
+  terms_ip_title: "5. Intellectual property",
+  terms_ip_body:
+    "The platform, its code, trademarks and content remain the exclusive property of Sunuhotel or its partners. Nothing in these terms grants you any ownership right over these elements. The data you record remains your property.",
+  terms_liability_title: "6. Liability",
+  terms_liability_body:
+    "We strive to ensure the availability and reliability of the service, without guaranteeing the absence of interruption or error. To the extent permitted by law, Sunuhotel cannot be held liable for indirect damages resulting from the use or inability to use the platform.",
+  terms_termination_title: "7. Suspension and termination",
+  terms_termination_body:
+    "We may suspend or terminate your access in the event of a breach of these terms, non-payment or fraudulent use. You may terminate your account at any time. Termination takes effect at the end of the current subscription period.",
+  terms_changes_title: "8. Changes to the terms",
+  terms_changes_body:
+    "We may modify these terms at any time. Material changes will be notified to you before they take effect. Continued use of the service after that date constitutes acceptance of the new terms.",
+  terms_law_title: "9. Governing law",
+  terms_law_body:
+    "These terms are governed by Senegalese law. In the event of a dispute, the parties will strive to reach an amicable solution before any legal action before the competent courts.",
+  terms_contact_title: "10. Contact",
+  terms_contact_body:
+    "For any question about these terms, contact us using the contact details shown in the footer.",
+  // Cookie consent
+  cookie_banner_title: "Cookies and privacy",
+  cookie_banner_text:
+    "Sunuhotel uses technical cookies and local storage required for your login, security and language preference. With your consent, we also measure site audience anonymously, without advertising cookies. You can accept all or keep essential cookies only.",
+  cookie_accept: "Accept all",
+  cookie_reject: "Essential cookies only",
+  cookie_manage: "Manage cookies",
+  // 404
+  not_found_eyebrow: "Error 404",
+  not_found_title: "This page does not exist",
+  not_found_text:
+    "The page you are looking for may have been moved, renamed or never existed. No worries: your next booking is only one click away.",
+  not_found_home: "Back to home",
+  not_found_owners: "For hotel owners",
+  not_found_help: "Need help?",
+  // Form validation
+  err_required: "This field is required.",
+  err_email_invalid: "Enter a valid email address.",
+  err_password_rule: "At least 10 characters, including letters and numbers.",
+  err_password_mismatch: "Passwords do not match.",
+  err_phone_invalid: "Enter a valid phone number (digits, spaces, +).",
+  err_slug_invalid: "Use lowercase letters, digits and hyphens only.",
+  err_country_invalid: "Enter a 2-letter country code (e.g. SN).",
+  err_currency_invalid: "Enter a 3-letter currency code (e.g. EUR).",
+  err_logo_invalid: "The logo must be a PNG, JPG or WebP file of 2 MB max.",
+  err_spam: "Your request was blocked. Please wait a few seconds and try again.",
+  err_rating_required: "Select a rating between 1 and 5 stars.",
+  err_amount_invalid: "Enter a valid amount greater than 0.",
 };
 
 export const dictionaries: Record<Locale, Dict> = { fr, en };

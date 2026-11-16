@@ -24,6 +24,7 @@ const tabs: { key: string; label: string }[] = [
   { key: "active", label: "active_status" },
   { key: "suspended", label: "suspended_status" },
   { key: "rejected", label: "rejected_status" },
+  { key: "recent", label: "Recently added" },
 ];
 
 export default function PlatformHotelsPage() {
@@ -33,8 +34,23 @@ export default function PlatformHotelsPage() {
   const [search, setSearch] = useState("");
   const [query, setQuery] = useState("");
   const [page, setPage] = useState(1);
+  const [sort, setSort] = useState("name");
   const [busyId, setBusyId] = useState<number | null>(null);
   const [creating, setCreating] = useState(false);
+
+  // "Recently added" is a sort-based view, not a status filter.
+  const activeTab = status === "" && sort === "recent" ? "recent" : status;
+
+  function pick(next: string) {
+    setPage(1);
+    if (next === "recent") {
+      setStatus("");
+      setSort("recent");
+    } else {
+      setStatus(next);
+      setSort("name");
+    }
+  }
 
   const { data: summary } = useQuery<{ data: PlatformSummary }>({
     queryKey: ["platform-summary"],
@@ -42,19 +58,14 @@ export default function PlatformHotelsPage() {
   });
 
   const { data, error, isLoading, refetch } = useQuery<{ data: Paginated<PlatformHotel> }>({
-    queryKey: ["platform-hotels", status, query, page],
+    queryKey: ["platform-hotels", status, query, page, sort],
     queryFn: () => {
-      const params = new URLSearchParams({ page: String(page), per_page: "25", sort: "name" });
+      const params = new URLSearchParams({ page: String(page), per_page: "25", sort });
       if (status) params.set("status", status);
       if (query) params.set("search", query);
       return api<{ data: Paginated<PlatformHotel> }>(`/platform/hotels?${params.toString()}`);
     },
   });
-
-  function pick(next: string) {
-    setStatus(next);
-    setPage(1);
-  }
 
   function runSearch(e: React.FormEvent) {
     e.preventDefault();
@@ -135,10 +146,10 @@ export default function PlatformHotelsPage() {
               key={tab.key}
               onClick={() => pick(tab.key)}
               className={`rounded-full px-3.5 py-1.5 text-xs font-medium transition ${
-                status === tab.key ? "bg-slate-900 text-white" : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+                activeTab === tab.key ? "bg-slate-900 text-white" : "bg-slate-100 text-slate-600 hover:bg-slate-200"
               }`}
             >
-              {tab.key ? t(tab.label) : t("all")}
+              {tab.key === "recent" ? "Recently added" : (tab.key ? t(tab.label) : t("all"))}
             </button>
           ))}
         </div>
@@ -148,13 +159,13 @@ export default function PlatformHotelsPage() {
           <Spinner />
         ) : items && items.length ? (
           <>
-            <Table headers={["", t("platform_hotels"), t("owner"), t("hotel_email"), t("city_label"), t("status"), ""]}>
+            <Table headers={["", t("platform_hotels"), t("owner"), t("hotel_email"), t("city_label"), t("created_on"), t("status"), ""]}>
               {items.map((h) => (
                 <tr key={h.id} className="hover:bg-slate-50">
                   <td className="px-5 py-3">
-                    <span className="flex size-9 flex-none items-center justify-center overflow-hidden rounded-lg bg-amber-600 text-xs font-bold text-white ring-1 ring-slate-200">
+                    <span className="flex size-9 flex-none items-center justify-center overflow-hidden rounded-lg bg-amber-700 text-xs font-bold text-white ring-1 ring-slate-200">
                       {h.logo_url ? (
-                        <Image src={h.logo_url} alt="" width={40} height={40} className="size-full bg-white object-contain" />
+                        <Image src={h.logo_url} alt={h.name} width={40} height={40} className="size-full bg-white object-contain" />
                       ) : (
                         h.name.charAt(0)
                       )}
@@ -162,7 +173,7 @@ export default function PlatformHotelsPage() {
                   </td>
                   <td className="px-5 py-3">
                     <p className="font-medium text-slate-900">{h.name}</p>
-                    <p className="text-xs text-slate-400">
+                    <p className="text-xs text-slate-500">
                       {h.slug} · {h.users_count} {t("persons").toLowerCase()} · {h.rooms_count} {t("room")}s
                     </p>
                   </td>
@@ -170,41 +181,41 @@ export default function PlatformHotelsPage() {
                     {h.owner ? (
                       <div>
                         <p className="text-slate-900">{h.owner.name}</p>
-                        <p className="text-xs text-slate-400">{h.owner.email}</p>
+                        <p className="text-xs text-slate-500">{h.owner.email}</p>
                       </div>
                     ) : (
                       "—"
                     )}
                   </td>
-                  {/* The hotel record's own address, which is what an admin
-                      edits on the hotel page. Kept separate from the owner
-                      above because the two are unrelated and often differ. */}
                   <td className="px-5 py-3 text-slate-600">
                     {h.email ?? "—"}
                   </td>
                   <td className="px-5 py-3 text-slate-600">{h.city ?? "—"}</td>
+                  <td className="px-5 py-3 text-slate-600 text-xs">
+                    {h.created_at ? new Date(h.created_at).toLocaleDateString() : "—"}
+                  </td>
                   <td className="px-5 py-3">
                     <Badge tone={toneByStatus[h.status]}>{t(statusLabelKey[h.status])}</Badge>
                   </td>
                   <td className="px-5 py-3">
-                    <div className="flex gap-1.5">
+                    <div className="flex flex-col gap-1.5">
                       <Link href={`/platform/hotels/${h.id}`}>
-                        <Button size="sm" variant="secondary">
+                        <Button size="sm" variant="secondary" className="w-full">
                           {t("edit")}
                         </Button>
                       </Link>
                       {h.status !== "active" && (
-                        <Button size="sm" variant="success" loading={busyId === h.id} onClick={() => act(h, "approve")}>
+                        <Button size="sm" variant="success" className="w-full" loading={busyId === h.id} onClick={() => act(h, "approve")}>
                           {t("approve")}
                         </Button>
                       )}
                       {h.status === "active" && (
-                        <Button size="sm" variant="secondary" onClick={() => act(h, "suspend")}>
+                        <Button size="sm" variant="secondary" className="w-full" onClick={() => act(h, "suspend")}>
                           {t("suspend")}
                         </Button>
                       )}
                       {h.status !== "rejected" && (
-                        <Button size="sm" variant="danger" onClick={() => act(h, "reject")}>
+                        <Button size="sm" variant="danger" className="w-full" onClick={() => act(h, "reject")}>
                           {t("reject")}
                         </Button>
                       )}
@@ -216,13 +227,13 @@ export default function PlatformHotelsPage() {
             {pag && pag.last_page > 1 && (
               <div className="flex items-center justify-end gap-2 border-t border-slate-100 px-5 py-3">
                 <Button size="sm" variant="secondary" disabled={page <= 1} onClick={() => setPage(page - 1)}>
-                  ←
+                  ‹
                 </Button>
                 <span className="text-xs text-slate-500">
                   {pag.current_page} / {pag.last_page}
                 </span>
                 <Button size="sm" variant="secondary" disabled={page >= pag.last_page} onClick={() => setPage(page + 1)}>
-                  →
+                  ›
                 </Button>
               </div>
             )}
@@ -234,8 +245,8 @@ export default function PlatformHotelsPage() {
 
       {creating && <CreateHotelModal onClose={() => setCreating(false)} />}
 
-      <p className="text-xs text-slate-400">
-        <Link href="/guest/sunuhotel-dakar" className="underline">
+      <p className="text-xs text-slate-500">
+        <Link href="/" className="underline">
           {t("back_website")}
         </Link>
       </p>
@@ -320,9 +331,9 @@ function CreateHotelModal({ onClose }: { onClose: () => void }) {
         <div className="flex items-center gap-5">
           <div className="flex size-16 flex-none items-center justify-center overflow-hidden rounded-xl bg-white ring-1 ring-slate-200">
             {logoPreview ? (
-              <Image src={logoPreview} alt="" width={160} height={160} className="size-full object-contain" />
+              <Image src={logoPreview} alt={t("hotel_logo")} width={160} height={160} className="size-full object-contain" />
             ) : (
-              <span className="text-lg font-bold text-slate-300">S</span>
+              <span className="text-lg font-bold text-slate-500">S</span>
             )}
           </div>
           <div className="flex-1">
@@ -337,10 +348,10 @@ function CreateHotelModal({ onClose }: { onClose: () => void }) {
           </div>
         </div>
 
-        <div className="grid gap-4 sm:grid-cols-2">
-          <div className="sm:col-span-2">
-            <label className="mb-1 block text-sm font-medium text-slate-700">{t("hotel_photos")}</label>
-            <input
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
+          <div className="min-w-0 flex-1">
+            <Input
+              label={t("hotel_photos")}
               type="file"
               multiple
               accept="image/png,image/jpeg,image/webp"
@@ -351,14 +362,21 @@ function CreateHotelModal({ onClose }: { onClose: () => void }) {
             {imagePreviews.length > 0 && (
               <div className="mt-2 flex flex-wrap gap-2">
                 {imagePreviews.map((src, i) => (
-                  <Image key={i} src={src} alt="" width={64} height={64} className="size-16 rounded-lg border border-slate-200 object-cover" />
+                  <Image
+                    key={i}
+                    src={src}
+                    alt={`${form.name || t("hotel_name")} — photo ${i + 1}`}
+                    width={64}
+                    height={64}
+                    className="size-16 rounded-lg border border-slate-200 object-cover"
+                  />
                 ))}
               </div>
             )}
           </div>
-
-<HotelFields form={form} set={set} idPrefix="create" />
         </div>
+
+        <HotelFields form={form} set={set} idPrefix="create" />
 
         {error && <p className="text-sm text-red-600">{error}</p>}
 
