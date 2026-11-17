@@ -1,3 +1,11 @@
+// Origins allowed to embed the app in an <iframe>. `X-Frame-Options` is
+// deliberately not sent: it cannot express an origin allowlist, so framing is
+// controlled by the CSP `frame-ancestors` directive instead. Override in
+// production with FRAME_ANCESTORS="'self' https://example.com".
+const frameAncestors =
+  process.env.FRAME_ANCESTORS ??
+  "'self' https://mannakyaw.com https://*.mannakyaw.com";
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   poweredByHeader: false,
@@ -21,7 +29,9 @@ const nextConfig = {
             value: "max-age=63072000; includeSubDomains; preload",
           },
           { key: "X-Content-Type-Options", value: "nosniff" },
-          { key: "X-Frame-Options", value: "DENY" },
+          // X-Frame-Options cannot express an allowlist (DENY/SAMEORIGIN both
+          // break an embed from mannakyaw.com), so send CSP instead.
+          { key: "Content-Security-Policy", value: `frame-ancestors ${frameAncestors}` },
           { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
           {
             key: "Permissions-Policy",
