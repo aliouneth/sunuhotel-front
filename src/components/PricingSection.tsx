@@ -17,7 +17,14 @@ export function PricingSection() {
   const featureKeys: Record<PlanKey, string[]> = {
     starter: ["f1", "f2", "f3", "f4"],
     pro: ["f1", "f2", "f3", "f4", "f5", "f6"],
-    enterprise: ["f1", "f2", "f3", "f4", "f5"],
+    enterprise: ["f1", "f2", "f5"],
+  };
+
+  // Enterprise is quoted by phone/email instead of a listed monthly price.
+  const quotedOnRequest: Record<PlanKey, boolean> = {
+    starter: false,
+    pro: false,
+    enterprise: true,
   };
 
   return (
@@ -51,12 +58,18 @@ export function PricingSection() {
                 {t(`plan_${key}_sub`)}
               </p>
 
-              <p className="mt-6 flex items-baseline gap-1">
-                <span className="text-3xl font-bold tracking-tight text-slate-900">
+              {quotedOnRequest[key] ? (
+                <p className="mt-6 text-sm font-semibold leading-relaxed text-slate-700">
                   {t(`plan_${key}_price`)}
-                </span>
-                <span className="text-sm text-slate-500">{t("per_month")}</span>
-              </p>
+                </p>
+              ) : (
+                <p className="mt-6 flex items-baseline gap-1">
+                  <span className="text-3xl font-bold tracking-tight text-slate-900">
+                    {t(`plan_${key}_price`)}
+                  </span>
+                  <span className="text-sm text-slate-500">{t("per_month")}</span>
+                </p>
+              )}
 
               <ul className="mt-6 flex-1 space-y-2.5">
                 {features.map((f) => (
