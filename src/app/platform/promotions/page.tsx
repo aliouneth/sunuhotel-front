@@ -1,13 +1,15 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { api } from "@/lib/api";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useLocale } from "@/i18n/LocaleProvider";
 import { Button, Card, CardHeader, EmptyState, ErrorBox, Input, Modal, PageHeader, Select, Spinner, Table } from "@/components/ui";
 import { usePlatform } from "@/components/ui";
+import { sortHotelsByName } from "@/components/RoomTypesManager";
 import { formatMoney, todayISO, addDaysISO } from "@/lib/format";
+import type { PlatformHotel, Paginated } from "@/types/dto";
 
 export interface PlatformPromotion {
   id: number;
@@ -21,14 +23,6 @@ export interface PlatformPromotion {
   is_active: boolean;
   hotel?: { id: number; name: string; slug: string; status: string; currency: string };
   room_type?: { id: number; name: string };
-}
-
-export interface PlatformHotelLite {
-  id: number;
-  name: string;
-  slug: string;
-  status: string;
-  currency: string;
 }
 
 export interface PlatformRoomTypeLite {
@@ -66,12 +60,26 @@ const emptyForm: FormState = {
 const authHeaders = (token?: string): Record<string, string> =>
   token ? { Authorization: `Bearer ${token}` } : {};
 
+async function fetchAllHotels(): Promise<PlatformHotel[]> {
+  const all: PlatformHotel[] = [];
+  let page = 1;
+  let lastPage = 1;
+  do {
+    const res = await api<{ data: Paginated<PlatformHotel> }>(`/platform/hotels?per_page=100&page=${page}`);
+    all.push(...(res.data.data ?? []));
+    lastPage = res.data.last_page ?? 1;
+    page += 1;
+  } while (page <= lastPage);
+  return all;
+}
+
 export default function PlatformPromotionsPage() {
   const router = useRouter();
   const { t, locale } = useLocale();
   const { platformAdminToken } = usePlatform();
   const queryClient = useQueryClient();
   const [form, setForm] = useState<FormState>(emptyForm);
+  const [hotelQuery, setHotelQuery] = useState("");
   const [createOpen, setCreateOpen] = useState(false);
   const [editPromo, setEditPromo] = useState<PlatformPromotion | null>(null);
   const [formError, setFormError] = useState("");
@@ -83,16 +91,21 @@ export default function PlatformPromotionsPage() {
     enabled: Boolean(platformAdminToken),
   });
 
-  const { data: hotelsData } = useQuery({
-    queryKey: ["platform", "hotels", "lites"],
-    queryFn: () =>
-      api<{ data: { data: PlatformHotelLite[] } }>("/platform/hotels?per_page=100", {
-        headers: authHeaders(platformAdminToken),
-      }),
+  const { data: hotelsData, refetch: refetchHotels } = useQuery<PlatformHotel[]>({
+    queryKey: ["platform-hotels", "all"],
+    queryFn: fetchAllHotels,
     enabled: Boolean(platformAdminToken),
+    refetchOnMount: "always",
+    refetchOnWindowFocus: true,
   });
 
-  const hotels = hotelsData?.data?.data ?? [];
+  // Promotions only apply to active hotels, and the platform endpoint returns
+  // pending-first then newest-first, so sort alphabetically for a predictable
+  // dropdown.
+  const hotels = useMemo(
+    () => sortHotelsByName((hotelsData ?? []).filter((h) => h.status === "active")),
+    [hotelsData]
+  );
 
   const { data: roomTypesData } = useQuery({
     queryKey: ["platform", "promo-room-types", form.hotel_id],
@@ -165,6 +178,7 @@ export default function PlatformPromotionsPage() {
 
   const openCreate = () => {
     setForm(emptyForm);
+    setHotelQuery("");
     setEditPromo(null);
     setFormError("");
     setCreateOpen(true);
@@ -183,10 +197,20 @@ export default function PlatformPromotionsPage() {
       currency: promo.currency,
       is_active: promo.is_active,
     });
+    setHotelQuery(promo.hotel?.name ?? "");
     setEditPromo(promo);
     setFormError("");
     setCreateOpen(true);
   };
+
+  /** Resolves the typed hotel name to a hotel id (partial, case-insensitive). */
+  function resolveHotelId(): string {
+    const q = hotelQuery.trim().toLowerCase();
+    const hit = hotels.find((h) => h.name.toLowerCase().includes(q));
+    const id = hit ? String(hit.id) : String(form.hotel_id ?? "");
+    if (hit) setForm((f) => ({ ...f, hotel_id: String(hit.id) }));
+    return id;
+  }
 
   return (
     <div className="space-y-6">
@@ -244,7 +268,8 @@ export default function PlatformPromotionsPage() {
             className="space-y-4"
             onSubmit={(e) => {
               e.preventDefault();
-              if (!form.hotel_id || !form.room_type_id) {
+              const selectedHotelId = resolveHotelId();
+              if (!selectedHotelId || !form.room_type_id) {
                 setFormError(t("err_required"));
                 return;
               }
@@ -271,12 +296,28 @@ export default function PlatformPromotionsPage() {
             <div className="grid gap-4 sm:grid-cols-2">
               <div>
                 <label className="mb-1 block text-xs font-medium text-slate-600">{t("promo_hotel")}</label>
-                <Select required value={form.hotel_id} onChange={(e) => setForm({ ...form, hotel_id: e.target.value, room_type_id: "" })}>
-                  <option value="">{t("promo_select_hotel")}</option>
+                <Input
+                  required
+                  list="promo-hotel-options"
+                  value={hotelQuery}
+                  onChange={(e) => {
+                    const v = e.target.value;
+                    const q = v.trim().toLowerCase();
+                    const hit = q ? hotels.find((h) => h.name.toLowerCase().includes(q)) : undefined;
+                    setHotelQuery(v);
+                    setForm((f) => ({
+                      ...f,
+                      hotel_id: hit ? String(hit.id) : "",
+                      room_type_id: "",
+                    }));
+                  }}
+                  placeholder={t("promo_select_hotel")}
+                />
+                <datalist id="promo-hotel-options">
                   {hotels.map((h) => (
-                    <option key={h.id} value={String(h.id)}>{h.name}</option>
+                    <option key={h.id} value={h.name} />
                   ))}
-                </Select>
+                </datalist>
               </div>
               <div>
                 <label className="mb-1 block text-xs font-medium text-slate-600">{t("promo_room_type")}</label>
