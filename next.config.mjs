@@ -4,7 +4,7 @@
 // production with FRAME_ANCESTORS="'self' https://example.com".
 const frameAncestors =
   process.env.FRAME_ANCESTORS ??
-  "'self' https://mannakyaw.com https://*.mannakyaw.com";
+  "'self' https://mannakyaw.com https://*.mannakyaw.com https://sunuhotel.com https://www.sunuhotel.com";
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
