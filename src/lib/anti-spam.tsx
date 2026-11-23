@@ -42,9 +42,12 @@ export function Honeypot({
       <label htmlFor={id}>Ne pas remplir ce champ</label>
       <input
         id={id}
-        name="company_website"
+        // A semantic name like "company_website" can trigger browser or
+        // password-manager autofill and falsely block real guest bookings.
+        name={`contact_${id}`}
         type="text"
         tabIndex={-1}
+        readOnly
         autoComplete="off"
         value={value}
         onChange={(event) => onChange(event.target.value)}
