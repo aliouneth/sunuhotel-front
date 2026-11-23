@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { BedDouble, Building2, CalendarRange, MapPin, Phone, User } from "lucide-react";
 import { api } from "@/lib/api";
@@ -38,6 +38,7 @@ type BookingErrors = FieldErrors<"firstName" | "lastName" | "email" | "phone">;
 export function AvailabilitySearch() {
   const { t, locale } = useLocale();
   const router = useRouter();
+  const bookingFormRef = useRef<HTMLFormElement>(null);
   const [city, setCity] = useState("");
   const [cities, setCities] = useState<string[]>([]);
   const [checkIn, setCheckIn] = useState("");
@@ -72,6 +73,13 @@ export function AvailabilitySearch() {
   const [bookError, setBookError] = useState("");
   const [bookingErrors, setBookingErrors] = useState<BookingErrors>({});
   const { honeypot, setHoneypot, isSpam } = useSpamGuard(3);
+
+  useEffect(() => {
+    if (!target) return;
+    requestAnimationFrame(() => {
+      bookingFormRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
+    });
+  }, [target]);
 
   function todayLocal() {
     const d = new Date();
@@ -349,7 +357,7 @@ export function AvailabilitySearch() {
                 </div>
 
                 {target?.hotel.id === hotel.id && (
-                  <form onSubmit={submitBooking} className="border-t border-amber-200 bg-gradient-to-br from-amber-50 to-orange-50 px-4 py-5 sm:px-6">
+                  <form ref={bookingFormRef} onSubmit={submitBooking} className="border-t border-amber-200 bg-gradient-to-br from-amber-50 to-orange-50 px-4 py-5 sm:px-6">
                     <Honeypot value={honeypot} onChange={setHoneypot} />
                     <p className="mb-3 flex items-center gap-2 text-sm font-semibold text-amber-900">
                       <User className="size-4" />
