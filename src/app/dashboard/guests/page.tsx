@@ -37,7 +37,7 @@ export default function GuestsPage() {
         <CardHeader
           title={t("guests")}
           action={
-            <Input value={search} onChange={(e) => setSearch(e.target.value)} placeholder={t("search_placeholder")} className="w-full sm:w-56" />
+            <Input aria-label={t("search")} value={search} onChange={(e) => setSearch(e.target.value)} className="w-full sm:w-56" />
           }
         />
         {data?.data.length ? (

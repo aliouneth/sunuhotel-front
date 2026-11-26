@@ -31,6 +31,15 @@ const methodLabels: Record<string, string> = {
 
 const statusKeys = ["pending", "confirmed", "checked_in", "checked_out", "cancelled", "no_show"];
 
+const statusLabelKeys: Record<string, string> = {
+  pending: "status_pending",
+  confirmed: "confirmed",
+  checked_in: "status_checked_in",
+  checked_out: "status_checked_out",
+  cancelled: "status_cancelled",
+  no_show: "status_no_show",
+};
+
 export default function BookingsPage() {
   const { t, locale } = useLocale();
   const qc = useQueryClient();
@@ -53,7 +62,7 @@ export default function BookingsPage() {
 
   const hasFilters = Boolean(status || search || from || to);
 
-  const statusLabel = (s: string) => (s === "pending" ? t("status_pending") : s);
+  const statusLabel = (s: string) => t(statusLabelKeys[s] ?? s);
 
   const canCheckIn = (b: Booking) => todayISO() >= toDateInput(b.check_in);
 
@@ -98,7 +107,6 @@ export default function BookingsPage() {
     <div className="space-y-6">
       <PageHeader
         title={t("bookings")}
-        subtitle={String(data?.total ?? 0)}
         action={
           can(user, "bookings.manage") ? (
             <Link href="/dashboard/bookings/new">
@@ -108,24 +116,31 @@ export default function BookingsPage() {
         }
       />
 
-      <Card>
-        <CardHeader title={t("bookings")} />
+      <Card className="overflow-hidden">
+        <CardHeader title={t("bookings_count").replace("{count}", String(data?.total ?? 0))} />
         <div className="flex flex-wrap items-end gap-3 border-b border-slate-100 px-5 py-3">
             <Input
+              aria-label={t("search")}
+              placeholder={t("search_guest_placeholder")}
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-full sm:w-56"
+              className="w-full sm:w-72"
             />
-            <Select value={status} onChange={(e) => setStatus(e.target.value)} className="w-full sm:w-44">
-            <option value="">{t("all")}</option>
-            {statusKeys.map((s) => (
-              <option key={s} value={s}>
-                {statusLabel(s)}
-              </option>
-            ))}
-          </Select>
-            <Input label={t("date_from")} type="date" value={from} onChange={(e) => setFrom(e.target.value)} className="w-full sm:w-40" />
-            <Input label={t("date_to")} type="date" value={to} onChange={(e) => setTo(e.target.value)} className="w-full sm:w-40" />
+            <Select
+              aria-label={t("status")}
+              value={status}
+              onChange={(e) => setStatus(e.target.value)}
+              className="w-full sm:w-52"
+            >
+              <option value="">{t("all")}</option>
+              {statusKeys.map((s) => (
+                <option key={s} value={s}>
+                  {statusLabel(s)}
+                </option>
+              ))}
+            </Select>
+            <Input label={t("date_from")} type="date" value={from} onChange={(e) => setFrom(e.target.value)} className="w-full sm:w-44" />
+            <Input label={t("date_to")} type="date" value={to} onChange={(e) => setTo(e.target.value)} className="w-full sm:w-44" />
           {hasFilters && (
             <Button type="button" size="sm" variant="ghost" onClick={resetFilters}>
               {t("clear_filters")}
@@ -133,32 +148,35 @@ export default function BookingsPage() {
           )}
         </div>
         {data?.data.length ? (
-          <Table headers={["N°", t("guest"), "—", "Arrivée", "Départ", "Total", t("status"), t("actions")]}>
+          <Table
+            className="min-w-[1080px]"
+            headers={["N°", t("guest"), t("room"), t("arrival"), t("departure"), t("total"), t("status"), t("actions")]}
+          >
             {data.data.map((b) => (
               <tr
                 key={b.id}
-                className={
-                (b.balance_due_cents ?? 0) > 0
-                  ? "bg-blue-200 hover:bg-blue-300"
-                  : b.status === "pending"
-                    ? "bg-orange-50 hover:bg-orange-100"
-                    : "hover:bg-slate-50"
-              }
+                className={`border-b border-slate-200 last:border-b-0 ${
+                  b.status === "pending"
+                    ? "bg-amber-50/70 hover:bg-amber-100/80"
+                    : (b.balance_due_cents ?? 0) > 0
+                      ? "bg-sky-50 hover:bg-sky-100"
+                      : "hover:bg-slate-50"
+                }`}
               >
-                <td className="px-5 py-3 font-mono text-xs font-medium text-slate-900">{b.booking_number}</td>
+                <td className="whitespace-nowrap px-5 py-3 font-mono text-xs font-medium text-slate-900">{b.booking_number}</td>
                 <td className="px-5 py-3 font-medium text-slate-900">
                   {b.guest?.full_name ?? b.guest ? `${b.guest.first_name} ${b.guest.last_name}` : `#${b.guest_id}`}
                 </td>
-                <td className="px-5 py-3 text-slate-500">
+                <td className="whitespace-nowrap px-5 py-3 text-slate-500">
                   {b.rooms?.map((r) => r.room?.room_number).join(", ") ?? "—"}
                 </td>
-                <td className="px-5 py-3 text-slate-600">{formatDate(b.check_in, locale)}</td>
-                <td className="px-5 py-3 text-slate-600">{formatDate(b.check_out, locale)}</td>
-                <td className="px-5 py-3 font-medium text-slate-900">
+                <td className="whitespace-nowrap px-5 py-3 text-slate-600">{formatDate(b.check_in, locale)}</td>
+                <td className="whitespace-nowrap px-5 py-3 text-slate-600">{formatDate(b.check_out, locale)}</td>
+                <td className="whitespace-nowrap px-5 py-3 font-medium tabular-nums text-slate-900">
                   {formatMoney(b.total_cents, user?.hotel?.currency, locale)}
                   <span className="ml-1 text-xs font-normal text-slate-500">({formatMoney(b.paid_cents, user?.hotel?.currency, locale)})</span>
                 </td>
-                <td className="px-5 py-3">
+                <td className="whitespace-nowrap px-5 py-3">
                   <Badge tone={statusTones[b.status]}>{statusLabel(b.status)}</Badge>
                   {(b.payments ?? []).some((p) => p.status === "completed" && (p.notes ?? "").toLowerCase().includes("paydunya")) && (
                     <span className="ml-2 inline-flex items-center rounded-full bg-blue-100 px-2 py-0.5 text-xs font-medium text-blue-700">

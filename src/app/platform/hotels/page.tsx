@@ -128,9 +128,9 @@ export default function PlatformHotelsPage() {
           action={
             <form onSubmit={runSearch} className="flex gap-2">
               <Input
+                aria-label={t("search")}
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                placeholder={t("search_placeholder")}
                 className="w-full sm:w-56"
               />
               <Button type="submit" size="sm">

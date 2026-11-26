@@ -171,7 +171,7 @@ export function Shell({ children }: { children: React.ReactNode }) {
             <span className="hidden text-xs text-slate-500 sm:block">{locale.toUpperCase()}</span>
           </div>
         </header>
-        <main className="mx-auto w-full max-w-6xl flex-1 px-4 py-4 md:px-6 md:py-6">{children}</main>
+        <main className="w-full flex-1 px-4 py-4 md:px-6 md:py-6 xl:px-8 2xl:px-10">{children}</main>
       </div>
     </div>
   );

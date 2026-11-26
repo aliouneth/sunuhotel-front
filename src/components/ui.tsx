@@ -233,10 +233,10 @@ export function EmptyState({ children }: { children: ReactNode }) {
   return <div className="px-5 py-10 text-center text-sm text-slate-500">{children}</div>;
 }
 
-export function Table({ headers, children }: { headers: ReactNode[]; children: ReactNode }) {
+export function Table({ headers, children, className = "" }: { headers: ReactNode[]; children: ReactNode; className?: string }) {
   return (
     <div className="overflow-x-auto">
-      <table className="w-full min-w-[640px] text-sm">
+      <table className={`w-full min-w-[640px] text-sm ${className}`}>
         <thead>
           <tr className="border-b border-slate-100 text-left text-xs uppercase tracking-wide text-slate-500">
             {headers.map((h, i) => (
@@ -246,7 +246,7 @@ export function Table({ headers, children }: { headers: ReactNode[]; children: R
             ))}
           </tr>
         </thead>
-        <tbody className="divide-y divide-slate-100">{children}</tbody>
+        <tbody className="divide-y divide-slate-200">{children}</tbody>
       </table>
     </div>
   );
