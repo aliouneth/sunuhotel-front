@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { CheckCircle2, Clock, XCircle } from "lucide-react";
 import { api } from "@/lib/api";
@@ -21,25 +21,38 @@ const buttonClass =
 export default function PaymentThankYou({
   slug,
   hotelName,
+  hotelPhone,
   currency,
+  paymentsEnabled,
 }: {
   slug: string;
   hotelName: string;
+  hotelPhone?: string | null;
   currency?: string;
+  paymentsEnabled?: boolean;
 }) {
   const { t, locale } = useLocale();
   const [ready, setReady] = useState(false);
   const [token, setToken] = useState<string | null>(null);
+  const [bookingRef, setBookingRef] = useState<string | null>(null);
   const [payment, setPayment] = useState<PaymentStatus | null>(null);
   const [unreachable, setUnreachable] = useState(false);
+  const readParams = useRef<{ token: string | null; booking: string | null } | null>(null);
 
-  // PayDunya appends ?token=<invoice_token> to the return_url. Read it once and
-  // strip it from the address bar so a refresh starts from a clean URL.
+  // PayDunya appends ?token=<invoice_token> to the return_url. When online
+  // payment is disabled the reservation flow redirects here with ?booking=...
+  // instead. Read it once and strip it from the address bar so a refresh
+  // starts from a clean URL. The ref keeps React Strict Mode's second dev-mode
+  // effect run from clearing the state after the query string was stripped.
   useEffect(() => {
-    if (typeof window === "undefined") return;
-    const value = new URLSearchParams(window.location.search).get("token");
-    setToken(value);
-    if (value) window.history.replaceState({}, "", window.location.pathname);
+    if (typeof window === "undefined" || readParams.current) return;
+    const params = new URLSearchParams(window.location.search);
+    const tokenValue = params.get("token");
+    const bookingValue = params.get("booking");
+    readParams.current = { token: tokenValue, booking: bookingValue };
+    setToken(tokenValue);
+    setBookingRef(bookingValue);
+    if (tokenValue || bookingValue) window.history.replaceState({}, "", window.location.pathname);
     setReady(true);
   }, []);
 
@@ -70,6 +83,46 @@ export default function PaymentThankYou({
 
   if (!ready) {
     return <Spinner />;
+  }
+
+  // Reservation created directly (online payment temporarily disabled): it is
+  // a pending request the hotel still has to accept, so there is no payment
+  // status to poll. Show this both after the redirect (?booking=...) and on a
+  // direct visit to the thank-you page while the gateway is off.
+  if (!token && (bookingRef || paymentsEnabled === false)) {
+    const note = fill(
+      t(hotelPhone ? "offline_confirmation_note" : "offline_confirmation_note_no_phone"),
+      { hotel: hotelName, phone: hotelPhone ?? "" }
+    );
+
+    return (
+      <Card
+        tone="green"
+        icon={<CheckCircle2 className="size-10 text-emerald-700" />}
+        title={t("reservation_recorded")}
+      >
+        <p className="mt-2 text-sm text-emerald-800">{note}</p>
+        <dl className="mt-5 space-y-2 rounded-lg border border-emerald-100 bg-white/60 px-4 py-3 text-sm">
+          {bookingRef && (
+            <div className="flex items-center justify-between gap-4">
+              <dt className="text-slate-500">{t("reservation_reference")}</dt>
+              <dd className="font-mono font-semibold text-slate-900">{bookingRef}</dd>
+            </div>
+          )}
+          <div className="flex items-center justify-between gap-4">
+            <dt className="text-slate-500">{t("hotel_label")}</dt>
+            <dd className="font-medium text-slate-900">{hotelName}</dd>
+          </div>
+          {hotelPhone && (
+            <div className="flex items-center justify-between gap-4">
+              <dt className="text-slate-500">{t("phone")}</dt>
+              <dd className="font-medium text-slate-900">{hotelPhone}</dd>
+            </div>
+          )}
+        </dl>
+        <Actions slug={slug} />
+      </Card>
+    );
   }
 
   if (!token) {
@@ -179,5 +232,13 @@ function Card({
       <h1 className="mt-4 text-2xl font-bold tracking-tight text-slate-900">{title}</h1>
       <div className="text-left">{children}</div>
     </div>
+  );
+}
+
+/** Replace {placeholders} without treating `$` in the values as a pattern. */
+function fill(template: string, values: Record<string, string>): string {
+  return Object.entries(values).reduce(
+    (text, [key, value]) => text.split(`{${key}}`).join(value),
+    template
   );
 }

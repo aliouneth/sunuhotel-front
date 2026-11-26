@@ -28,6 +28,8 @@ export interface HotelBillingData {
     plan?: { id: number; name: string } | null;
   }[];
   total: number;
+  /** False when online payment (PayDunya) is temporarily disabled. */
+  payments_enabled?: boolean;
 }
 
 const badgeTone = (status: string) =>
@@ -131,7 +133,12 @@ export default function BillingPage() {
           <Table headers={[t("invoice_month"), t("plan_name"), t("invoice_amount"), t("invoice_paid"), t("invoice_status"), t("paid_on"), t("invoice_actions")]}>
             {data.invoices.map((inv) => {
               const due = inv.amount_cents - inv.paid_cents;
-              const payable = canPay && inv.status !== "paid" && inv.status !== "cancelled" && due > 0;
+              const payable =
+                canPay &&
+                data.payments_enabled !== false &&
+                inv.status !== "paid" &&
+                inv.status !== "cancelled" &&
+                due > 0;
 
               return (
                 <tr key={inv.id}>

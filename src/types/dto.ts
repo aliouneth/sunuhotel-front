@@ -357,6 +357,8 @@ export interface HotelSearchResult {
   logo_url?: string | null;
   images?: HotelImage[];
   available_rooms?: AvailableRoom[];
+  /** False when online payment is temporarily disabled (reservation requests only). */
+  payments_enabled?: boolean;
 }
 
 export interface PublicReview {
@@ -384,6 +386,8 @@ export interface PublicHotel {
   rating?: { average: number | null; count: number } | null;
   reviews?: PublicReview[];
   room_types: (RoomType & { features?: string[] | null })[];
+  /** False when online payment is temporarily disabled (reservation requests only). */
+  payments_enabled?: boolean;
 }
 
 export type HotelStatus = "pending" | "active" | "suspended" | "rejected" | "trial";

@@ -51,7 +51,13 @@ export default async function ThankYouPage({ params }: { params: { slug: string 
       </header>
 
       <section className="mx-auto max-w-2xl px-6 pt-6">
-        <PaymentThankYou slug={params.slug} hotelName={hotel.name} currency={hotel.currency} />
+        <PaymentThankYou
+          slug={params.slug}
+          hotelName={hotel.name}
+          hotelPhone={hotel.phone}
+          currency={hotel.currency}
+          paymentsEnabled={hotel.payments_enabled !== false}
+        />
       </section>
     </main>
   );

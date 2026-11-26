@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
 import { api, getGuestToken, queryString } from "@/lib/api";
 import { useLocale } from "@/i18n/LocaleProvider";
@@ -31,6 +32,10 @@ type BookableType = {
 
 export function GuestAvailability({ hotel, slug }: { hotel: PublicHotel; slug: string }) {
   const { t, locale } = useLocale();
+  const router = useRouter();
+  // When PayDunya is disabled the backend creates the reservation directly as
+  // a pending request instead of returning a payment URL.
+  const paymentsEnabled = hotel.payments_enabled !== false;
   const [checkIn, setCheckIn] = useState(() => todayISO(1));
   const [checkOut, setCheckOut] = useState(() => addDaysISO(todayISO(1), 2));
   const [roomTypeId, setRoomTypeId] = useState("");
@@ -133,7 +138,13 @@ export function GuestAvailability({ hotel, slug }: { hotel: PublicHotel; slug: s
     setBusy(true);
     setBookError("");
     try {
-      const result = await api<{ data: { payment_url: string; token: string } }>(`/hotels/${slug}/public/bookings`, {
+      const result = await api<{
+        data: {
+          payment_url?: string | null;
+          token?: string;
+          booking?: { booking_number: string } | null;
+        };
+      }>(`/hotels/${slug}/public/bookings`, {
         method: "POST",
         body: JSON.stringify({
           guest: {
@@ -149,10 +160,21 @@ export function GuestAvailability({ hotel, slug }: { hotel: PublicHotel; slug: s
         }),
       });
 
-      if (!result.data?.payment_url) throw new Error(t("payment_start_error"));
+      // With online payment on, hand off to PayDunya's page. With it off, the
+      // reservation already exists as a pending request: show the confirmation.
+      if (result.data?.payment_url) {
+        window.location.assign(result.data.payment_url);
+        return;
+      }
 
-      // Payment guarantees the reservation: hand off to PayDunya's page.
-      window.location.assign(result.data.payment_url);
+      if (result.data?.booking?.booking_number) {
+        router.push(
+          `/guest/${slug}/thank-you?booking=${encodeURIComponent(result.data.booking.booking_number)}`
+        );
+        return;
+      }
+
+      throw new Error(t("error_generic"));
     } catch (err) {
       setBookError((err as { message?: string }).message ?? t("error_generic"));
       setBusy(false);
@@ -323,14 +345,16 @@ export function GuestAvailability({ hotel, slug }: { hotel: PublicHotel; slug: s
                 }}
                 error={bookingErrors.phone ? t(bookingErrors.phone) : undefined}
               />
-              <p className="rounded-lg bg-slate-50 px-3 py-2 text-xs text-slate-600">{t("payment_required_note")}</p>
+              <p className="rounded-lg bg-slate-50 px-3 py-2 text-xs text-slate-600">
+                {paymentsEnabled ? t("payment_required_note") : t("pending_approval_note")}
+              </p>
               {bookError && <p className="text-sm text-red-600">{bookError}</p>}
               <div className="flex justify-end gap-2">
                 <Button type="button" variant="secondary" onClick={() => setBooking(null)}>
                   {t("cancel")}
                 </Button>
                 <Button type="submit" loading={busy}>
-                  {t("pay_to_confirm")}
+                  {paymentsEnabled ? t("pay_to_confirm") : t("send_request")}
                 </Button>
               </div>
             </form>

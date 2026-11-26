@@ -162,27 +162,43 @@ export function AvailabilitySearch() {
     setBookBusy(true);
     setBookError("");
     try {
-      const result = await api<{ data: { payment_url: string; token: string } }>(
-        `/hotels/${target.hotel.slug}/public/bookings`,
-        {
-          method: "POST",
-          body: JSON.stringify({
-            guest: {
-              first_name: firstName.trim(),
-              last_name: lastName.trim(),
-              email: email.trim().toLowerCase() || undefined,
-              phone: phone.trim(),
-            },
-            check_in: checkInValue,
-            check_out: checkOutValue,
-            rooms: [target.group.rooms[0].id],
-            adults: 1,
-          }),
-        }
-      );
-      if (!result.data?.payment_url) throw new Error(t("payment_start_error"));
-      // Payment guarantees the reservation: hand off to PayDunya's page.
-      window.location.assign(result.data.payment_url);
+      const result = await api<{
+        data: {
+          payment_url?: string | null;
+          token?: string;
+          booking?: { booking_number: string } | null;
+        };
+      }>(`/hotels/${target.hotel.slug}/public/bookings`, {
+        method: "POST",
+        body: JSON.stringify({
+          guest: {
+            first_name: firstName.trim(),
+            last_name: lastName.trim(),
+            email: email.trim().toLowerCase() || undefined,
+            phone: phone.trim(),
+          },
+          check_in: checkInValue,
+          check_out: checkOutValue,
+          rooms: [target.group.rooms[0].id],
+          adults: 1,
+        }),
+      });
+
+      // With online payment on, hand off to PayDunya's page. With it off, the
+      // reservation already exists as a pending request: show the confirmation.
+      if (result.data?.payment_url) {
+        window.location.assign(result.data.payment_url);
+        return;
+      }
+
+      if (result.data?.booking?.booking_number) {
+        router.push(
+          `/guest/${target.hotel.slug}/thank-you?booking=${encodeURIComponent(result.data.booking.booking_number)}`
+        );
+        return;
+      }
+
+      throw new Error(t("payment_start_error"));
     } catch (err) {
       setBookError((err as { message?: string }).message ?? t("error_generic"));
     } finally {
@@ -430,14 +446,22 @@ export function AvailabilitySearch() {
                       </label>
                     </div>
                     {bookError && <p className="mt-2 text-xs text-red-600">{bookError}</p>}
-                    <p className="mt-2 text-xs text-amber-800">{t("payment_required_note")}</p>
+                    <p className="mt-2 text-xs text-amber-800">
+                      {target.hotel.payments_enabled === false
+                        ? t("pending_approval_note")
+                        : t("payment_required_note")}
+                    </p>
                     <div className="mt-4 flex items-center gap-3">
                       <button
                         type="submit"
                         disabled={bookBusy}
                         className="rounded-lg bg-amber-700 px-5 py-2 text-sm font-medium text-white transition hover:bg-amber-800 disabled:opacity-50"
                       >
-                        {bookBusy ? "…" : t("pay_to_confirm")}
+                        {bookBusy
+                          ? "…"
+                          : target.hotel.payments_enabled === false
+                            ? t("send_request")
+                            : t("pay_to_confirm")}
                       </button>
                       <button type="button" onClick={() => setTarget(null)} className="text-sm text-slate-500 hover:text-slate-700">
                         {t("cancel")}
