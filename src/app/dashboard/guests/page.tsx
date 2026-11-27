@@ -3,16 +3,48 @@
 import { useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { api, queryString } from "@/lib/api";
+import { useAuth } from "@/context/AuthProvider";
 import { useLocale } from "@/i18n/LocaleProvider";
+import { formatDate, formatMoney } from "@/lib/format";
 import { Ban } from "lucide-react";
 import { Badge, Button, Card, CardHeader, EmptyState, ErrorBox, Fieldset, Input, Modal, PageHeader, Spinner, Table } from "@/components/ui";
 import type { Guest, Paginated } from "@/types/dto";
+
+interface GuestBookingHistory {
+  id: number;
+  booking_number: string;
+  status: string;
+  check_in: string;
+  check_out: string;
+  total_cents: number;
+  paid_cents: number;
+  rooms: string;
+}
+
+const statusTones: Record<string, string> = {
+  pending: "amber",
+  confirmed: "blue",
+  checked_in: "green",
+  checked_out: "slate",
+  cancelled: "red",
+  no_show: "violet",
+};
+
+const statusLabelKeys: Record<string, string> = {
+  pending: "status_pending",
+  confirmed: "confirmed",
+  checked_in: "status_checked_in",
+  checked_out: "status_checked_out",
+  cancelled: "cancelled",
+  no_show: "status_no_show",
+};
 
 export default function GuestsPage() {
   const { t } = useLocale();
   const qc = useQueryClient();
   const [search, setSearch] = useState("");
   const [createOpen, setCreateOpen] = useState(false);
+  const [historyGuest, setHistoryGuest] = useState<Guest | null>(null);
 
   const { data, error, isLoading, refetch } = useQuery<Paginated<Guest>>({
     queryKey: ["guests", search],
@@ -41,7 +73,7 @@ export default function GuestsPage() {
           }
         />
         {data?.data.length ? (
-          <Table headers={["Name", t("email"), t("phone"), "Nationalité", t("status"), ""]}>
+          <Table headers={[t("name"), t("email"), t("phone"), t("nationality"), t("status"), t("actions")]}>
             {data.data.map((g) => (
               <tr key={g.id} className="hover:bg-slate-50">
                 <td className="px-5 py-3 font-medium text-slate-900">{g.full_name ?? `${g.first_name} ${g.last_name}`}</td>
@@ -57,7 +89,11 @@ export default function GuestsPage() {
                     <Badge tone="green">OK</Badge>
                   )}
                 </td>
-                <td className="px-5 py-3" />
+                <td className="px-5 py-3 text-right">
+                  <Button size="sm" variant="secondary" onClick={() => setHistoryGuest(g)}>
+                    {t("guest_history")}
+                  </Button>
+                </td>
               </tr>
             ))}
           </Table>
@@ -74,7 +110,73 @@ export default function GuestsPage() {
           setCreateOpen(false);
         }}
       />
+
+      <GuestHistoryModal guest={historyGuest} onClose={() => setHistoryGuest(null)} />
     </div>
+  );
+}
+
+function GuestHistoryModal({ guest, onClose }: { guest: Guest | null; onClose: () => void }) {
+  const { t, locale } = useLocale();
+  const { user } = useAuth();
+  const currency = user?.hotel?.currency;
+  const guestId = guest?.id ?? 0;
+
+  const { data, error, isLoading, refetch } = useQuery<GuestBookingHistory[]>({
+    queryKey: ["guest-history", guestId],
+    queryFn: () =>
+      api<{ data: GuestBookingHistory[] }>(`/guests/${guestId}/history`).then((b) => b.data),
+    enabled: Boolean(guest),
+  });
+
+  const guestName = guest?.full_name ?? `${guest?.first_name ?? ""} ${guest?.last_name ?? ""}`.trim();
+
+  return (
+    <Modal
+      open={Boolean(guest)}
+      onClose={onClose}
+      title={t("guest_history_title").replace("{name}", guestName)}
+      size="lg"
+    >
+      {isLoading ? (
+        <Spinner />
+      ) : error ? (
+        <ErrorBox message={(error as { message?: string }).message} onRetry={() => refetch()} />
+      ) : data?.length ? (
+        <>
+          <p className="mb-3 text-xs text-slate-500">
+            {t("guest_history_count").replace("{count}", String(data.length))}
+          </p>
+          <Table
+            headers={[
+              t("booking_number"),
+              t("status"),
+              t("check_in_date"),
+              t("check_out_date"),
+              t("room"),
+              t("total"),
+            ]}
+          >
+            {data.map((b) => (
+              <tr key={b.id} className="hover:bg-slate-50">
+                <td className="px-5 py-3 font-medium text-slate-900">{b.booking_number}</td>
+                <td className="px-5 py-3">
+                  <Badge tone={statusTones[b.status] ?? "slate"}>
+                    {t(statusLabelKeys[b.status] ?? b.status)}
+                  </Badge>
+                </td>
+                <td className="px-5 py-3 text-slate-600">{formatDate(b.check_in, locale)}</td>
+                <td className="px-5 py-3 text-slate-600">{formatDate(b.check_out, locale)}</td>
+                <td className="px-5 py-3 text-slate-600">{b.rooms || "—"}</td>
+                <td className="px-5 py-3 text-slate-600">{formatMoney(b.total_cents, currency, locale)}</td>
+              </tr>
+            ))}
+          </Table>
+        </>
+      ) : (
+        <EmptyState>{t("guest_history_empty")}</EmptyState>
+      )}
+    </Modal>
   );
 }
 

@@ -276,6 +276,21 @@ function RoomModal({
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
 
+  function selectRoomType(id: string) {
+    const selected = types.find((rt) => String(rt.id) === id);
+    setForm((f) => ({
+      ...f,
+      room_type_id: id,
+      // New rooms inherit the type's defaults; editing keeps custom values.
+      ...(room
+        ? {}
+        : {
+            capacity: selected ? String(selected.base_capacity) : "",
+            daily_rate: selected ? String(selected.base_rate_cents / 100) : "",
+          }),
+    }));
+  }
+
   async function submit(e: React.FormEvent) {
     e.preventDefault();
     setBusy(true);
@@ -311,7 +326,7 @@ function RoomModal({
           <Input label={t("floor")} type="number" min={0} value={form.floor} onChange={(e) => setForm({ ...form, floor: e.target.value })} />
         </Fieldset>
         <Fieldset>
-          <Select label={t("type")} required value={form.room_type_id} onChange={(e) => setForm({ ...form, room_type_id: e.target.value })}>
+          <Select label={t("type")} required value={form.room_type_id} onChange={(e) => selectRoomType(e.target.value)}>
             <option value="">—</option>
             {types.map((rt) => (
               <option key={rt.id} value={rt.id}>

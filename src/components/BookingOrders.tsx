@@ -7,6 +7,7 @@ import { useAuth } from "@/context/AuthProvider";
 import { useLocale } from "@/i18n/LocaleProvider";
 import { Badge, Button, Select } from "@/components/ui";
 import { formatMoney } from "@/lib/format";
+import { can } from "@/lib/permissions";
 import type { BookingStatus, Hotel, Order, OrderCategory } from "@/types/dto";
 
 const CATEGORIES: OrderCategory[] = ["restaurant", "spa", "leisure"];
@@ -61,11 +62,15 @@ export function BookingOrders({
   const qc = useQueryClient();
   const { user } = useAuth();
   const categories = enabledCategories(user?.hotel);
+  const canView = can(user, "orders.view");
+  const canManage = can(user, "orders.manage");
 
   const { data: orders = [], isLoading } = useQuery<Order[]>({
     queryKey: ["booking-orders", bookingId],
     queryFn: () => api<{ data: Order[] }>(`/bookings/${bookingId}/orders`).then((b) => b.data),
-    enabled: categories.length > 0,
+    enabled: canView && categories.length > 0,
+    retry: (failureCount, error) =>
+      (error as ApiError).status === 403 ? false : failureCount < 2,
   });
 
   const [adding, setAdding] = useState(false);
@@ -73,7 +78,9 @@ export function BookingOrders({
   const [items, setItems] = useState<DraftItem[]>([emptyItem()]);
   const [error, setError] = useState("");
 
-  const editable = ordersEditable(bookingStatus);
+  // Accountants (and other view-only roles) may read orders but must not be
+  // offered controls that the API will reject with a 403.
+  const editable = canManage && ordersEditable(bookingStatus);
 
   function refresh() {
     qc.invalidateQueries({ queryKey: ["booking-orders", bookingId] });
@@ -113,7 +120,7 @@ export function BookingOrders({
     onError: (err) => setError((err as ApiError).message ?? t("error_generic")),
   });
 
-  if (categories.length === 0) return null;
+  if (!canView || categories.length === 0) return null;
 
   const activeTotal = orders
     .filter((o) => o.status === "open")
